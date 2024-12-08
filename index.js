@@ -5,14 +5,16 @@ const { sequelize } = require("./src/models");
 const userRoutes = require("./src/routes/userRoutes");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000;
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api/users", userRoutes);
-
+app.use("/api/user", userRoutes);
+app.get("/", (req, res) => {
+  res.json({ msg: "server is live" });
+});
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: "Something went wrong!" });
@@ -27,7 +29,7 @@ const startServer = async () => {
     console.log("Database synchronized.");
 
     app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+      console.log(`http://localhost:${PORT}`);
     });
   } catch (error) {
     console.error("Unable to start server:", error);
