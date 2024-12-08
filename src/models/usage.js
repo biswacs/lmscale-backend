@@ -1,14 +1,23 @@
 const { Model, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
-class Deployment extends Model {}
+class Usage extends Model {}
 
-Deployment.init(
+Usage.init(
   {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
+    },
+    token: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    date: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
     userId: {
       type: DataTypes.UUID,
@@ -18,23 +27,23 @@ Deployment.init(
         key: "id",
       },
     },
-    modelId: {
+    deploymentId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: "Models",
+        model: "Deployments",
         key: "id",
       },
     },
-    status: {
-      type: DataTypes.ENUM("pending", "running", "stopped", "failed"),
+    tokensUsed: {
+      type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: "pending",
+      defaultValue: 0,
     },
-    config: {
-      type: DataTypes.JSONB,
+    cost: {
+      type: DataTypes.DECIMAL(10, 6),
       allowNull: false,
-      defaultValue: {},
+      defaultValue: 0,
     },
     metadata: {
       type: DataTypes.JSONB,
@@ -49,17 +58,20 @@ Deployment.init(
       type: DataTypes.DATE,
       allowNull: false,
     },
-    deletedAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
   },
   {
     sequelize,
-    modelName: "Deployment",
-    paranoid: true,
+    modelName: "Usage",
     timestamps: true,
+    indexes: [
+      {
+        fields: ["date", "userId"],
+      },
+      {
+        fields: ["deploymentId"],
+      },
+    ],
   }
 );
 
-module.exports = Deployment;
+module.exports = Usage;

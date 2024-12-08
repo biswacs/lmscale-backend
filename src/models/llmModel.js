@@ -1,45 +1,43 @@
 const { Model, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
-class Deployment extends Model {}
+class LLMModel extends Model {}
 
-Deployment.init(
+LLMModel.init(
   {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    userId: {
-      type: DataTypes.UUID,
+    name: {
+      type: DataTypes.STRING,
       allowNull: false,
-      references: {
-        model: "Users",
-        key: "id",
+    },
+    author: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    type: {
+      type: DataTypes.ENUM("chat", "code"),
+      allowNull: false,
+    },
+    pricePerToken: {
+      type: DataTypes.DECIMAL(10, 6),
+      allowNull: false,
+      validate: {
+        min: 0,
       },
-    },
-    modelId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: "Models",
-        key: "id",
-      },
-    },
-    status: {
-      type: DataTypes.ENUM("pending", "running", "stopped", "failed"),
-      allowNull: false,
-      defaultValue: "pending",
-    },
-    config: {
-      type: DataTypes.JSONB,
-      allowNull: false,
-      defaultValue: {},
     },
     metadata: {
       type: DataTypes.JSONB,
       allowNull: false,
       defaultValue: {},
+    },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -56,10 +54,10 @@ Deployment.init(
   },
   {
     sequelize,
-    modelName: "Deployment",
+    modelName: "Model",
     paranoid: true,
     timestamps: true,
   }
 );
 
-module.exports = Deployment;
+module.exports = LLMModel;
