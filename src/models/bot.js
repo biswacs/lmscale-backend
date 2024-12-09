@@ -22,6 +22,10 @@ Bot.init(
         is: /^[a-z0-9-]+$/,
       },
     },
+    image: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     userId: {
       type: DataTypes.UUID,
       allowNull: false,
