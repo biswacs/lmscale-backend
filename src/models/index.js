@@ -4,6 +4,7 @@ const LLMModel = require("./llmModel");
 const Deployment = require("./deployment");
 const ApiKey = require("./apiKey");
 const Usage = require("./usage");
+const Bot = require("./bot");
 
 User.hasMany(Deployment, {
   foreignKey: "userId",
@@ -55,6 +56,26 @@ LLMModel.hasMany(Deployment, {
   as: "deployments",
 });
 
+Bot.belongsTo(User, {
+  foreignKey: "userId",
+  as: "user",
+});
+
+Bot.belongsTo(Deployment, {
+  foreignKey: "deploymentId",
+  as: "deployment",
+});
+
+Bot.hasMany(Usage, {
+  foreignKey: "botId",
+  as: "usages",
+});
+
+User.hasMany(Bot, {
+  foreignKey: "userId",
+  as: "bots",
+});
+
 module.exports = {
   sequelize,
   User,
@@ -62,4 +83,5 @@ module.exports = {
   Deployment,
   ApiKey,
   Usage,
+  Bot,
 };

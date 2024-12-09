@@ -31,10 +31,23 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    role: {
+      type: DataTypes.ENUM("user", "admin"),
+      allowNull: false,
+      defaultValue: "user",
+    },
+    botLimit: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 5,
+    },
     metadata: {
       type: DataTypes.JSONB,
       allowNull: false,
-      defaultValue: {},
+      defaultValue: {
+        usageQuota: null,
+        totalTokensUsed: 0,
+      },
     },
     isActive: {
       type: DataTypes.BOOLEAN,

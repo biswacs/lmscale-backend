@@ -35,6 +35,14 @@ Usage.init(
         key: "id",
       },
     },
+    botId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: "Bots",
+        key: "id",
+      },
+    },
     tokensUsed: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -44,6 +52,11 @@ Usage.init(
       type: DataTypes.DECIMAL(10, 6),
       allowNull: false,
       defaultValue: 0,
+    },
+    type: {
+      type: DataTypes.ENUM("api", "bot"),
+      allowNull: false,
+      defaultValue: "api",
     },
     metadata: {
       type: DataTypes.JSONB,
@@ -69,6 +82,12 @@ Usage.init(
       },
       {
         fields: ["deploymentId"],
+      },
+      {
+        fields: ["botId"],
+      },
+      {
+        fields: ["type"],
       },
     ],
   }

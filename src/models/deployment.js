@@ -31,10 +31,19 @@ Deployment.init(
       allowNull: false,
       defaultValue: "pending",
     },
+    type: {
+      type: DataTypes.ENUM("standard", "bot"),
+      allowNull: false,
+      defaultValue: "standard",
+    },
     config: {
       type: DataTypes.JSONB,
       allowNull: false,
-      defaultValue: {},
+      defaultValue: {
+        maxTokens: 2000,
+        temperature: 0.7,
+        rateLimit: 50,
+      },
     },
     metadata: {
       type: DataTypes.JSONB,
@@ -59,6 +68,20 @@ Deployment.init(
     modelName: "Deployment",
     paranoid: true,
     timestamps: true,
+    indexes: [
+      {
+        fields: ["userId"],
+      },
+      {
+        fields: ["modelId"],
+      },
+      {
+        fields: ["status"],
+      },
+      {
+        fields: ["type"],
+      },
+    ],
   }
 );
 
