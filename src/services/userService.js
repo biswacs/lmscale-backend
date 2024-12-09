@@ -81,22 +81,50 @@ class UserService {
     };
   }
 
-  async getUserById(userId) {
-    console.log(`Fetching user by id: ${userId}`);
-    const user = await User.findOne({
-      where: {
-        id: userId,
-        isActive: true,
-      },
-    });
+  async getUserProfile(userId) {
+    console.log(`[UserService] Fetching user profile for userId: ${userId}`);
 
-    if (!user) {
-      console.log(`Get user failed - user not found: ${userId}`);
-      return { success: false, message: "User not found" };
+    try {
+      const userProfile = await User.findOne({
+        where: { id: userId },
+        attributes: [
+          "id",
+          "name",
+          "email",
+          "metadata",
+          "isActive",
+          "createdAt",
+          "updatedAt",
+        ],
+      });
+
+      if (!userProfile) {
+        console.log(`[UserService] Profile not found for userId: ${userId}`);
+        return {
+          success: false,
+          message: "User profile not found",
+        };
+      }
+
+      console.log(
+        `[UserService] Profile retrieved successfully for userId: ${userId}`
+      );
+      return {
+        success: true,
+        data: { user: userProfile },
+        message: "Profile retrieved successfully",
+      };
+    } catch (error) {
+      console.error("[UserService] Error fetching user profile:", {
+        userId,
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      });
+      return {
+        success: false,
+        message: "Failed to retrieve user profile",
+      };
     }
-
-    console.log(`User retrieved successfully: ${userId}`);
-    return { success: true, data: { user } };
   }
 
   async deactivateUser(userId) {

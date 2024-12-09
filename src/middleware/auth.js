@@ -16,6 +16,7 @@ const auth = async (req, res, next) => {
         id: decoded.id,
         isActive: true,
       },
+      attributes: ["id", "email"],
     });
 
     if (!user) {
