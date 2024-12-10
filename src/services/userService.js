@@ -83,7 +83,6 @@ class UserService {
 
   async getUserProfile(userId) {
     console.log(`[UserService] Fetching user profile for userId: ${userId}`);
-
     try {
       const userProfile = await User.findOne({
         where: { id: userId },
