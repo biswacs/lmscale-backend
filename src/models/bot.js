@@ -22,6 +22,10 @@ Bot.init(
         is: /^[a-z0-9-]+$/,
       },
     },
+    website: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     image: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -50,19 +54,7 @@ Bot.init(
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    configuration: {
-      type: DataTypes.JSONB,
-      allowNull: false,
-      defaultValue: {
-        temperature: 0.7,
-        maxTokens: 2000,
-        topP: 1,
-        frequencyPenalty: 0,
-        presencePenalty: 0,
-        stopSequences: [],
-      },
-    },
-    metadata: {
+    config: {
       type: DataTypes.JSONB,
       allowNull: false,
       defaultValue: {},
@@ -72,32 +64,14 @@ Bot.init(
       defaultValue: "active",
       allowNull: false,
     },
-    avatar: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
     welcomeMessage: {
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    inputPlaceholder: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    rateLimit: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 50, // requests per minute
-    },
-    isPublic: {
+    isActive: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
-    },
-    allowedDomains: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: false,
-      defaultValue: [],
     },
     createdAt: {
       type: DataTypes.DATE,
