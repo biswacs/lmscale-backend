@@ -11,9 +11,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api/user", userRoutes);
-app.get("/", (req, res) => {
-  res.json({ msg: "server is live" });
+app.use("/api/v1/user", userRoutes);
+app.get("/api/v1/lmscale", (req, res) => {
+  res.json({ msg: "LmScale" });
 });
 app.use((err, req, res, next) => {
   console.error(err.stack);
