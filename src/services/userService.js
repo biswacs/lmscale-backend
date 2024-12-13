@@ -2,8 +2,8 @@ const { User } = require("../models");
 const jwt = require("jsonwebtoken");
 
 class UserService {
-  generateToken(userId) {
-    console.log(`Generating token for user: ${userId}`);
+  generateAccessToken(userId) {
+    console.log(`Generating accessToken for user: ${userId}`);
     if (!process.env.JWT_SECRET) {
       console.error("JWT_SECRET missing in environment configuration");
       throw new Error("JWT_SECRET is not configured");
@@ -29,10 +29,10 @@ class UserService {
       });
 
       console.log(`User created successfully with id: ${user.id}`);
-      const token = this.generateToken(user.id);
+      const accessToken = this.generateAccessToken(user.id);
       return {
         success: true,
-        data: { token, user },
+        data: { accessToken, user },
         message: "User created successfully",
       };
     } catch (error) {
@@ -73,10 +73,10 @@ class UserService {
     }
 
     console.log(`User authenticated successfully: ${user.id}`);
-    const token = this.generateToken(user.id);
+    const accessToken = this.generateAccessToken(user.id);
     return {
       success: true,
-      data: { token, user },
+      data: { accessToken, user },
       message: "Login successful",
     };
   }

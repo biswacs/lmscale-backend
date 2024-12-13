@@ -31,7 +31,7 @@ const userController = {
 
       res.status(201).json({
         message: result.message,
-        token: result.data.token,
+        accessToken: result.data.accessToken,
         user: result.data.user,
       });
     } catch (error) {
@@ -72,7 +72,7 @@ const userController = {
 
       res.json({
         message: result.message,
-        token: result.data.token,
+        accessToken: result.data.accessToken,
         user: result.data.user,
       });
     } catch (error) {
