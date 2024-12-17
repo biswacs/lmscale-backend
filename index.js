@@ -11,8 +11,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api/v1/user", userRoutes);
-app.get("/api/v1/lmscale", (req, res) => {
+app.use("/v1/user", userRoutes);
+app.get("/v1/lmscale", (req, res) => {
   res.json({ msg: "LmScale" });
 });
 app.use((err, req, res, next) => {

@@ -1,22 +1,24 @@
 const UserService = require("../services/userService");
+const userSchemas = require("../validation/userSchemas");
 const userService = new UserService();
 
 const userController = {
   async register(req, res) {
     try {
-      const { name, email, password } = req.body;
+      const validatedData = userSchemas.register.parse(req.body);
+
       console.log("[UserController] Registration attempt", {
-        name,
-        email,
+        name: validatedData.name,
+        email: validatedData.email,
         timestamp: new Date().toISOString(),
         ip: req.ip,
       });
 
-      const result = await userService.createUser({ name, email, password });
+      const result = await userService.createUser(validatedData);
 
       if (!result.success) {
         console.log("[UserController] Registration failed", {
-          email,
+          email: validatedData.email,
           error: result.message,
           timestamp: new Date().toISOString(),
         });
@@ -25,7 +27,7 @@ const userController = {
 
       console.log("[UserController] Registration successful", {
         userId: result.data.user.id,
-        email,
+        email: validatedData.email,
         timestamp: new Date().toISOString(),
       });
 
@@ -35,6 +37,17 @@ const userController = {
         user: result.data.user,
       });
     } catch (error) {
+      if (error.errors) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation error",
+          errors: error.errors.map((err) => ({
+            field: err.path.join("."),
+            message: err.message,
+          })),
+        });
+      }
+
       console.error("[UserController] Registration failed", {
         email: req.body.email,
         error: error.message,
@@ -46,18 +59,22 @@ const userController = {
 
   async login(req, res) {
     try {
-      const { email, password } = req.body;
+      const validatedData = userSchemas.login.parse(req.body);
+
       console.log("[UserController] Login attempt", {
-        email,
+        email: validatedData.email,
         timestamp: new Date().toISOString(),
         ip: req.ip,
       });
 
-      const result = await userService.authenticateUser(email, password);
+      const result = await userService.authenticateUser(
+        validatedData.email,
+        validatedData.password
+      );
 
       if (!result.success) {
         console.log("[UserController] Login failed", {
-          email,
+          email: validatedData.email,
           error: result.message,
           timestamp: new Date().toISOString(),
         });
@@ -66,7 +83,7 @@ const userController = {
 
       console.log("[UserController] Login successful", {
         userId: result.data.user.id,
-        email,
+        email: validatedData.email,
         timestamp: new Date().toISOString(),
       });
 
@@ -76,6 +93,17 @@ const userController = {
         user: result.data.user,
       });
     } catch (error) {
+      if (error.errors) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation error",
+          errors: error.errors.map((err) => ({
+            field: err.path.join("."),
+            message: err.message,
+          })),
+        });
+      }
+
       console.error("[UserController] Login failed", {
         email: req.body.email,
         error: error.message,
@@ -84,6 +112,7 @@ const userController = {
       res.status(500).json({ message: "Internal server error" });
     }
   },
+
   async getProfile(req, res) {
     try {
       console.log("[UserController] Fetching user profile", {
