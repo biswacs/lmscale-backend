@@ -4,8 +4,8 @@ const userSchemas = {
   register: z.object({
     name: z
       .string()
-      .min(2, "Name must be at least 3 characters")
-      .max(50, "Name must not exceed 30 characters")
+      .min(3, "Name must be at least 3 characters")
+      .max(24, "Name must not exceed 24 characters")
       .transform((val) => val.trim()),
     email: z
       .string()
