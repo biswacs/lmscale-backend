@@ -82,7 +82,6 @@ const userController = {
       }
 
       console.log("[UserController] Login successful", {
-        userId: result.data.user.id,
         email: validatedData.email,
         timestamp: new Date().toISOString(),
       });
@@ -90,7 +89,6 @@ const userController = {
       res.json({
         message: result.message,
         accessToken: result.data.accessToken,
-        user: result.data.user,
       });
     } catch (error) {
       if (error.errors) {

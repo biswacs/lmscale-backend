@@ -47,38 +47,63 @@ class UserService {
   async authenticateUser(email, password) {
     console.log(`Attempting to authenticate user: ${email}`);
 
-    if (!email || !password) {
-      console.log("Authentication failed - missing email or password");
-      return { success: false, message: "Email and password are required" };
+    try {
+      if (!email || !password) {
+        console.log("Authentication failed - missing email or password");
+        return { success: false, message: "Email and password are required" };
+      }
+
+      const user = await User.findOne({
+        where: {
+          email: email.toLowerCase(),
+          isActive: true,
+        },
+        attributes: ["id", "name", "email", "password"],
+        raw: false,
+      });
+
+      if (!user) {
+        console.log(`Authentication failed - user not found: ${email}`);
+        return { success: false, message: "Invalid email" };
+      }
+
+      const isValidPassword = await user.validatePassword(password);
+      if (!isValidPassword) {
+        console.log(
+          `Authentication failed - invalid password for user: ${email}`
+        );
+        return { success: false, message: "Invalid password" };
+      }
+
+      console.log(`User authenticated successfully: ${user.id}`);
+
+      const userData = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      };
+
+      const accessToken = await this.generateAccessToken(userData.id);
+
+      if (!accessToken) {
+        throw new Error("Failed to generate access token");
+      }
+
+      return {
+        success: true,
+        data: {
+          accessToken,
+        },
+        message: "Login successful",
+      };
+    } catch (error) {
+      console.error("Authentication error:", error);
+      return {
+        success: false,
+        message: "An error occurred during authentication",
+        error: error.message,
+      };
     }
-
-    const user = await User.findOne({
-      where: {
-        email: email.toLowerCase(),
-        isActive: true,
-      },
-    });
-
-    if (!user) {
-      console.log(`Authentication failed - user not found: ${email}`);
-      return { success: false, message: "Invalid email" };
-    }
-
-    const isValidPassword = await user.validatePassword(password);
-    if (!isValidPassword) {
-      console.log(
-        `Authentication failed - invalid password for user: ${email}`
-      );
-      return { success: false, message: "Invalid password" };
-    }
-
-    console.log(`User authenticated successfully: ${user.id}`);
-    const accessToken = this.generateAccessToken(user.id);
-    return {
-      success: true,
-      data: { accessToken, user },
-      message: "Login successful",
-    };
   }
 
   async getUserProfile(userId) {
