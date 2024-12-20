@@ -31,16 +31,6 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    role: {
-      type: DataTypes.ENUM("user", "admin"),
-      allowNull: false,
-      defaultValue: "user",
-    },
-    botLimit: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 5,
-    },
     metadata: {
       type: DataTypes.JSONB,
       allowNull: false,
@@ -84,6 +74,21 @@ User.init(
         }
       },
     },
+    indexes: [
+      {
+        fields: ["isActive"],
+        name: "user_active_idx",
+      },
+      {
+        fields: ["createdAt"],
+        name: "user_created_idx",
+      },
+      {
+        using: "gin",
+        fields: ["metadata"],
+        name: "user_metadata_idx",
+      },
+    ],
   }
 );
 

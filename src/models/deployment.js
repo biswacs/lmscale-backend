@@ -10,6 +10,18 @@ Deployment.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    slug: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      validate: {
+        is: /^[a-z0-9-]+$/,
+      },
+    },
     userId: {
       type: DataTypes.UUID,
       allowNull: false,
@@ -17,6 +29,11 @@ Deployment.init(
         model: "Users",
         key: "id",
       },
+    },
+    type: {
+      type: DataTypes.ENUM("chat", "code", "image"),
+      allowNull: false,
+      defaultValue: "chat",
     },
     modelId: {
       type: DataTypes.UUID,
@@ -26,15 +43,9 @@ Deployment.init(
         key: "id",
       },
     },
-    status: {
-      type: DataTypes.ENUM("pending", "running", "stopped", "failed"),
+    systemPrompt: {
+      type: DataTypes.TEXT,
       allowNull: false,
-      defaultValue: "pending",
-    },
-    type: {
-      type: DataTypes.ENUM("standard", "bot"),
-      allowNull: false,
-      defaultValue: "standard",
     },
     config: {
       type: DataTypes.JSONB,
@@ -45,10 +56,10 @@ Deployment.init(
         rateLimit: 50,
       },
     },
-    metadata: {
-      type: DataTypes.JSONB,
+    status: {
+      type: DataTypes.ENUM("active", "inactive", "maintenance"),
+      defaultValue: "active",
       allowNull: false,
-      defaultValue: {},
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -58,16 +69,21 @@ Deployment.init(
       type: DataTypes.DATE,
       allowNull: false,
     },
-    deletedAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
   },
   {
     sequelize,
     modelName: "Deployment",
-    paranoid: true,
     timestamps: true,
+    hooks: {
+      beforeValidate: async (deployment) => {
+        if (deployment.name && !deployment.slug) {
+          deployment.slug = deployment.name
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, "")
+            .replace(/\s+/g, "-");
+        }
+      },
+    },
     indexes: [
       {
         fields: ["userId"],
@@ -76,10 +92,10 @@ Deployment.init(
         fields: ["modelId"],
       },
       {
-        fields: ["status"],
+        fields: ["type"],
       },
       {
-        fields: ["type"],
+        fields: ["status"],
       },
     ],
   }

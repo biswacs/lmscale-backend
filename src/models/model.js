@@ -1,9 +1,9 @@
 const { Model, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
-class LLMModel extends Model {}
+class LLM extends Model {}
 
-LLMModel.init(
+LLM.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -60,4 +60,4 @@ LLMModel.init(
   }
 );
 
-module.exports = LLMModel;
+module.exports = LLM;
