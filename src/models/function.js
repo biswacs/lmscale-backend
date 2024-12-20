@@ -1,9 +1,9 @@
 const { Model, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
-class Usage extends Model {}
+class Function extends Model {}
 
-Usage.init(
+Function.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -18,41 +18,34 @@ Usage.init(
         key: "id",
       },
     },
-    apiKeyId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: "ApiKeys",
-        key: "id",
-      },
-    },
-    deploymentVersion: {
-      type: DataTypes.INTEGER,
+    name: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
-    inputTokens: {
-      type: DataTypes.INTEGER,
+    endpoint: {
+      type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: 0,
+    },
+    method: {
+      type: DataTypes.STRING,
+      allowNull: false,
       validate: {
-        min: 0,
+        isIn: [["GET", "POST"]],
       },
     },
-    outputTokens: {
-      type: DataTypes.INTEGER,
+    parameters: {
+      type: DataTypes.JSONB,
       allowNull: false,
-      defaultValue: 0,
-      validate: {
-        min: 0,
-      },
+      defaultValue: {},
     },
-    cost: {
-      type: DataTypes.DECIMAL(10, 6),
+    authType: {
+      type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: 0,
-      validate: {
-        min: 0,
-      },
+    },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -62,20 +55,26 @@ Usage.init(
       type: DataTypes.DATE,
       allowNull: false,
     },
+    deletedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     sequelize,
-    modelName: "Usage",
+    modelName: "Function",
+    paranoid: true,
     timestamps: true,
     indexes: [
       {
-        fields: ["instanceId", "createdAt"],
+        fields: ["instanceId"],
       },
       {
-        fields: ["apiKeyId"],
+        using: "gin",
+        fields: ["parameters"],
       },
     ],
   }
 );
 
-module.exports = Usage;
+module.exports = Function;

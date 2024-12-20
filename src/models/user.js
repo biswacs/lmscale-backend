@@ -76,17 +76,8 @@ User.init(
     },
     indexes: [
       {
-        fields: ["isActive"],
-        name: "user_active_idx",
-      },
-      {
-        fields: ["createdAt"],
-        name: "user_created_idx",
-      },
-      {
         using: "gin",
         fields: ["metadata"],
-        name: "user_metadata_idx",
       },
     ],
   }

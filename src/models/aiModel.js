@@ -1,9 +1,9 @@
 const { Model, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
-class LLM extends Model {}
+class AiModel extends Model {}
 
-LLM.init(
+AiModel.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -13,26 +13,27 @@ LLM.init(
     name: {
       type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        isIn: [["llama2", "mistral"]],
+      },
     },
-    author: {
+    tag: {
       type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        isIn: [["7b", "13b"]],
+      },
     },
-    type: {
-      type: DataTypes.ENUM("chat", "code"),
+    pullCommand: {
+      type: DataTypes.TEXT,
       allowNull: false,
     },
-    pricePerToken: {
-      type: DataTypes.DECIMAL(10, 6),
+    baseMemoryRequired: {
+      type: DataTypes.INTEGER,
       allowNull: false,
       validate: {
         min: 0,
       },
-    },
-    metadata: {
-      type: DataTypes.JSONB,
-      allowNull: false,
-      defaultValue: {},
     },
     isActive: {
       type: DataTypes.BOOLEAN,
@@ -47,17 +48,18 @@ LLM.init(
       type: DataTypes.DATE,
       allowNull: false,
     },
-    deletedAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
   },
   {
     sequelize,
-    modelName: "Model",
-    paranoid: true,
+    modelName: "AiModel",
     timestamps: true,
+    indexes: [
+      {
+        fields: ["name", "tag"],
+        unique: true,
+      },
+    ],
   }
 );
 
-module.exports = LLM;
+module.exports = AiModel;

@@ -1,7 +1,12 @@
 const { Model, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
+const crypto = require("crypto");
 
-class ApiKey extends Model {}
+class ApiKey extends Model {
+  static generateKey() {
+    return crypto.randomBytes(32).toString("hex");
+  }
+}
 
 ApiKey.init(
   {
@@ -9,15 +14,6 @@ ApiKey.init(
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
-    },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    key: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
     },
     userId: {
       type: DataTypes.UUID,
@@ -27,14 +23,10 @@ ApiKey.init(
         key: "id",
       },
     },
-    permissions: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
+    key: {
+      type: DataTypes.STRING(64),
       allowNull: false,
-      defaultValue: ["read"],
-    },
-    lastUsed: {
-      type: DataTypes.DATE,
-      allowNull: true,
+      unique: true,
     },
     metadata: {
       type: DataTypes.JSONB,
@@ -45,6 +37,10 @@ ApiKey.init(
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true,
+    },
+    lastUsed: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -64,6 +60,18 @@ ApiKey.init(
     modelName: "ApiKey",
     paranoid: true,
     timestamps: true,
+    hooks: {
+      beforeCreate: async (apiKey) => {
+        if (!apiKey.key) {
+          apiKey.key = ApiKey.generateKey();
+        }
+      },
+    },
+    indexes: [
+      {
+        fields: ["userId"],
+      },
+    ],
   }
 );
 

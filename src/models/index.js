@@ -1,87 +1,93 @@
 const sequelize = require("../config/database");
 const User = require("./user");
-const LLMModel = require("./llmModel");
-const Deployment = require("./deployment");
+const AiModel = require("./aiModel");
 const ApiKey = require("./apiKey");
+const Function = require("./function");
+const Instance = require("./instance");
+const Instruction = require("./instruction");
+const Server = require("./server");
 const Usage = require("./usage");
-const Bot = require("./bot");
-
-User.hasMany(Deployment, {
-  foreignKey: "userId",
-  as: "deployments",
-});
 
 User.hasMany(ApiKey, {
   foreignKey: "userId",
   as: "apiKeys",
 });
-
-User.hasMany(Usage, {
+User.hasMany(Instance, {
   foreignKey: "userId",
-  as: "usages",
-});
-
-Deployment.belongsTo(User, {
-  foreignKey: "userId",
-  as: "user",
-});
-
-Deployment.belongsTo(LLMModel, {
-  foreignKey: "modelId",
-  as: "model",
-});
-
-Deployment.hasMany(Usage, {
-  foreignKey: "deploymentId",
-  as: "usages",
+  as: "instances",
 });
 
 ApiKey.belongsTo(User, {
   foreignKey: "userId",
   as: "user",
 });
-
-Usage.belongsTo(User, {
-  foreignKey: "userId",
-  as: "user",
-});
-
-Usage.belongsTo(Deployment, {
-  foreignKey: "deploymentId",
-  as: "deployment",
-});
-
-LLMModel.hasMany(Deployment, {
-  foreignKey: "modelId",
-  as: "deployments",
-});
-
-Bot.belongsTo(User, {
-  foreignKey: "userId",
-  as: "user",
-});
-
-Bot.belongsTo(Deployment, {
-  foreignKey: "deploymentId",
-  as: "deployment",
-});
-
-Bot.hasMany(Usage, {
-  foreignKey: "botId",
+ApiKey.hasMany(Usage, {
+  foreignKey: "apiKeyId",
   as: "usages",
 });
 
-User.hasMany(Bot, {
+Instance.belongsTo(User, {
   foreignKey: "userId",
-  as: "bots",
+  as: "user",
+});
+Instance.belongsTo(AiModel, {
+  foreignKey: "modelId",
+  as: "model",
+});
+Instance.belongsTo(Server, {
+  foreignKey: "serverId",
+  as: "server",
+});
+Instance.hasOne(Instruction, {
+  foreignKey: "instanceId",
+  as: "instruction",
+});
+Instance.hasMany(Function, {
+  foreignKey: "instanceId",
+  as: "functions",
+});
+Instance.hasMany(Usage, {
+  foreignKey: "instanceId",
+  as: "usages",
+});
+
+Server.hasMany(Instance, {
+  foreignKey: "serverId",
+  as: "instances",
+});
+
+AiModel.hasMany(Instance, {
+  foreignKey: "modelId",
+  as: "instances",
+});
+
+Instruction.belongsTo(Instance, {
+  foreignKey: "instanceId",
+  as: "instance",
+});
+
+Function.belongsTo(Instance, {
+  foreignKey: "instanceId",
+  as: "instance",
+});
+
+Usage.belongsTo(Instance, {
+  foreignKey: "instanceId",
+  as: "instance",
+});
+Usage.belongsTo(ApiKey, {
+  foreignKey: "apiKeyId",
+  as: "apiKey",
 });
 
 module.exports = {
   sequelize,
   User,
-  LLMModel,
-  Deployment,
+  AiModel,
   ApiKey,
+  Function,
+  Instance,
+  Instruction,
+  Server,
   Usage,
-  Bot,
 };
