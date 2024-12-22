@@ -54,18 +54,14 @@ const createRedisRateLimiter = (windowMs, max, message) => {
         await redisClient.pExpire(key, windowMs);
       }
 
-      const ttl = await redisClient.pTTL(key);
-
       res.setHeader("X-RateLimit-Limit", max);
       res.setHeader("X-RateLimit-Remaining", Math.max(0, max - count));
-      res.setHeader("X-RateLimit-Reset", Date.now() + ttl);
 
       if (count > max) {
         console.log(`Rate limit exceeded for ${ip}`);
         return res.status(429).json({
           success: false,
           message: message,
-          retryAfter: Math.ceil(ttl / 1000 / 60),
         });
       }
 
@@ -79,15 +75,15 @@ const createRedisRateLimiter = (windowMs, max, message) => {
 
 const rateLimiters = {
   login: createRedisRateLimiter(
-    5 * 60 * 1000,
-    20,
-    "Too many login attempts from this IP. Please try again after 5 minutes."
+    2 * 60 * 1000,
+    10,
+    "Too many login attempts from this IP. Please try again later."
   ),
 
   register: createRedisRateLimiter(
-    10 * 60 * 1000,
+    2 * 60 * 1000,
     10,
-    "Too many registration attempts from this IP. Please try again after 10 minutes."
+    "Too many registration attempts from this IP. Please try again later."
   ),
 
   global: createRedisRateLimiter(
