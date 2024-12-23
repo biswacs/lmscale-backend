@@ -15,13 +15,15 @@ class UserService {
 
   async createUser({ name = "", email, password }) {
     console.log(`Attempting to create user with email: ${email}`);
-    const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) {
-      console.log(`User creation failed - email already exists: ${email}`);
-      return { success: false, message: "Email already exists" };
-    }
 
     try {
+      const existingUser = await User.findOne({ where: { email } });
+
+      if (existingUser) {
+        console.log(`User creation failed - email already exists: ${email}`);
+        return { success: false, message: "Email already exists" };
+      }
+
       const user = await User.create({
         name,
         email: email.toLowerCase(),
