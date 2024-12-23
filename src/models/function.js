@@ -10,6 +10,10 @@ Function.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     instanceId: {
       type: DataTypes.UUID,
       allowNull: false,
@@ -17,10 +21,6 @@ Function.init(
         model: "Instances",
         key: "id",
       },
-    },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
     },
     endpoint: {
       type: DataTypes.STRING,

@@ -10,6 +10,10 @@ Instance.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     userId: {
       type: DataTypes.UUID,
       allowNull: false,
@@ -34,40 +38,10 @@ Instance.init(
         key: "id",
       },
     },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    instanceType: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        isIn: [["chat", "code"]],
-      },
-    },
-    temperature: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-      validate: {
-        min: 0,
-        max: 2,
-      },
-    },
-    maxTokens: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      validate: {
-        min: 1,
-      },
-    },
-    deploymentVersion: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 1,
-    },
-    modelfileHash: {
-      type: DataTypes.STRING,
-      allowNull: false,
+    config: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: {},
     },
     isActive: {
       type: DataTypes.BOOLEAN,

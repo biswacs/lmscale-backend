@@ -17,23 +17,14 @@ AiModel.init(
         isIn: [["llama2", "mistral"]],
       },
     },
-    tag: {
-      type: DataTypes.STRING,
+    config: {
+      type: DataTypes.JSONB,
       allowNull: false,
-      validate: {
-        isIn: [["7b", "13b"]],
-      },
+      defaultValue: {},
     },
     pullCommand: {
       type: DataTypes.TEXT,
       allowNull: false,
-    },
-    baseMemoryRequired: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      validate: {
-        min: 0,
-      },
     },
     isActive: {
       type: DataTypes.BOOLEAN,
@@ -55,7 +46,7 @@ AiModel.init(
     timestamps: true,
     indexes: [
       {
-        fields: ["name", "tag"],
+        fields: ["name"],
         unique: true,
       },
     ],

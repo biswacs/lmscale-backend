@@ -26,10 +26,6 @@ Usage.init(
         key: "id",
       },
     },
-    deploymentVersion: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
     inputTokens: {
       type: DataTypes.INTEGER,
       allowNull: false,

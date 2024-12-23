@@ -14,18 +14,15 @@ Server.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    host: {
+    publicIp: {
       type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        isHostPort(value) {
-          if (!/^[\w.-]+:\d+$/.test(value)) {
-            throw new Error("Host must be in format ip:port or hostname:port");
-          }
-        },
-      },
     },
-    specs: {
+    publicDns: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    config: {
       type: DataTypes.JSONB,
       allowNull: false,
       defaultValue: {},
@@ -66,7 +63,7 @@ Server.init(
       },
       {
         using: "gin",
-        fields: ["specs", "loadedModels"],
+        fields: ["loadedModels"],
       },
     ],
   }
