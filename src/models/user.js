@@ -8,7 +8,7 @@ class User extends Model {
     return bcrypt.compare(password, this.password);
   }
 
-  async rotateApiKey() {
+  async generateNewApiKey() {
     const newApiKey = crypto.randomBytes(32).toString("hex");
     await this.update({
       apiKey: newApiKey,
@@ -46,6 +46,7 @@ User.init(
       type: DataTypes.STRING(64),
       allowNull: false,
       unique: true,
+      defaultValue: () => crypto.randomBytes(32).toString("hex"),
     },
     metadata: {
       type: DataTypes.JSONB,
@@ -67,9 +68,6 @@ User.init(
       beforeCreate: async (user) => {
         if (user.password) {
           user.password = await bcrypt.hash(user.password, 10);
-        }
-        if (!user.apiKey) {
-          user.apiKey = crypto.randomBytes(32).toString("hex");
         }
       },
     },
