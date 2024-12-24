@@ -10,53 +10,46 @@ Usage.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    instanceId: {
+    userId: {
       type: DataTypes.UUID,
       allowNull: false,
+      references: {
+        model: "Users",
+        key: "id",
+      },
+    },
+    instanceId: {
+      type: DataTypes.UUID,
+      allowNull: true,
       references: {
         model: "Instances",
         key: "id",
       },
     },
-    apiKeyId: {
-      type: DataTypes.UUID,
+    type: {
+      type: DataTypes.ENUM("chat", "instance"),
       allowNull: false,
-      references: {
-        model: "ApiKeys",
-        key: "id",
-      },
+      defaultValue: "chat",
     },
     inputTokens: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
-      validate: {
-        min: 0,
-      },
     },
     outputTokens: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
-      validate: {
-        min: 0,
-      },
     },
     cost: {
       type: DataTypes.DECIMAL(10, 6),
       allowNull: false,
       defaultValue: 0,
-      validate: {
-        min: 0,
-      },
     },
-    createdAt: {
-      type: DataTypes.DATE,
+    metadata: {
+      type: DataTypes.JSONB,
       allowNull: false,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
+      defaultValue: {},
     },
   },
   {
@@ -65,10 +58,10 @@ Usage.init(
     timestamps: true,
     indexes: [
       {
-        fields: ["instanceId", "createdAt"],
+        fields: ["userId", "type", "createdAt"],
       },
       {
-        fields: ["apiKeyId"],
+        fields: ["instanceId"],
       },
     ],
   }

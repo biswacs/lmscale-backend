@@ -1,10 +1,24 @@
 const { Model, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 
 class User extends Model {
   async validatePassword(password) {
     return bcrypt.compare(password, this.password);
+  }
+
+  async rotateApiKey() {
+    const newApiKey = crypto.randomBytes(32).toString("hex");
+    await this.update({
+      apiKey: newApiKey,
+      metadata: {
+        ...this.metadata,
+        apiKeyCreatedAt: new Date(),
+        previousApiKey: this.apiKey,
+      },
+    });
+    return newApiKey;
   }
 }
 
@@ -23,38 +37,25 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
-      validate: {
-        isEmail: true,
-      },
     },
     password: {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    apiKey: {
+      type: DataTypes.STRING(64),
+      allowNull: false,
+      unique: true,
+    },
     metadata: {
       type: DataTypes.JSONB,
       allowNull: false,
-      defaultValue: {
-        usageQuota: null,
-        totalTokensUsed: 0,
-      },
+      defaultValue: {},
     },
     isActive: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    deletedAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
     },
   },
   {
@@ -67,19 +68,11 @@ User.init(
         if (user.password) {
           user.password = await bcrypt.hash(user.password, 10);
         }
-      },
-      beforeUpdate: async (user) => {
-        if (user.changed("password")) {
-          user.password = await bcrypt.hash(user.password, 10);
+        if (!user.apiKey) {
+          user.apiKey = crypto.randomBytes(32).toString("hex");
         }
       },
     },
-    indexes: [
-      {
-        using: "gin",
-        fields: ["metadata"],
-      },
-    ],
   }
 );
 

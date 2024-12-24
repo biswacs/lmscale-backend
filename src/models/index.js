@@ -1,28 +1,18 @@
 const sequelize = require("../config/database");
 const User = require("./user");
 const AiModel = require("./aiModel");
-const ApiKey = require("./apiKey");
 const Function = require("./function");
 const Instance = require("./instance");
 const Instruction = require("./instruction");
 const Server = require("./server");
 const Usage = require("./usage");
 
-User.hasMany(ApiKey, {
-  foreignKey: "userId",
-  as: "apiKeys",
-});
 User.hasMany(Instance, {
   foreignKey: "userId",
   as: "instances",
 });
-
-ApiKey.belongsTo(User, {
+User.hasMany(Usage, {
   foreignKey: "userId",
-  as: "user",
-});
-ApiKey.hasMany(Usage, {
-  foreignKey: "apiKeyId",
   as: "usages",
 });
 
@@ -75,16 +65,15 @@ Usage.belongsTo(Instance, {
   foreignKey: "instanceId",
   as: "instance",
 });
-Usage.belongsTo(ApiKey, {
-  foreignKey: "apiKeyId",
-  as: "apiKey",
+Usage.belongsTo(User, {
+  foreignKey: "userId",
+  as: "user",
 });
 
 module.exports = {
   sequelize,
   User,
   AiModel,
-  ApiKey,
   Function,
   Instance,
   Instruction,

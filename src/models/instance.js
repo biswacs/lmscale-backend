@@ -38,6 +38,11 @@ Instance.init(
         key: "id",
       },
     },
+    instanceType: {
+      type: DataTypes.ENUM("dedicated", "public"),
+      allowNull: false,
+      defaultValue: "dedicated",
+    },
     config: {
       type: DataTypes.JSONB,
       allowNull: true,
@@ -76,6 +81,7 @@ Instance.init(
       {
         fields: ["serverId"],
       },
+      { fields: ["instanceType"] },
     ],
   }
 );

@@ -21,6 +21,13 @@ Server.init(
         isIP: true,
       },
     },
+    privateIp: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      validate: {
+        isIP: true,
+      },
+    },
     hostUrl: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -29,6 +36,22 @@ Server.init(
       },
     },
     accessToken: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    region: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    amiId: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    keyName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    computeType: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -50,19 +73,36 @@ Server.init(
     status: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: "offline",
+      defaultValue: "running",
       validate: {
-        isIn: [["online", "offline", "maintenance", "error"]],
+        isIn: [["pending", "running", "stopping", "stopped", "terminated"]], // Valid statuses
       },
+    },
+    metrics: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: {},
+    },
+    securityGroups: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: true,
+      defaultValue: [],
+    },
+    subnetId: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    launchTime: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    shutdownTime: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
     lastHealthCheck: {
       type: DataTypes.DATE,
       allowNull: true,
-    },
-    resourceMetrics: {
-      type: DataTypes.JSONB,
-      allowNull: false,
-      defaultValue: {},
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -78,12 +118,9 @@ Server.init(
     modelName: "Server",
     timestamps: true,
     indexes: [
-      {
-        fields: ["status"],
-      },
-      {
-        fields: ["serverType"],
-      },
+      { fields: ["status"] },
+      { fields: ["region"] },
+      { fields: ["serverType"] },
     ],
   }
 );
