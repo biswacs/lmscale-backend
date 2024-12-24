@@ -12,7 +12,7 @@ User.hasMany(ApiKey, {
   foreignKey: "userId",
   as: "apiKeys",
 });
-User.hasMany(Instance, {
+User.hasOne(Instance, {
   foreignKey: "userId",
   as: "instances",
 });
