@@ -14,35 +14,55 @@ Server.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    publicIp: {
+    hostIp: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        isIP: true,
+      },
+    },
+    hostUrl: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        isUrl: true,
+      },
+    },
+    accessToken: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    publicDns: {
-      type: DataTypes.STRING,
+    serverType: {
+      type: DataTypes.ENUM("dedicated", "public"),
       allowNull: false,
+      defaultValue: "dedicated",
     },
     config: {
       type: DataTypes.JSONB,
       allowNull: false,
       defaultValue: {},
     },
-    loadedModels: {
-      type: DataTypes.JSONB,
+    maxConcurrentRequests: {
+      type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: [],
+      defaultValue: 1,
     },
     status: {
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: "offline",
       validate: {
-        isIn: [["online", "offline"]],
+        isIn: [["online", "offline", "maintenance", "error"]],
       },
     },
     lastHealthCheck: {
       type: DataTypes.DATE,
       allowNull: true,
+    },
+    resourceMetrics: {
+      type: DataTypes.JSONB,
+      allowNull: false,
+      defaultValue: {},
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -62,8 +82,7 @@ Server.init(
         fields: ["status"],
       },
       {
-        using: "gin",
-        fields: ["loadedModels"],
+        fields: ["serverType"],
       },
     ],
   }
