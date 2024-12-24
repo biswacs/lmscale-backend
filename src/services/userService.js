@@ -1,6 +1,6 @@
 const { User } = require("../models");
 const jwt = require("jsonwebtoken");
-
+// hash password and then store
 class UserService {
   generateAccessToken(userId) {
     console.log(`Generating accessToken for user: ${userId}`);
@@ -11,6 +11,11 @@ class UserService {
     return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
       expiresIn: "24h",
     });
+  }
+  generateRandomUserId(email,name){
+    const number = Math.floor(Math.random() * 10000).toString().padStart(4, '0')
+    const timestamp = Date.now();
+    return `${email.slice(0, 2)}${name.slice(0, 2)}${number}${timestamp}`;
   }
 
   async createUser({ name = "", email, password }) {
@@ -23,11 +28,11 @@ class UserService {
         console.log(`User creation failed - email already exists: ${email}`);
         return { success: false, message: "Email already exists" };
       }
-
+      const encryptedPassword = await bcrypt.hash(password, 10);
       const user = await User.create({
         name,
         email: email.toLowerCase(),
-        password,
+        password:encryptedPassword,
       });
 
       console.log(`User created successfully with id: ${user.id}`);
@@ -68,8 +73,8 @@ class UserService {
         console.log(`Authentication failed - user not found: ${email}`);
         return { success: false, message: "Invalid email" };
       }
-
-      const isValidPassword = await user.validatePassword(password);
+      const encryptPass= await bcrypt.hash(password,10)
+      const isValidPassword = await user.validatePassword(encryptPass);
       if (!isValidPassword) {
         console.log(
           `Authentication failed - invalid password for user: ${email}`
@@ -84,8 +89,7 @@ class UserService {
         name: user.name,
         email: user.email,
       };
-
-      const accessToken = await this.generateAccessToken(userData.id);
+      const accessToken = generateAccessToken(userData.id);
 
       if (!accessToken) {
         throw new Error("Failed to generate access token");

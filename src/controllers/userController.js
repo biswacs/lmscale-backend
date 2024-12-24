@@ -1,7 +1,6 @@
 const UserService = require("../services/userService");
 const userSchemas = require("../validation/userSchemas");
 const userService = new UserService();
-
 const userController = {
   async register(req, res) {
     try {
