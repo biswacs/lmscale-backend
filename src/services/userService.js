@@ -12,12 +12,7 @@ class UserService {
       expiresIn: "24h",
     });
   }
-  generateRandomUserId(email,name){
-    const number = Math.floor(Math.random() * 10000).toString().padStart(4, '0')
-    const timestamp = Date.now();
-    return `${email.slice(0, 2)}${name.slice(0, 2)}${number}${timestamp}`;
-  }
-
+  
   async createUser({ name = "", email, password }) {
     console.log(`Attempting to create user with email: ${email}`);
 
@@ -89,7 +84,7 @@ class UserService {
         name: user.name,
         email: user.email,
       };
-      const accessToken = generateAccessToken(userData.id);
+      const accessToken = this.generateAccessToken(userData.id);
 
       if (!accessToken) {
         throw new Error("Failed to generate access token");
