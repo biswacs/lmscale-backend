@@ -10,9 +10,7 @@ class UserService {
       );
       throw new Error("JWT_SECRET is not configured");
     }
-    return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-      expiresIn: "24h",
-    });
+    return jwt.sign({ id: userId }, process.env.JWT_SECRET);
   }
 
   async createUser({ name = "", email, password }) {
