@@ -3,9 +3,11 @@ const jwt = require("jsonwebtoken");
 
 class UserService {
   generateAccessToken(userId) {
-    console.log(`Generating accessToken for user: ${userId}`);
+    console.log(`[UserService] Generating accessToken for user: ${userId}`);
     if (!process.env.JWT_SECRET) {
-      console.error("JWT_SECRET missing in environment configuration");
+      console.error(
+        "[UserService] JWT_SECRET missing in environment configuration"
+      );
       throw new Error("JWT_SECRET is not configured");
     }
     return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
@@ -47,11 +49,13 @@ class UserService {
   }
 
   async authenticateUser(email, password) {
-    console.log(`Attempting to authenticate user: ${email}`);
+    console.log(`[UserService] Attempting to authenticate user: ${email}`);
 
     try {
       if (!email || !password) {
-        console.log("Authentication failed - missing email or password");
+        console.log(
+          "[UserService] Authentication failed - missing email or password"
+        );
         return { success: false, message: "Email and password are required" };
       }
 
@@ -65,19 +69,21 @@ class UserService {
       });
 
       if (!user) {
-        console.log(`Authentication failed - user not found: ${email}`);
+        console.log(
+          `[UserService] Authentication failed - user not found: ${email}`
+        );
         return { success: false, message: "Invalid email" };
       }
 
       const isValidPassword = await user.validatePassword(password);
       if (!isValidPassword) {
         console.log(
-          `Authentication failed - invalid password for user: ${email}`
+          `[UserService] Authentication failed - invalid password for user: ${email}`
         );
         return { success: false, message: "Invalid password" };
       }
 
-      console.log(`User authenticated successfully: ${user.id}`);
+      console.log(`[UserService] User authenticated successfully: ${user.id}`);
 
       const userData = {
         id: user.id,
@@ -99,7 +105,7 @@ class UserService {
         message: "Login successful",
       };
     } catch (error) {
-      console.error("Authentication error:", error);
+      console.error("[UserService] Authentication error:", error);
       return {
         success: false,
         message: "An error occurred during authentication",
@@ -154,15 +160,17 @@ class UserService {
   }
 
   async deactivateUser(userId) {
-    console.log(`Attempting to deactivate user: ${userId}`);
+    console.log(`[UserService] Attempting to deactivate user: ${userId}`);
     const user = await User.findByPk(userId);
     if (!user) {
-      console.log(`Deactivation failed - user not found: ${userId}`);
+      console.log(
+        `[UserService] Deactivation failed - user not found: ${userId}`
+      );
       return { success: false, message: "User not found" };
     }
 
     await user.update({ isActive: false });
-    console.log(`User deactivated successfully: ${userId}`);
+    console.log(`[UserService] User deactivated successfully: ${userId}`);
     return {
       success: true,
       message: "User deactivated successfully",
