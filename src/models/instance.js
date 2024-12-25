@@ -14,29 +14,46 @@ Instance.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    userId: {
-      type: DataTypes.UUID,
+    hostIp: {
+      type: DataTypes.STRING,
       allowNull: false,
-      references: {
-        model: "Users",
-        key: "id",
+      validate: {
+        isIP: true,
       },
     },
-    modelId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: "AiModels",
-        key: "id",
+    privateIp: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      validate: {
+        isIP: true,
       },
     },
-    serverId: {
-      type: DataTypes.UUID,
+    hostUrl: {
+      type: DataTypes.STRING,
       allowNull: false,
-      references: {
-        model: "Servers",
-        key: "id",
+      validate: {
+        isUrl: true,
       },
+    },
+    accessToken: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    region: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    amiId: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    sshKey: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    computeType: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     instanceType: {
       type: DataTypes.ENUM("dedicated", "public"),
@@ -45,13 +62,47 @@ Instance.init(
     },
     config: {
       type: DataTypes.JSONB,
+      allowNull: false,
+      defaultValue: {},
+    },
+    maxConcurrentRequests: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+    },
+    status: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "running",
+      validate: {
+        isIn: [["pending", "running", "stopping", "stopped", "terminated"]], // Valid statuses
+      },
+    },
+    metrics: {
+      type: DataTypes.JSONB,
       allowNull: true,
       defaultValue: {},
     },
-    isActive: {
-      type: DataTypes.BOOLEAN,
+    securityGroups: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: true,
+      defaultValue: [],
+    },
+    subnetId: {
+      type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: true,
+    },
+    launchTime: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    shutdownTime: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    lastHealthCheck: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -61,26 +112,14 @@ Instance.init(
       type: DataTypes.DATE,
       allowNull: false,
     },
-    deletedAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
   },
   {
     sequelize,
     modelName: "Instance",
-    paranoid: true,
     timestamps: true,
     indexes: [
-      {
-        fields: ["userId"],
-      },
-      {
-        fields: ["modelId"],
-      },
-      {
-        fields: ["serverId"],
-      },
+      { fields: ["status"] },
+      { fields: ["region"] },
       { fields: ["instanceType"] },
     ],
   }

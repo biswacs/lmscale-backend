@@ -1,9 +1,9 @@
 const { Model, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
-class AiModel extends Model {}
+class Llm extends Model {}
 
-AiModel.init(
+Llm.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -42,7 +42,7 @@ AiModel.init(
   },
   {
     sequelize,
-    modelName: "AiModel",
+    modelName: "Llm",
     timestamps: true,
     indexes: [
       {
@@ -53,4 +53,4 @@ AiModel.init(
   }
 );
 
-module.exports = AiModel;
+module.exports = Llm;

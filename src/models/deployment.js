@@ -1,9 +1,9 @@
 const { Model, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
-class Function extends Model {}
+class Deployment extends Model {}
 
-Function.init(
+Deployment.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -14,33 +14,39 @@ Function.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    deploymentId: {
+    userId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: "Deployments",
+        model: "Users",
         key: "id",
       },
     },
-    endpoint: {
-      type: DataTypes.STRING,
+    llmId: {
+      type: DataTypes.UUID,
       allowNull: false,
-    },
-    method: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        isIn: [["GET", "POST"]],
+      references: {
+        model: "Llms",
+        key: "id",
       },
     },
-    parameters: {
-      type: DataTypes.JSONB,
+    instanceId: {
+      type: DataTypes.UUID,
       allowNull: false,
-      defaultValue: {},
+      references: {
+        model: "Instances",
+        key: "id",
+      },
     },
-    authType: {
-      type: DataTypes.STRING,
+    deploymentType: {
+      type: DataTypes.ENUM("dedicated", "public"),
       allowNull: false,
+      defaultValue: "dedicated",
+    },
+    config: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: {},
     },
     isActive: {
       type: DataTypes.BOOLEAN,
@@ -62,19 +68,22 @@ Function.init(
   },
   {
     sequelize,
-    modelName: "Function",
+    modelName: "Deployment",
     paranoid: true,
     timestamps: true,
     indexes: [
       {
-        fields: ["deploymentId"],
+        fields: ["userId"],
       },
       {
-        using: "gin",
-        fields: ["parameters"],
+        fields: ["llmId"],
       },
+      {
+        fields: ["instanceId"],
+      },
+      { fields: ["deploymentType"] },
     ],
   }
 );
 
-module.exports = Function;
+module.exports = Deployment;

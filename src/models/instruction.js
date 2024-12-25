@@ -18,11 +18,11 @@ Instruction.init(
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    instanceId: {
+    deploymentId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: "Instances",
+        model: "Deployments",
         key: "id",
       },
     },
@@ -47,7 +47,7 @@ Instruction.init(
     timestamps: true,
     indexes: [
       {
-        fields: ["instanceId", "version"],
+        fields: ["deploymentId", "version"],
         unique: true,
       },
     ],

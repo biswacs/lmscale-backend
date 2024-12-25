@@ -18,18 +18,18 @@ Usage.init(
         key: "id",
       },
     },
-    instanceId: {
+    deploymentId: {
       type: DataTypes.UUID,
       allowNull: true,
       references: {
-        model: "Instances",
+        model: "Deployments",
         key: "id",
       },
     },
     type: {
-      type: DataTypes.ENUM("chat", "instance"),
+      type: DataTypes.ENUM("standard", "deployment"),
       allowNull: false,
-      defaultValue: "chat",
+      defaultValue: "standard",
     },
     inputTokens: {
       type: DataTypes.INTEGER,
@@ -61,7 +61,7 @@ Usage.init(
         fields: ["userId", "type", "createdAt"],
       },
       {
-        fields: ["instanceId"],
+        fields: ["deploymentId"],
       },
     ],
   }

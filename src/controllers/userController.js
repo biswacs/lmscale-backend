@@ -2,7 +2,7 @@ const UserService = require("../services/userService");
 const userSchemas = require("../validation/userSchemas");
 const userService = new UserService();
 
-const userController = {
+const UserController = {
   async register(req, res) {
     try {
       const validatedData = userSchemas.register.parse(req.body);
@@ -81,4 +81,4 @@ const userController = {
   },
 };
 
-module.exports = userController;
+module.exports = UserController;

@@ -1,69 +1,69 @@
 const sequelize = require("../config/database");
 const User = require("./user");
-const AiModel = require("./aiModel");
+const Deployment = require("./deployment");
+const Llm = require("./llm");
 const Function = require("./function");
-const Instance = require("./instance");
 const Instruction = require("./instruction");
-const Server = require("./server");
+const Instance = require("./instance");
 const Usage = require("./usage");
 
-User.hasMany(Instance, {
+User.hasMany(Deployment, {
   foreignKey: "userId",
-  as: "instances",
+  as: "deployments",
 });
 User.hasMany(Usage, {
   foreignKey: "userId",
   as: "usages",
 });
 
-Instance.belongsTo(User, {
+Deployment.belongsTo(User, {
   foreignKey: "userId",
   as: "user",
 });
-Instance.belongsTo(AiModel, {
+Deployment.belongsTo(Llm, {
   foreignKey: "modelId",
   as: "model",
 });
-Instance.belongsTo(Server, {
-  foreignKey: "serverId",
-  as: "server",
-});
-Instance.hasOne(Instruction, {
+Deployment.belongsTo(Instance, {
   foreignKey: "instanceId",
+  as: "instance",
+});
+Deployment.hasOne(Instruction, {
+  foreignKey: "deploymentId",
   as: "instruction",
 });
-Instance.hasMany(Function, {
-  foreignKey: "instanceId",
+Deployment.hasMany(Function, {
+  foreignKey: "deploymentId",
   as: "functions",
 });
-Instance.hasMany(Usage, {
-  foreignKey: "instanceId",
+Deployment.hasMany(Usage, {
+  foreignKey: "deploymentId",
   as: "usages",
 });
 
-Server.hasMany(Instance, {
-  foreignKey: "serverId",
-  as: "instances",
+Instance.hasMany(Deployment, {
+  foreignKey: "instanceId",
+  as: "deployments",
 });
 
-AiModel.hasMany(Instance, {
+Llm.hasMany(Deployment, {
   foreignKey: "modelId",
-  as: "instances",
+  as: "deployments",
 });
 
-Instruction.belongsTo(Instance, {
-  foreignKey: "instanceId",
-  as: "instance",
+Instruction.belongsTo(Deployment, {
+  foreignKey: "deploymentId",
+  as: "deployment",
 });
 
-Function.belongsTo(Instance, {
-  foreignKey: "instanceId",
-  as: "instance",
+Function.belongsTo(Deployment, {
+  foreignKey: "deploymentId",
+  as: "deployment",
 });
 
-Usage.belongsTo(Instance, {
-  foreignKey: "instanceId",
-  as: "instance",
+Usage.belongsTo(Deployment, {
+  foreignKey: "deploymentId",
+  as: "deployment",
 });
 Usage.belongsTo(User, {
   foreignKey: "userId",
@@ -73,10 +73,10 @@ Usage.belongsTo(User, {
 module.exports = {
   sequelize,
   User,
-  AiModel,
+  Llm,
   Function,
-  Instance,
+  Deployment,
   Instruction,
-  Server,
+  Instance,
   Usage,
 };
