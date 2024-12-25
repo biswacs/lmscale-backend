@@ -1,5 +1,5 @@
 const AWS = require("aws-sdk");
-const { Instance } = require("../models");
+const { Instance } = require("../../models");
 const jwt = require("jsonwebtoken");
 
 AWS.config.update({ region: process.env.AWS_REGION });
