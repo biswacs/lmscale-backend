@@ -6,6 +6,8 @@ const Function = require("./function");
 const Instruction = require("./instruction");
 const Instance = require("./instance");
 const Usage = require("./usage");
+const Conversation = require("./conversation");
+const Message = require("./message");
 
 User.hasMany(Deployment, {
   foreignKey: "userId",
@@ -14,6 +16,10 @@ User.hasMany(Deployment, {
 User.hasMany(Usage, {
   foreignKey: "userId",
   as: "usages",
+});
+User.hasMany(Conversation, {
+  foreignKey: "userId",
+  as: "conversations",
 });
 
 Deployment.belongsTo(User, {
@@ -39,6 +45,10 @@ Deployment.hasMany(Function, {
 Deployment.hasMany(Usage, {
   foreignKey: "deploymentId",
   as: "usages",
+});
+Deployment.hasMany(Conversation, {
+  foreignKey: "deploymentId",
+  as: "conversations",
 });
 
 Instance.hasMany(Deployment, {
@@ -70,6 +80,24 @@ Usage.belongsTo(User, {
   as: "user",
 });
 
+Conversation.belongsTo(User, {
+  foreignKey: "userId",
+  as: "user",
+});
+Conversation.belongsTo(Deployment, {
+  foreignKey: "deploymentId",
+  as: "deployment",
+});
+Conversation.hasMany(Message, {
+  foreignKey: "conversationId",
+  as: "messages",
+});
+
+Message.belongsTo(Conversation, {
+  foreignKey: "conversationId",
+  as: "conversation",
+});
+
 module.exports = {
   sequelize,
   User,
@@ -79,4 +107,6 @@ module.exports = {
   Instruction,
   Instance,
   Usage,
+  Conversation,
+  Message,
 };
