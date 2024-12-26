@@ -27,9 +27,9 @@ Usage.init(
       },
     },
     type: {
-      type: DataTypes.ENUM("standard", "deployment"),
+      type: DataTypes.ENUM("playground", "deployment"),
       allowNull: false,
-      defaultValue: "standard",
+      defaultValue: "playground",
     },
     inputTokens: {
       type: DataTypes.INTEGER,
