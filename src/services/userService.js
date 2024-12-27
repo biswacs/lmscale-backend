@@ -3,7 +3,11 @@ const jwt = require("jsonwebtoken");
 
 class UserService {
   generateAccessToken(userId) {
-    console.log(`[UserService] Generating accessToken for user: ${userId}`);
+    console.log("[UserService] Generating accessToken", {
+      userId,
+      timestamp: new Date().toISOString(),
+    });
+
     if (!process.env.JWT_SECRET) {
       console.error(
         "[UserService] JWT_SECRET missing in environment configuration"
@@ -14,13 +18,22 @@ class UserService {
   }
 
   async createUser({ name = "", email, password }) {
-    console.log(`Attempting to create user with email: ${email}`);
+    console.log("[UserService] Attempting to create user", {
+      email,
+      timestamp: new Date().toISOString(),
+    });
 
     try {
       const existingUser = await User.findOne({ where: { email } });
 
       if (existingUser) {
-        console.log(`User creation failed - email already exists: ${email}`);
+        console.log(
+          "[UserService] User creation failed - email already exists",
+          {
+            email,
+            timestamp: new Date().toISOString(),
+          }
+        );
         return { success: false, message: "Email already exists" };
       }
 
@@ -30,7 +43,12 @@ class UserService {
         password,
       });
 
-      console.log(`User created successfully with id: ${user.id}`);
+      console.log("[UserService] User created successfully", {
+        userId: user.id,
+        email: user.email,
+        timestamp: new Date().toISOString(),
+      });
+
       const accessToken = this.generateAccessToken(user.id);
       return {
         success: true,
@@ -38,7 +56,12 @@ class UserService {
         message: "User created successfully",
       };
     } catch (error) {
-      console.error("Error creating user:", error);
+      console.error("[UserService] Error creating user:", {
+        email,
+        error: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString(),
+      });
       return {
         success: false,
         message: "Failed to create user",
@@ -47,12 +70,20 @@ class UserService {
   }
 
   async authenticateUser(email, password) {
-    console.log(`[UserService] Attempting to authenticate user: ${email}`);
+    console.log("[UserService] Attempting to authenticate user", {
+      email,
+      timestamp: new Date().toISOString(),
+    });
 
     try {
       if (!email || !password) {
         console.log(
-          "[UserService] Authentication failed - missing email or password"
+          "[UserService] Authentication failed - missing credentials",
+          {
+            email,
+            hasPassword: !!password,
+            timestamp: new Date().toISOString(),
+          }
         );
         return { success: false, message: "Email and password are required" };
       }
@@ -67,21 +98,28 @@ class UserService {
       });
 
       if (!user) {
-        console.log(
-          `[UserService] Authentication failed - user not found: ${email}`
-        );
+        console.log("[UserService] Authentication failed - user not found", {
+          email,
+          timestamp: new Date().toISOString(),
+        });
         return { success: false, message: "Invalid email" };
       }
 
       const isValidPassword = await user.validatePassword(password);
       if (!isValidPassword) {
-        console.log(
-          `[UserService] Authentication failed - invalid password for user: ${email}`
-        );
+        console.log("[UserService] Authentication failed - invalid password", {
+          userId: user.id,
+          email,
+          timestamp: new Date().toISOString(),
+        });
         return { success: false, message: "Invalid password" };
       }
 
-      console.log(`[UserService] User authenticated successfully: ${user.id}`);
+      console.log("[UserService] User authenticated successfully", {
+        userId: user.id,
+        email,
+        timestamp: new Date().toISOString(),
+      });
 
       const userData = {
         id: user.id,
@@ -97,13 +135,16 @@ class UserService {
 
       return {
         success: true,
-        data: {
-          accessToken,
-        },
+        data: { accessToken },
         message: "Login successful",
       };
     } catch (error) {
-      console.error("[UserService] Authentication error:", error);
+      console.error("[UserService] Authentication error:", {
+        email,
+        error: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString(),
+      });
       return {
         success: false,
         message: "An error occurred during authentication",
@@ -113,7 +154,11 @@ class UserService {
   }
 
   async getUserProfile(userId) {
-    console.log(`[UserService] Fetching user profile for userId: ${userId}`);
+    console.log("[UserService] Fetching user profile", {
+      userId,
+      timestamp: new Date().toISOString(),
+    });
+
     try {
       const userProfile = await User.findOne({
         where: { id: userId },
@@ -129,16 +174,21 @@ class UserService {
       });
 
       if (!userProfile) {
-        console.log(`[UserService] Profile not found for userId: ${userId}`);
+        console.log("[UserService] Profile not found", {
+          userId,
+          timestamp: new Date().toISOString(),
+        });
         return {
           success: false,
           message: "User profile not found",
         };
       }
 
-      console.log(
-        `[UserService] Profile retrieved successfully for userId: ${userId}`
-      );
+      console.log("[UserService] Profile retrieved successfully", {
+        userId,
+        timestamp: new Date().toISOString(),
+      });
+
       return {
         success: true,
         data: { user: userProfile },
@@ -148,6 +198,7 @@ class UserService {
       console.error("[UserService] Error fetching user profile:", {
         userId,
         error: error.message,
+        stack: error.stack,
         timestamp: new Date().toISOString(),
       });
       return {
@@ -158,21 +209,45 @@ class UserService {
   }
 
   async deactivateUser(userId) {
-    console.log(`[UserService] Attempting to deactivate user: ${userId}`);
-    const user = await User.findByPk(userId);
-    if (!user) {
-      console.log(
-        `[UserService] Deactivation failed - user not found: ${userId}`
-      );
-      return { success: false, message: "User not found" };
-    }
+    console.log("[UserService] Attempting to deactivate user", {
+      userId,
+      timestamp: new Date().toISOString(),
+    });
 
-    await user.update({ isActive: false });
-    console.log(`[UserService] User deactivated successfully: ${userId}`);
-    return {
-      success: true,
-      message: "User deactivated successfully",
-    };
+    try {
+      const user = await User.findByPk(userId);
+
+      if (!user) {
+        console.log("[UserService] Deactivation failed - user not found", {
+          userId,
+          timestamp: new Date().toISOString(),
+        });
+        return { success: false, message: "User not found" };
+      }
+
+      await user.update({ isActive: false });
+
+      console.log("[UserService] User deactivated successfully", {
+        userId,
+        timestamp: new Date().toISOString(),
+      });
+
+      return {
+        success: true,
+        message: "User deactivated successfully",
+      };
+    } catch (error) {
+      console.error("[UserService] Error deactivating user:", {
+        userId,
+        error: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString(),
+      });
+      return {
+        success: false,
+        message: "Failed to deactivate user",
+      };
+    }
   }
 }
 
