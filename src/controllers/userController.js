@@ -8,7 +8,6 @@ const UserController = {
 
     console.log("[UserController] Received registration request", {
       email: req.body.email,
-      requestId: req.id,
       timestamp: new Date().toISOString(),
     });
 
@@ -20,7 +19,6 @@ const UserController = {
         console.log("[UserController] Registration failed - validation error", {
           email: req.body.email,
           reason: result.message,
-          requestId: req.id,
           duration: Date.now() - startTime,
           timestamp: new Date().toISOString(),
         });
@@ -30,7 +28,6 @@ const UserController = {
       console.log("[UserController] Registration successful", {
         userId: result.data.user.id,
         email: result.data.user.email,
-        requestId: req.id,
         duration: Date.now() - startTime,
         timestamp: new Date().toISOString(),
       });
@@ -45,7 +42,6 @@ const UserController = {
         email: req.body.email,
         error: error.message,
         stack: error.stack,
-        requestId: req.id,
         duration: Date.now() - startTime,
         timestamp: new Date().toISOString(),
       });
@@ -69,7 +65,6 @@ const UserController = {
 
     console.log("[UserController] Received login request", {
       email: req.body.email,
-      requestId: req.id,
       timestamp: new Date().toISOString(),
     });
 
@@ -84,7 +79,6 @@ const UserController = {
         console.log("[UserController] Login failed", {
           email: req.body.email,
           reason: result.message,
-          requestId: req.id,
           duration: Date.now() - startTime,
           timestamp: new Date().toISOString(),
         });
@@ -93,7 +87,6 @@ const UserController = {
 
       console.log("[UserController] Login successful", {
         email: req.body.email,
-        requestId: req.id,
         duration: Date.now() - startTime,
         timestamp: new Date().toISOString(),
       });
@@ -107,7 +100,6 @@ const UserController = {
         email: req.body.email,
         error: error.message,
         stack: error.stack,
-        requestId: req.id,
         duration: Date.now() - startTime,
         timestamp: new Date().toISOString(),
       });
@@ -131,7 +123,6 @@ const UserController = {
 
     console.log("[UserController] Received profile request", {
       userId: req.user.id,
-      requestId: req.id,
       timestamp: new Date().toISOString(),
     });
 
@@ -142,7 +133,6 @@ const UserController = {
         console.log("[UserController] Profile retrieval failed", {
           userId: req.user.id,
           reason: result.message,
-          requestId: req.id,
           duration: Date.now() - startTime,
           timestamp: new Date().toISOString(),
         });
@@ -151,7 +141,6 @@ const UserController = {
 
       console.log("[UserController] Profile retrieved successfully", {
         userId: req.user.id,
-        requestId: req.id,
         duration: Date.now() - startTime,
         timestamp: new Date().toISOString(),
       });
@@ -165,7 +154,6 @@ const UserController = {
         userId: req.user.id,
         error: error.message,
         stack: error.stack,
-        requestId: req.id,
         duration: Date.now() - startTime,
         timestamp: new Date().toISOString(),
       });
@@ -178,7 +166,6 @@ const UserController = {
 
     console.log("[UserController] Received deactivation request", {
       userId: req.params.userId,
-      requestId: req.id,
       timestamp: new Date().toISOString(),
     });
 
@@ -189,7 +176,6 @@ const UserController = {
         console.log("[UserController] User deactivation failed", {
           userId: req.params.userId,
           reason: result.message,
-          requestId: req.id,
           duration: Date.now() - startTime,
           timestamp: new Date().toISOString(),
         });
@@ -198,7 +184,6 @@ const UserController = {
 
       console.log("[UserController] User deactivated successfully", {
         userId: req.params.userId,
-        requestId: req.id,
         duration: Date.now() - startTime,
         timestamp: new Date().toISOString(),
       });
@@ -209,7 +194,6 @@ const UserController = {
         userId: req.params.userId,
         error: error.message,
         stack: error.stack,
-        requestId: req.id,
         duration: Date.now() - startTime,
         timestamp: new Date().toISOString(),
       });
