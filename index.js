@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const { sequelize } = require("./src/models");
 const userRoutes = require("./src/routes/userRoutes");
+const playgroundRoutes = require("./src/routes/playgroundRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -13,9 +14,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/v1/user", userRoutes);
+app.use("/v1/playground", playgroundRoutes);
+
 app.get("/v1/lmscale", (req, res) => {
   res.json({ msg: "LmScale" });
 });
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: "Something went wrong!" });
