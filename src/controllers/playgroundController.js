@@ -1,4 +1,6 @@
 const axios = require("axios");
+const stream = require("stream");
+const { pipeline } = require("stream/promises");
 
 const PlaygroundController = {
   async chat(req, res) {
@@ -12,35 +14,28 @@ const PlaygroundController = {
     });
 
     try {
-      const gpuResponse = await axios.post(
-        `${GPU_SERVER}/chat/stream`,
-        req.body,
-        {
-          responseType: "stream",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      gpuResponse.data.on("data", (chunk) => {
-        res.write(chunk);
+      const gpuResponse = await axios({
+        method: "post",
+        url: `${GPU_SERVER}/chat/stream`,
+        data: req.body,
+        responseType: "stream",
       });
 
-      gpuResponse.data.on("end", () => {
-        res.end();
+      const transformStream = new stream.Transform({
+        transform(chunk, encoding, callback) {
+          this.push(chunk);
+          callback();
+        },
       });
 
-      gpuResponse.data.on("error", (error) => {
-        res.write(
-          `data: ${JSON.stringify({ error: "Stream error", done: true })}\n\n`
-        );
-        res.end();
-      });
+      await pipeline(gpuResponse.data, transformStream, res);
     } catch (error) {
-      res.write(
-        `data: ${JSON.stringify({ error: "Request failed", done: true })}\n\n`
-      );
+      const errorMessage = `data: ${JSON.stringify({
+        error: "Request failed",
+        done: true,
+      })}\n\n`;
+
+      res.write(errorMessage);
       res.end();
     }
   },
