@@ -1,7 +1,7 @@
 const axios = require("axios");
 
-const DeploymentController = {
-  async chat(req, res) {
+const ChatController = {
+  async completion(req, res) {
     const GPU_SERVER = "http://13.232.229.112:8000";
 
     res.writeHead(200, {
@@ -42,4 +42,4 @@ const DeploymentController = {
   },
 };
 
-module.exports = DeploymentController;
+module.exports = ChatController;

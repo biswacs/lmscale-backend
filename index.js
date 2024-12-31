@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const { sequelize } = require("./src/models");
 const userRoutes = require("./src/routes/userRoutes");
-const deploymentRoutes = require("./src/routes/deploymentRoutes");
+const chatRoutes = require("./src/routes/chatRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/v1/user", userRoutes);
-app.use("/v1/deployment", deploymentRoutes);
+app.use("/v1/chat", chatRoutes);
 
 app.get("/v1/lmscale", (req, res) => {
   res.json({ msg: "LmScale" });
