@@ -160,46 +160,6 @@ const UserController = {
       res.status(500).json({ message: "Internal server error" });
     }
   },
-
-  async deactivateUser(req, res) {
-    const startTime = Date.now();
-
-    console.log("[UserController] Received deactivation request", {
-      userId: req.params.userId,
-      timestamp: new Date().toISOString(),
-    });
-
-    try {
-      const result = await userService.deactivateUser(req.params.userId);
-
-      if (!result.success) {
-        console.log("[UserController] User deactivation failed", {
-          userId: req.params.userId,
-          reason: result.message,
-          duration: Date.now() - startTime,
-          timestamp: new Date().toISOString(),
-        });
-        return res.status(404).json({ message: result.message });
-      }
-
-      console.log("[UserController] User deactivated successfully", {
-        userId: req.params.userId,
-        duration: Date.now() - startTime,
-        timestamp: new Date().toISOString(),
-      });
-
-      res.json({ message: result.message });
-    } catch (error) {
-      console.error("[UserController] Deactivation error:", {
-        userId: req.params.userId,
-        error: error.message,
-        stack: error.stack,
-        duration: Date.now() - startTime,
-        timestamp: new Date().toISOString(),
-      });
-      res.status(500).json({ message: "Internal server error" });
-    }
-  },
 };
 
 module.exports = UserController;

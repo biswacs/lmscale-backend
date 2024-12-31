@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const { sequelize } = require("./src/models");
 const userRoutes = require("./src/routes/userRoutes");
-const playgroundRoutes = require("./src/routes/playgroundRoutes");
+const deploymentRoutes = require("./src/routes/deploymentRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/v1/user", userRoutes);
-app.use("/v1/playground", playgroundRoutes);
+app.use("/v1/deployment", deploymentRoutes);
 
 app.get("/v1/lmscale", (req, res) => {
   res.json({ msg: "LmScale" });
@@ -30,7 +30,7 @@ const startServer = async () => {
     await sequelize.authenticate();
     console.log("Database connection established successfully.");
 
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ alter: false });
     console.log("Database synchronized.");
 
     app.listen(PORT, () => {

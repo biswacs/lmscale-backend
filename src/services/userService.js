@@ -207,48 +207,6 @@ class UserService {
       };
     }
   }
-
-  async deactivateUser(userId) {
-    console.log("[UserService] Attempting to deactivate user", {
-      userId,
-      timestamp: new Date().toISOString(),
-    });
-
-    try {
-      const user = await User.findByPk(userId);
-
-      if (!user) {
-        console.log("[UserService] Deactivation failed - user not found", {
-          userId,
-          timestamp: new Date().toISOString(),
-        });
-        return { success: false, message: "User not found" };
-      }
-
-      await user.update({ isActive: false });
-
-      console.log("[UserService] User deactivated successfully", {
-        userId,
-        timestamp: new Date().toISOString(),
-      });
-
-      return {
-        success: true,
-        message: "User deactivated successfully",
-      };
-    } catch (error) {
-      console.error("[UserService] Error deactivating user:", {
-        userId,
-        error: error.message,
-        stack: error.stack,
-        timestamp: new Date().toISOString(),
-      });
-      return {
-        success: false,
-        message: "Failed to deactivate user",
-      };
-    }
-  }
 }
 
 module.exports = UserService;
