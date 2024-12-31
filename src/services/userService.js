@@ -5,7 +5,6 @@ class UserService {
   generateAccessToken(userId) {
     console.log("[UserService] Generating accessToken", {
       userId,
-      timestamp: new Date().toISOString(),
     });
 
     if (!process.env.JWT_SECRET) {
@@ -20,7 +19,6 @@ class UserService {
   async createUser({ name = "", email, password }) {
     console.log("[UserService] Attempting to create user", {
       email,
-      timestamp: new Date().toISOString(),
     });
 
     try {
@@ -31,7 +29,6 @@ class UserService {
           "[UserService] User creation failed - email already exists",
           {
             email,
-            timestamp: new Date().toISOString(),
           }
         );
         return { success: false, message: "Email already exists" };
@@ -46,7 +43,6 @@ class UserService {
       console.log("[UserService] User created successfully", {
         userId: user.id,
         email: user.email,
-        timestamp: new Date().toISOString(),
       });
 
       const accessToken = this.generateAccessToken(user.id);
@@ -60,7 +56,6 @@ class UserService {
         email,
         error: error.message,
         stack: error.stack,
-        timestamp: new Date().toISOString(),
       });
       return {
         success: false,
@@ -72,7 +67,6 @@ class UserService {
   async authenticateUser(email, password) {
     console.log("[UserService] Attempting to authenticate user", {
       email,
-      timestamp: new Date().toISOString(),
     });
 
     try {
@@ -82,7 +76,6 @@ class UserService {
           {
             email,
             hasPassword: !!password,
-            timestamp: new Date().toISOString(),
           }
         );
         return { success: false, message: "Email and password are required" };
@@ -100,7 +93,6 @@ class UserService {
       if (!user) {
         console.log("[UserService] Authentication failed - user not found", {
           email,
-          timestamp: new Date().toISOString(),
         });
         return { success: false, message: "Invalid email" };
       }
@@ -110,7 +102,6 @@ class UserService {
         console.log("[UserService] Authentication failed - invalid password", {
           userId: user.id,
           email,
-          timestamp: new Date().toISOString(),
         });
         return { success: false, message: "Invalid password" };
       }
@@ -118,7 +109,6 @@ class UserService {
       console.log("[UserService] User authenticated successfully", {
         userId: user.id,
         email,
-        timestamp: new Date().toISOString(),
       });
 
       const userData = {
@@ -127,7 +117,7 @@ class UserService {
         email: user.email,
       };
 
-      const accessToken = await this.generateAccessToken(userData.id);
+      const accessToken = this.generateAccessToken(userData.id);
 
       if (!accessToken) {
         throw new Error("Failed to generate access token");
@@ -143,7 +133,6 @@ class UserService {
         email,
         error: error.message,
         stack: error.stack,
-        timestamp: new Date().toISOString(),
       });
       return {
         success: false,
@@ -156,7 +145,6 @@ class UserService {
   async getUserProfile(userId) {
     console.log("[UserService] Fetching user profile", {
       userId,
-      timestamp: new Date().toISOString(),
     });
 
     try {
@@ -176,7 +164,6 @@ class UserService {
       if (!userProfile) {
         console.log("[UserService] Profile not found", {
           userId,
-          timestamp: new Date().toISOString(),
         });
         return {
           success: false,
@@ -186,7 +173,6 @@ class UserService {
 
       console.log("[UserService] Profile retrieved successfully", {
         userId,
-        timestamp: new Date().toISOString(),
       });
 
       return {
@@ -199,7 +185,6 @@ class UserService {
         userId,
         error: error.message,
         stack: error.stack,
-        timestamp: new Date().toISOString(),
       });
       return {
         success: false,

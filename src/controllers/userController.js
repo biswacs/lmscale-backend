@@ -1,14 +1,11 @@
-const UserService = require("../services/userService");
 const userSchemas = require("../validation/userSchemas");
+const UserService = require("../services/userService");
 const userService = new UserService();
 
 const UserController = {
   async register(req, res) {
-    const startTime = Date.now();
-
     console.log("[UserController] Received registration request", {
       email: req.body.email,
-      timestamp: new Date().toISOString(),
     });
 
     try {
@@ -18,9 +15,6 @@ const UserController = {
       if (!result.success) {
         console.log("[UserController] Registration failed - validation error", {
           email: req.body.email,
-          reason: result.message,
-          duration: Date.now() - startTime,
-          timestamp: new Date().toISOString(),
         });
         return res.status(400).json({ message: result.message });
       }
@@ -28,8 +22,6 @@ const UserController = {
       console.log("[UserController] Registration successful", {
         userId: result.data.user.id,
         email: result.data.user.email,
-        duration: Date.now() - startTime,
-        timestamp: new Date().toISOString(),
       });
 
       res.status(201).json({
@@ -42,8 +34,6 @@ const UserController = {
         email: req.body.email,
         error: error.message,
         stack: error.stack,
-        duration: Date.now() - startTime,
-        timestamp: new Date().toISOString(),
       });
 
       if (error.errors) {
@@ -61,11 +51,8 @@ const UserController = {
   },
 
   async login(req, res) {
-    const startTime = Date.now();
-
     console.log("[UserController] Received login request", {
       email: req.body.email,
-      timestamp: new Date().toISOString(),
     });
 
     try {
@@ -78,17 +65,12 @@ const UserController = {
       if (!result.success) {
         console.log("[UserController] Login failed", {
           email: req.body.email,
-          reason: result.message,
-          duration: Date.now() - startTime,
-          timestamp: new Date().toISOString(),
         });
         return res.status(401).json({ message: result.message });
       }
 
       console.log("[UserController] Login successful", {
         email: req.body.email,
-        duration: Date.now() - startTime,
-        timestamp: new Date().toISOString(),
       });
 
       res.json({
@@ -100,8 +82,6 @@ const UserController = {
         email: req.body.email,
         error: error.message,
         stack: error.stack,
-        duration: Date.now() - startTime,
-        timestamp: new Date().toISOString(),
       });
 
       if (error.errors) {
@@ -119,11 +99,8 @@ const UserController = {
   },
 
   async getProfile(req, res) {
-    const startTime = Date.now();
-
     console.log("[UserController] Received profile request", {
       userId: req.user.id,
-      timestamp: new Date().toISOString(),
     });
 
     try {
@@ -133,16 +110,12 @@ const UserController = {
         console.log("[UserController] Profile retrieval failed", {
           userId: req.user.id,
           reason: result.message,
-          duration: Date.now() - startTime,
-          timestamp: new Date().toISOString(),
         });
         return res.status(404).json({ message: result.message });
       }
 
       console.log("[UserController] Profile retrieved successfully", {
         userId: req.user.id,
-        duration: Date.now() - startTime,
-        timestamp: new Date().toISOString(),
       });
 
       res.json({
@@ -154,8 +127,6 @@ const UserController = {
         userId: req.user.id,
         error: error.message,
         stack: error.stack,
-        duration: Date.now() - startTime,
-        timestamp: new Date().toISOString(),
       });
       res.status(500).json({ message: "Internal server error" });
     }

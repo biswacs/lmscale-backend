@@ -4,6 +4,7 @@ const cors = require("cors");
 const { sequelize } = require("./src/models");
 const userRoutes = require("./src/routes/userRoutes");
 const chatRoutes = require("./src/routes/chatRoutes");
+const gpuRoutes = require("./src/routes/gpuRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -13,11 +14,17 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const Env = process.env.Env || "Prod";
+console.log("Environment:", Env);
+if (Env == "Local") {
+  app.use("/v1/gpu", gpuRoutes);
+}
+
 app.use("/v1/user", userRoutes);
 app.use("/v1/chat", chatRoutes);
 
 app.get("/v1/lmscale", (req, res) => {
-  res.json({ msg: "LmScale" });
+  res.json({ message: "LmScale" });
 });
 
 app.use((err, req, res, next) => {

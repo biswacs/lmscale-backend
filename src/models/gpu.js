@@ -64,9 +64,9 @@ Gpu.init(
         activeRequests: 0,
       },
     },
-    accessToken: {
+    gpuAccessToken: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     lastHealthCheck: {
       type: DataTypes.DATE,
