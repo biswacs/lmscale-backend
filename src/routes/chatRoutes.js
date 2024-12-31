@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post(
   "/completion",
-
+  auth,
   rateLimiters.global,
   ChatController.completion
 );
