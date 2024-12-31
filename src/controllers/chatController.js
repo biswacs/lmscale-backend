@@ -1,9 +1,8 @@
 const axios = require("axios");
+const { Gpu } = require("../models");
 
 const ChatController = {
   async completion(req, res) {
-    const GPU_SERVER = "http://13.232.229.112:8000";
-
     res.writeHead(200, {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
@@ -12,14 +11,24 @@ const ChatController = {
     });
 
     try {
-      const gpuResponse = await axios.post(
-        `${GPU_SERVER}/chat/stream`,
-        req.body,
-        {
-          responseType: "stream",
-          timeout: 10000,
-        }
-      );
+      const gpu = await Gpu.findOne({
+        attributes: ["hostIp"],
+      });
+      if (!gpu) {
+        console.log("Gpu not found");
+        res.write(
+          `data: ${JSON.stringify({
+            error: "GPU Error, Request failed",
+            done: false,
+          })}\n\n`
+        );
+        res.end();
+      }
+      const gpu_url = `http://${gpu.hostIp}:8000`;
+      const gpuResponse = await axios.post(`${gpu_url}/chat/stream`, req.body, {
+        responseType: "stream",
+        timeout: 10000,
+      });
 
       gpuResponse.data.pipe(res);
 
