@@ -64,6 +64,15 @@ User.init(
     modelName: "User",
     paranoid: true,
     timestamps: true,
+    indexes: [
+      {
+        fields: ["email"],
+        unique: true,
+      },
+      {
+        fields: ["name"],
+      },
+    ],
     hooks: {
       beforeCreate: async (user) => {
         if (user.password) {

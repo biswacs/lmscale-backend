@@ -22,27 +22,6 @@ Deployment.init(
         key: "id",
       },
     },
-    llmId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: "Llms",
-        key: "id",
-      },
-    },
-    instanceId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: "Instances",
-        key: "id",
-      },
-    },
-    deploymentType: {
-      type: DataTypes.ENUM("dedicated", "public"),
-      allowNull: false,
-      defaultValue: "dedicated",
-    },
     config: {
       type: DataTypes.JSONB,
       allowNull: true,
@@ -52,18 +31,6 @@ Deployment.init(
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    deletedAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
     },
   },
   {
@@ -75,13 +42,6 @@ Deployment.init(
       {
         fields: ["userId"],
       },
-      {
-        fields: ["llmId"],
-      },
-      {
-        fields: ["instanceId"],
-      },
-      { fields: ["deploymentType"] },
     ],
   }
 );

@@ -31,14 +31,6 @@ Instruction.init(
       allowNull: false,
       defaultValue: 1,
     },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
   },
   {
     sequelize,

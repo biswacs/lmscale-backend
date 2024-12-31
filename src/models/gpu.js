@@ -72,18 +72,11 @@ Gpu.init(
       type: DataTypes.DATE,
       allowNull: true,
     },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
   },
   {
     sequelize,
     modelName: "Gpu",
+    paranoid: true,
     timestamps: true,
     indexes: [{ fields: ["status"] }, { fields: ["region"] }],
   }

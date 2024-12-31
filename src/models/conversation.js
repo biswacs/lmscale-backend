@@ -10,13 +10,9 @@ Conversation.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    userId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: "Users",
-        key: "id",
-      },
+    title: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     deploymentId: {
       type: DataTypes.UUID,
@@ -26,23 +22,10 @@ Conversation.init(
         key: "id",
       },
     },
-    type: {
-      type: DataTypes.ENUM("playground", "deployment"),
-      allowNull: false,
-      defaultValue: "playground",
-    },
-    title: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
     metadata: {
       type: DataTypes.JSONB,
       allowNull: false,
       defaultValue: {},
-    },
-    lastMessageAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
     },
     isActive: {
       type: DataTypes.BOOLEAN,
@@ -57,13 +40,7 @@ Conversation.init(
     timestamps: true,
     indexes: [
       {
-        fields: ["userId", "type", "createdAt"],
-      },
-      {
         fields: ["deploymentId"],
-      },
-      {
-        fields: ["lastMessageAt"],
       },
     ],
   }

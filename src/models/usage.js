@@ -10,14 +10,6 @@ Usage.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    userId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: "Users",
-        key: "id",
-      },
-    },
     deploymentId: {
       type: DataTypes.UUID,
       allowNull: true,
@@ -25,11 +17,6 @@ Usage.init(
         model: "Deployments",
         key: "id",
       },
-    },
-    type: {
-      type: DataTypes.ENUM("playground", "deployment"),
-      allowNull: false,
-      defaultValue: "playground",
     },
     inputTokens: {
       type: DataTypes.INTEGER,
@@ -55,11 +42,9 @@ Usage.init(
   {
     sequelize,
     modelName: "Usage",
+    paranoid: true,
     timestamps: true,
     indexes: [
-      {
-        fields: ["userId", "type", "createdAt"],
-      },
       {
         fields: ["deploymentId"],
       },

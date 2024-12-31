@@ -22,27 +22,16 @@ Llm.init(
       allowNull: false,
       defaultValue: {},
     },
-    pullCommand: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
     isActive: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true,
     },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
   },
   {
     sequelize,
     modelName: "Llm",
+    paranoid: true,
     timestamps: true,
     indexes: [
       {

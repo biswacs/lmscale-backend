@@ -22,7 +22,7 @@ Message.init(
       type: DataTypes.ENUM("user", "ai", "system"),
       allowNull: false,
     },
-    content: {
+    text: {
       type: DataTypes.TEXT,
       allowNull: false,
     },
@@ -41,10 +41,6 @@ Message.init(
       allowNull: false,
       defaultValue: "completed",
     },
-    completedAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
   },
   {
     sequelize,
@@ -52,7 +48,7 @@ Message.init(
     timestamps: true,
     indexes: [
       {
-        fields: ["conversationId", "createdAt"],
+        fields: ["conversationId"],
       },
       {
         fields: ["role"],
