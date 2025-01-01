@@ -26,7 +26,7 @@ const UserController = {
 
       res.status(201).json({
         message: result.message,
-        lm_access_token: result.data.lm_access_token,
+        lm_auth_token: result.data.lm_auth_token,
         user: result.data.user,
       });
     } catch (error) {
@@ -75,7 +75,7 @@ const UserController = {
 
       res.json({
         message: result.message,
-        lm_access_token: result.data.lm_access_token,
+        lm_auth_token: result.data.lm_auth_token,
       });
     } catch (error) {
       console.error("[UserController] Login error:", {
