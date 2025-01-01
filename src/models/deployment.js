@@ -1,4 +1,4 @@
-const { Model, DataTypes } = require("sequelize");
+const { Model, DataTypes, ENUM } = require("sequelize");
 const sequelize = require("../config/database");
 const crypto = require("crypto");
 
@@ -55,6 +55,11 @@ Deployment.init(
         key: "id",
       },
     },
+    type: {
+      type: ENUM("playground", "production"),
+      allowNull: false,
+      defaultValue: "production",
+    },
     apiKey: {
       type: DataTypes.STRING(64),
       allowNull: false,
@@ -80,6 +85,9 @@ Deployment.init(
     indexes: [
       {
         fields: ["userId"],
+      },
+      {
+        fields: ["type"],
       },
     ],
   }

@@ -17,33 +17,55 @@ class UserService {
   }
 
   async createUser({ name = "", email, password }) {
-    console.log("[UserService] Attempting to create user", {
-      email,
-    });
+    console.log("[UserService] Attempting to create user", { email });
+
+    const transaction = await sequelize.transaction();
 
     try {
-      const existingUser = await User.findOne({ where: { email } });
+      const existingUser = await User.findOne({
+        where: { email },
+        transaction,
+      });
 
       if (existingUser) {
         console.log(
           "[UserService] User creation failed - email already exists",
-          {
-            email,
-          }
+          { email }
         );
+        await transaction.rollback();
         return { success: false, message: "Email already exists" };
       }
 
-      const user = await User.create({
-        name,
-        email: email.toLowerCase(),
-        password,
-      });
+      const user = await User.create(
+        {
+          name,
+          email: email.toLowerCase(),
+          password,
+        },
+        { transaction }
+      );
 
       console.log("[UserService] User created successfully", {
         userId: user.id,
         email: user.email,
       });
+
+      const deployment = await Deployment.create(
+        {
+          name: "Playground",
+          description: "Default playground deployment",
+          type: "playground",
+          userId: user.id,
+        },
+        { transaction }
+      );
+
+      console.log("[UserService] Playground deployment created", {
+        deploymentId: deployment.id,
+        userId: user.id,
+      });
+
+      await transaction.commit();
 
       const accessToken = this.generateAccessToken(user.id);
       return {
@@ -57,6 +79,9 @@ class UserService {
         error: error.message,
         stack: error.stack,
       });
+
+      await transaction.rollback();
+
       return {
         success: false,
         message: "Failed to create user",
