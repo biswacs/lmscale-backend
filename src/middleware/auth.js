@@ -8,8 +8,8 @@ const auth = async (req, res, next) => {
       return res.status(401).json({ message: "Authorization header missing" });
     }
 
-    const accessToken = authHeader.replace("Bearer ", "");
-    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
+    const lm_access_token = authHeader.replace("Bearer ", "");
+    const decoded = jwt.verify(lm_access_token, process.env.JWT_SECRET);
 
     const user = await User.findOne({
       where: {
@@ -24,7 +24,7 @@ const auth = async (req, res, next) => {
     }
 
     req.user = user;
-    req.accessToken = accessToken;
+    req.lm_access_token = lm_access_token;
     next();
   } catch (error) {
     res.status(401).json({ message: "Please authenticate" });

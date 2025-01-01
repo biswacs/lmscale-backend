@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 
 class UserService {
   generateAccessToken(userId) {
-    console.log("[UserService] Generating accessToken", {
+    console.log("[UserService] Generating lm_access_token", {
       userId,
     });
 
@@ -67,10 +67,10 @@ class UserService {
 
       await transaction.commit();
 
-      const accessToken = this.generateAccessToken(user.id);
+      const lm_access_token = this.generateAccessToken(user.id);
       return {
         success: true,
-        data: { accessToken, user },
+        data: { lm_access_token, user },
         message: "User created successfully",
       };
     } catch (error) {
@@ -142,15 +142,15 @@ class UserService {
         email: user.email,
       };
 
-      const accessToken = this.generateAccessToken(userData.id);
+      const lm_access_token = this.generateAccessToken(userData.id);
 
-      if (!accessToken) {
+      if (!lm_access_token) {
         throw new Error("Failed to generate access token");
       }
 
       return {
         success: true,
-        data: { accessToken },
+        data: { lm_access_token },
         message: "Login successful",
       };
     } catch (error) {
