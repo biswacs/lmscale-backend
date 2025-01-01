@@ -131,6 +131,51 @@ const UserController = {
       res.status(500).json({ message: "Internal server error" });
     }
   },
+
+  async getDeployments(req, res) {
+    console.log("[UserController] Received user deployments request", {
+      userId: req.user.id,
+    });
+
+    try {
+      const result = await userService.getUserDeployments(req.user.id);
+
+      if (!result.success) {
+        console.log("[UserController] Deployments retrieval failed", {
+          userId: req.user.id,
+          reason: result.message,
+        });
+        return res.status(404).json({
+          success: false,
+          message: result.message,
+        });
+      }
+
+      console.log("[UserController] Deployments retrieved successfully", {
+        userId: req.user.id,
+        deploymentsCount: result.data.deployments.length,
+      });
+
+      return res.json({
+        success: true,
+        message: result.message,
+        data: {
+          deployments: result.data.deployments,
+        },
+      });
+    } catch (error) {
+      console.error("[UserController] Deployments retrieval error:", {
+        userId: req.user.id,
+        error: error.message,
+        stack: error.stack,
+      });
+
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  },
 };
 
 module.exports = UserController;

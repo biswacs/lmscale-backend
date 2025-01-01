@@ -1,4 +1,4 @@
-const { User } = require("../models");
+const { User, Deployment } = require("../models");
 const jwt = require("jsonwebtoken");
 
 class UserService {
@@ -189,6 +189,60 @@ class UserService {
       return {
         success: false,
         message: "Failed to retrieve user profile",
+      };
+    }
+  }
+
+  async getUserDeployments(userId) {
+    console.log("[UserService] Fetching user deployments", {
+      userId,
+    });
+
+    try {
+      const deployments = await Deployment.findAll({
+        where: { userId: userId },
+        attributes: [
+          "id",
+          "name",
+          "description",
+          "prompt",
+          "isActive",
+          "createdAt",
+          "updatedAt",
+        ],
+      });
+
+      if (!deployments || deployments.length === 0) {
+        console.log("[UserService] No deployments found", {
+          userId,
+        });
+        return {
+          success: true,
+          message: "No deployments found for user",
+          data: { deployments: [] },
+        };
+      }
+
+      console.log("[UserService] Deployments retrieved successfully", {
+        userId,
+        deploymentsCount: deployments.length,
+      });
+
+      return {
+        success: true,
+        message: "Deployments retrieved successfully",
+        data: { deployments },
+      };
+    } catch (error) {
+      console.error("[UserService] Error fetching user deployments:", {
+        userId,
+        error: error.message,
+        stack: error.stack,
+      });
+
+      return {
+        success: false,
+        message: "Failed to retrieve user deployments",
       };
     }
   }
