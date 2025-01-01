@@ -44,12 +44,14 @@ class GpuService {
           message: "User not found",
         };
       }
+
       if (!process.env.DevEm) {
         console.error(
           "[GpuService] DevEm missing in environment configuration"
         );
         throw new Error("DevEm is not configured");
       }
+
       if (user.email !== process.env.DevEm) {
         console.log("[GpuService] Creation failed - unauthorized user", {
           userId,
