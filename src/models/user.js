@@ -1,24 +1,10 @@
 const { Model, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 const bcrypt = require("bcryptjs");
-const crypto = require("crypto");
 
 class User extends Model {
   async validatePassword(password) {
     return bcrypt.compare(password, this.password);
-  }
-
-  async generateNewApiKey() {
-    const newApiKey = crypto.randomBytes(32).toString("hex");
-    await this.update({
-      apiKey: newApiKey,
-      metadata: {
-        ...this.metadata,
-        apiKeyCreatedAt: new Date(),
-        previousApiKey: this.apiKey,
-      },
-    });
-    return newApiKey;
   }
 }
 
@@ -42,12 +28,7 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    apiKey: {
-      type: DataTypes.STRING(64),
-      allowNull: false,
-      unique: true,
-      defaultValue: () => crypto.randomBytes(32).toString("hex"),
-    },
+
     metadata: {
       type: DataTypes.JSONB,
       allowNull: false,
