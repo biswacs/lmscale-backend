@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { User, Gpu, sequelize } = require("../models");
+const { Gpu, sequelize } = require("../models");
 
 class GpuService {
   generateGpuAccessToken(gpuId) {
@@ -78,7 +78,10 @@ class GpuService {
         success: true,
         message: "GPU created successfully",
         data: {
-          gpu,
+          gpu: {
+            id: gpu.id,
+            name: gpu.name,
+          },
         },
       };
     } catch (error) {

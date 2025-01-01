@@ -45,8 +45,7 @@ const GpuController = {
 
       console.log("[GpuController] GPU created successfully", {
         userEmail: req.user.email,
-        gpuId: response.data.gpu.id,
-        gpuName: response.data.gpu.name,
+        gpu: response.data.gpu,
       });
 
       return res.status(201).json({
