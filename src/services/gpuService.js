@@ -17,9 +17,9 @@ class GpuService {
     return jwt.sign({ gpuId: gpuId }, process.env.GPU_JWT_SECRET);
   }
 
-  async createGpu(body, userId) {
+  async createGpu(body, userEmail) {
     console.log("[GpuService] Attempting to create GPU", {
-      userId,
+      userEmail,
       gpuDetails: {
         name: body.name,
         hostIp: body.hostIp,
@@ -30,21 +30,6 @@ class GpuService {
     const transaction = await sequelize.transaction();
 
     try {
-      const user = await User.findOne({
-        where: { id: userId },
-        attributes: ["id", "email"],
-      });
-
-      if (!user) {
-        console.log("[GpuService] Creation failed - user not found", {
-          userId,
-        });
-        return {
-          success: false,
-          message: "User not found",
-        };
-      }
-
       if (!process.env.DevEm) {
         console.error(
           "[GpuService] DevEm missing in environment configuration"
@@ -52,10 +37,9 @@ class GpuService {
         throw new Error("DevEm is not configured");
       }
 
-      if (user.email !== process.env.DevEm) {
+      if (userEmail !== process.env.DevEm) {
         console.log("[GpuService] Creation failed - unauthorized user", {
-          userId,
-          userEmail: user.email,
+          userEmail,
         });
         return {
           success: false,
@@ -95,12 +79,11 @@ class GpuService {
         message: "GPU created successfully",
         data: {
           gpu,
-          user,
         },
       };
     } catch (error) {
       console.error("[GpuService] Error creating GPU:", {
-        userId,
+        userEmail,
         error: error.message,
         stack: error.stack,
       });

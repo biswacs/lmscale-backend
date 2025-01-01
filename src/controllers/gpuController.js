@@ -4,7 +4,7 @@ const gpuService = new GpuService();
 const GpuController = {
   async create(req, res) {
     console.log("[GpuController] Received GPU creation request", {
-      userId: req.user.id,
+      userEmail: req.user.email,
       gpuDetails: {
         name: req.body.name,
         hostIp: req.body.hostIp,
@@ -20,7 +20,7 @@ const GpuController = {
         console.log(
           "[GpuController] Creation failed - missing required fields",
           {
-            userId: req.user.id,
+            userEmail: req.user.email,
             missingFields,
           }
         );
@@ -30,11 +30,11 @@ const GpuController = {
         });
       }
 
-      const response = await gpuService.createGpu(req.body, req.user.id);
+      const response = await gpuService.createGpu(req.body, req.user.email);
 
       if (!response.success) {
         console.log("[GpuController] GPU creation failed", {
-          userId: req.user.id,
+          userEmail: req.user.email,
           reason: response.message,
         });
         return res.status(400).json({
@@ -44,7 +44,7 @@ const GpuController = {
       }
 
       console.log("[GpuController] GPU created successfully", {
-        userId: req.user.id,
+        userEmail: req.user.email,
         gpuId: response.data.gpu.id,
         gpuName: response.data.gpu.name,
       });
@@ -58,7 +58,7 @@ const GpuController = {
       });
     } catch (error) {
       console.error("[GpuController] GPU creation error:", {
-        userId: req.user.id,
+        userEmail: req.user.email,
         error: error.message,
         stack: error.stack,
       });
