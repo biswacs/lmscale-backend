@@ -1,4 +1,4 @@
-const { User, Deployment } = require("../models");
+const { User, Deployment, sequelize } = require("../models");
 const jwt = require("jsonwebtoken");
 
 class UserService {
