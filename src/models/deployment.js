@@ -32,6 +32,10 @@ Deployment.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    prompt: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     userId: {
       type: DataTypes.UUID,
       allowNull: false,
