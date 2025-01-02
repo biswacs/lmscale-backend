@@ -146,11 +146,13 @@ const PlaygroundController = {
         );
       }
 
-      const formattedMessages = messagesResult.data.messages
-        .map(
-          (msg) => `${msg.role === "user" ? "User" : "Agent"}: ${msg.content}`
-        )
-        .join("\n");
+      const formattedMessages = [
+        ...new Set(
+          messagesResult.data.messages.map(
+            (msg) => `${msg.role === "user" ? "User" : "Agent"}: ${msg.content}`
+          )
+        ),
+      ].join("\n");
 
       console.log(
         "[PlaygroundController] Formatted conversation:",
