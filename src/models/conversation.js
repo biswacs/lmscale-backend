@@ -14,11 +14,11 @@ Conversation.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    deploymentId: {
+    agentId: {
       type: DataTypes.UUID,
       allowNull: true,
       references: {
-        model: "Deployments",
+        model: "Agents",
         key: "id",
       },
     },
@@ -40,7 +40,7 @@ Conversation.init(
     timestamps: true,
     indexes: [
       {
-        fields: ["deploymentId"],
+        fields: ["agentId"],
       },
     ],
   }

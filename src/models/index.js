@@ -1,6 +1,6 @@
 const sequelize = require("../config/database");
 const User = require("./user");
-const Deployment = require("./deployment");
+const Agent = require("./agent");
 const Llm = require("./llm");
 const Function = require("./function");
 const Instruction = require("./instruction");
@@ -9,54 +9,54 @@ const Usage = require("./usage");
 const Conversation = require("./conversation");
 const Message = require("./message");
 
-User.hasMany(Deployment, {
+User.hasMany(Agent, {
   foreignKey: "userId",
-  as: "deployments",
+  as: "agents",
 });
 
-Deployment.belongsTo(User, {
+Agent.belongsTo(User, {
   foreignKey: "userId",
   as: "user",
 });
 
-Deployment.hasMany(Instruction, {
-  foreignKey: "deploymentId",
+Agent.hasMany(Instruction, {
+  foreignKey: "agentId",
   as: "instruction",
 });
 
-Deployment.hasMany(Function, {
-  foreignKey: "deploymentId",
+Agent.hasMany(Function, {
+  foreignKey: "agentId",
   as: "functions",
 });
 
-Deployment.hasMany(Usage, {
-  foreignKey: "deploymentId",
+Agent.hasMany(Usage, {
+  foreignKey: "agentId",
   as: "usages",
 });
 
-Deployment.hasMany(Conversation, {
-  foreignKey: "deploymentId",
+Agent.hasMany(Conversation, {
+  foreignKey: "agentId",
   as: "conversations",
 });
 
-Instruction.belongsTo(Deployment, {
-  foreignKey: "deploymentId",
-  as: "deployment",
+Instruction.belongsTo(Agent, {
+  foreignKey: "agentId",
+  as: "agent",
 });
 
-Function.belongsTo(Deployment, {
-  foreignKey: "deploymentId",
-  as: "deployment",
+Function.belongsTo(Agent, {
+  foreignKey: "agentId",
+  as: "agent",
 });
 
-Usage.belongsTo(Deployment, {
-  foreignKey: "deploymentId",
-  as: "deployment",
+Usage.belongsTo(Agent, {
+  foreignKey: "agentId",
+  as: "agent",
 });
 
-Conversation.belongsTo(Deployment, {
-  foreignKey: "deploymentId",
-  as: "deployment",
+Conversation.belongsTo(Agent, {
+  foreignKey: "agentId",
+  as: "agent",
 });
 
 Conversation.hasMany(Message, {
@@ -74,7 +74,7 @@ module.exports = {
   User,
   Llm,
   Function,
-  Deployment,
+  Agent,
   Instruction,
   Gpu,
   Usage,

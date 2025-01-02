@@ -2,7 +2,7 @@ const { Model, DataTypes, ENUM } = require("sequelize");
 const sequelize = require("../config/database");
 const crypto = require("crypto");
 
-class Deployment extends Model {
+class Agent extends Model {
   async generateNewApiKey() {
     const newApiKey = crypto.randomBytes(32).toString("hex");
     await this.update({
@@ -17,7 +17,7 @@ class Deployment extends Model {
   }
 }
 
-Deployment.init(
+Agent.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -79,7 +79,7 @@ Deployment.init(
   },
   {
     sequelize,
-    modelName: "Deployment",
+    modelName: "Agent",
     paranoid: true,
     timestamps: true,
     indexes: [
@@ -93,4 +93,4 @@ Deployment.init(
   }
 );
 
-module.exports = Deployment;
+module.exports = Agent;

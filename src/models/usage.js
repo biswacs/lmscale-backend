@@ -10,11 +10,11 @@ Usage.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    deploymentId: {
+    agentId: {
       type: DataTypes.UUID,
       allowNull: true,
       references: {
-        model: "Deployments",
+        model: "Agents",
         key: "id",
       },
     },
@@ -46,7 +46,7 @@ Usage.init(
     timestamps: true,
     indexes: [
       {
-        fields: ["deploymentId"],
+        fields: ["agentId"],
       },
     ],
   }

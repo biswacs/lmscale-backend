@@ -1,4 +1,4 @@
-const { User, Deployment, sequelize } = require("../models");
+const { User, Agent, sequelize } = require("../models");
 const jwt = require("jsonwebtoken");
 
 class UserService {
@@ -50,18 +50,18 @@ class UserService {
         email: user.email,
       });
 
-      const deployment = await Deployment.create(
+      const agent = await Agent.create(
         {
           name: "Playground",
-          description: "Default playground deployment",
+          description: "Default playground agent",
           type: "playground",
           userId: user.id,
         },
         { transaction }
       );
 
-      console.log("[UserService] Playground deployment created", {
-        deploymentId: deployment.id,
+      console.log("[UserService] Playground agent created", {
+        agentId: agent.id,
         userId: user.id,
       });
 
@@ -218,13 +218,13 @@ class UserService {
     }
   }
 
-  async getUserDeployments(userId) {
-    console.log("[UserService] Fetching user deployments", {
+  async getUserAgents(userId) {
+    console.log("[UserService] Fetching user agents", {
       userId,
     });
 
     try {
-      const deployments = await Deployment.findAll({
+      const agents = await Agent.findAll({
         where: { userId: userId },
         attributes: [
           "id",
@@ -237,29 +237,29 @@ class UserService {
         ],
       });
 
-      if (!deployments || deployments.length === 0) {
-        console.log("[UserService] No deployments found", {
+      if (!agents || agents.length === 0) {
+        console.log("[UserService] No agents found", {
           userId,
         });
         return {
           success: true,
-          message: "No deployments found for user",
-          data: { deployments: [] },
+          message: "No agents found for user",
+          data: { agents: [] },
         };
       }
 
-      console.log("[UserService] Deployments retrieved successfully", {
+      console.log("[UserService] Agents retrieved successfully", {
         userId,
-        deploymentsCount: deployments.length,
+        agentsCount: agents.length,
       });
 
       return {
         success: true,
-        message: "Deployments retrieved successfully",
-        data: { deployments },
+        message: "Agents retrieved successfully",
+        data: { agents },
       };
     } catch (error) {
-      console.error("[UserService] Error fetching user deployments:", {
+      console.error("[UserService] Error fetching user agents:", {
         userId,
         error: error.message,
         stack: error.stack,
@@ -267,7 +267,7 @@ class UserService {
 
       return {
         success: false,
-        message: "Failed to retrieve user deployments",
+        message: "Failed to retrieve user agents",
       };
     }
   }

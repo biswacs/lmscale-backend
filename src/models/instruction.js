@@ -18,18 +18,13 @@ Instruction.init(
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    deploymentId: {
+    agentId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: "Deployments",
+        model: "Agents",
         key: "id",
       },
-    },
-    version: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 1,
     },
   },
   {
@@ -39,7 +34,7 @@ Instruction.init(
     timestamps: true,
     indexes: [
       {
-        fields: ["deploymentId", "version"],
+        fields: ["agentId"],
         unique: true,
       },
     ],

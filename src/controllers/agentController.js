@@ -1,11 +1,11 @@
-const DeploymentService = require("../services/deploymentService");
-const deploymentService = new DeploymentService();
+const AgentService = require("../services/agentService");
+const agentService = new AgentService();
 
-const DeploymentController = {
+const AgentController = {
   async create(req, res) {
-    console.log("[DeploymentController] Received deployment creation request", {
+    console.log("[AgentController] Received agent creation request", {
       userId: req.user.id,
-      deploymentDetails: {
+      agentDetails: {
         name: req.body.name,
         description: req.body.description,
       },
@@ -17,7 +17,7 @@ const DeploymentController = {
 
       if (missingFields.length > 0) {
         console.log(
-          "[DeploymentController] Creation failed - missing required fields",
+          "[AgentController] Creation failed - missing required fields",
           {
             userId: req.user.id,
             missingFields,
@@ -29,13 +29,10 @@ const DeploymentController = {
         });
       }
 
-      const response = await deploymentService.createDeployment(
-        req.body,
-        req.user.id
-      );
+      const response = await agentService.createAgent(req.body, req.user.id);
 
       if (!response.success) {
-        console.log("[DeploymentController] Deployment creation failed", {
+        console.log("[AgentController] Agent creation failed", {
           userId: req.user.id,
           reason: response.message,
         });
@@ -45,20 +42,20 @@ const DeploymentController = {
         });
       }
 
-      console.log("[DeploymentController] Deployment created successfully", {
+      console.log("[AgentController] Agent created successfully", {
         userId: req.user.id,
-        deployment: response.data.deployment,
+        agent: response.data.agent,
       });
 
       return res.status(201).json({
         success: true,
-        message: "Deployment created successfully",
+        message: "Agent created successfully",
         data: {
-          deployment: response.data.deployment,
+          agent: response.data.agent,
         },
       });
     } catch (error) {
-      console.error("[DeploymentController] Deployment creation error:", {
+      console.error("[AgentController] Agent creation error:", {
         userId: req.user.id,
         error: error.message,
         stack: error.stack,
@@ -72,18 +69,18 @@ const DeploymentController = {
   },
 
   async setPrompt(req, res) {
-    console.log("[DeploymentController] Received set prompt request", {
+    console.log("[AgentController] Received set prompt request", {
       userId: req.user.id,
-      deploymentId: req.body.deploymentId,
+      agentId: req.body.agentId,
     });
 
     try {
-      const requiredFields = ["deploymentId", "prompt"];
+      const requiredFields = ["agentId", "prompt"];
       const missingFields = requiredFields.filter((field) => !req.body[field]);
 
       if (missingFields.length > 0) {
         console.log(
-          "[DeploymentController] Set prompt failed - missing required fields",
+          "[AgentController] Set prompt failed - missing required fields",
           {
             userId: req.user.id,
             missingFields,
@@ -95,12 +92,12 @@ const DeploymentController = {
         });
       }
 
-      const response = await deploymentService.setPrompt(req.body, req.user.id);
+      const response = await agentService.setPrompt(req.body, req.user.id);
 
       if (!response.success) {
-        console.log("[DeploymentController] Set prompt failed", {
+        console.log("[AgentController] Set prompt failed", {
           userId: req.user.id,
-          deploymentId: req.body.deploymentId,
+          agentId: req.body.agentId,
           reason: response.message,
         });
         return res.status(400).json({
@@ -109,22 +106,22 @@ const DeploymentController = {
         });
       }
 
-      console.log("[DeploymentController] Prompt set successfully", {
+      console.log("[AgentController] Prompt set successfully", {
         userId: req.user.id,
-        deployment: response.data.deployment,
+        agent: response.data.agent,
       });
 
       return res.status(200).json({
         success: true,
         message: "Prompt updated successfully",
         data: {
-          deployment: response.data.deployment,
+          agent: response.data.agent,
         },
       });
     } catch (error) {
-      console.error("[DeploymentController] Set prompt error:", {
+      console.error("[AgentController] Set prompt error:", {
         userId: req.user.id,
-        deploymentId: req.body.deploymentId,
+        agentId: req.body.agentId,
         error: error.message,
         stack: error.stack,
       });
@@ -137,4 +134,4 @@ const DeploymentController = {
   },
 };
 
-module.exports = DeploymentController;
+module.exports = AgentController;

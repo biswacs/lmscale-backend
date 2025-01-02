@@ -8,6 +8,6 @@ const router = express.Router();
 router.post("/register", rateLimiters.register, UserController.register);
 router.post("/login", rateLimiters.login, UserController.login);
 router.get("/profile", auth, UserController.getProfile);
-router.get("/deployments", auth, UserController.getDeployments);
+router.get("/agents", auth, UserController.getAgents);
 
 module.exports = router;

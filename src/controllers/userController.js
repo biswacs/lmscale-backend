@@ -132,16 +132,16 @@ const UserController = {
     }
   },
 
-  async getDeployments(req, res) {
-    console.log("[UserController] Received user deployments request", {
+  async getAgents(req, res) {
+    console.log("[UserController] Received user agents request", {
       userId: req.user.id,
     });
 
     try {
-      const result = await userService.getUserDeployments(req.user.id);
+      const result = await userService.getUserAgents(req.user.id);
 
       if (!result.success) {
-        console.log("[UserController] Deployments retrieval failed", {
+        console.log("[UserController] Agents retrieval failed", {
           userId: req.user.id,
           reason: result.message,
         });
@@ -151,20 +151,20 @@ const UserController = {
         });
       }
 
-      console.log("[UserController] Deployments retrieved successfully", {
+      console.log("[UserController] Agents retrieved successfully", {
         userId: req.user.id,
-        deploymentsCount: result.data.deployments.length,
+        agentsCount: result.data.agents.length,
       });
 
       return res.json({
         success: true,
         message: result.message,
         data: {
-          deployments: result.data.deployments,
+          agents: result.data.agents,
         },
       });
     } catch (error) {
-      console.error("[UserController] Deployments retrieval error:", {
+      console.error("[UserController] Agents retrieval error:", {
         userId: req.user.id,
         error: error.message,
         stack: error.stack,

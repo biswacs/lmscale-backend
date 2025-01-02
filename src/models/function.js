@@ -14,11 +14,11 @@ Function.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    deploymentId: {
+    agentId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: "Deployments",
+        model: "Agents",
         key: "id",
       },
     },
@@ -55,7 +55,7 @@ Function.init(
     timestamps: true,
     indexes: [
       {
-        fields: ["deploymentId"],
+        fields: ["agentId"],
       },
       {
         using: "gin",
