@@ -1,7 +1,6 @@
 const sequelize = require("../config/database");
 const User = require("./user");
 const Agent = require("./agent");
-const Llm = require("./llm");
 const Function = require("./function");
 const Instruction = require("./instruction");
 const Gpu = require("./gpu");
@@ -72,7 +71,6 @@ Message.belongsTo(Conversation, {
 module.exports = {
   sequelize,
   User,
-  Llm,
   Function,
   Agent,
   Instruction,

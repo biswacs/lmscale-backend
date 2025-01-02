@@ -18,6 +18,11 @@ Usage.init(
         key: "id",
       },
     },
+    type: {
+      type: DataTypes.ENUM("playground", "production"),
+      allowNull: false,
+      defaultValue: "production",
+    },
     inputTokens: {
       type: DataTypes.INTEGER,
       allowNull: false,

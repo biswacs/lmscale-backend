@@ -22,6 +22,11 @@ Conversation.init(
         key: "id",
       },
     },
+    type: {
+      type: DataTypes.ENUM("playground", "production"),
+      allowNull: false,
+      defaultValue: "production",
+    },
     metadata: {
       type: DataTypes.JSONB,
       allowNull: false,

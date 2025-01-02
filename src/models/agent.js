@@ -1,4 +1,4 @@
-const { Model, DataTypes, ENUM } = require("sequelize");
+const { Model, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 const crypto = require("crypto");
 
@@ -56,7 +56,7 @@ Agent.init(
       },
     },
     type: {
-      type: ENUM("playground", "production"),
+      type: DataTypes.ENUM("playground", "production"),
       allowNull: false,
       defaultValue: "production",
     },
@@ -85,9 +85,6 @@ Agent.init(
     indexes: [
       {
         fields: ["userId"],
-      },
-      {
-        fields: ["type"],
       },
     ],
   }
