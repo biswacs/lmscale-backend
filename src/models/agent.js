@@ -7,11 +7,6 @@ class Agent extends Model {
     const newApiKey = crypto.randomBytes(32).toString("hex");
     await this.update({
       apiKey: newApiKey,
-      metadata: {
-        ...this.metadata,
-        apiKeyCreatedAt: new Date(),
-        previousApiKey: this.apiKey,
-      },
     });
     return newApiKey;
   }

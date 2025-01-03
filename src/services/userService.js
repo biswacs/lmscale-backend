@@ -178,7 +178,6 @@ class UserService {
           "id",
           "name",
           "email",
-          "metadata",
           "isActive",
           "createdAt",
           "updatedAt",

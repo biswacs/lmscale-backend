@@ -25,9 +25,6 @@ class ConversationService {
 
       const conversation = await Conversation.create({
         agentId: agent.id,
-        metadata: {
-          createdBy: userId,
-        },
         lastMessageAt: new Date(),
       });
 
@@ -60,7 +57,6 @@ class ConversationService {
       const conversations = await Conversation.findAll({
         where: {
           agentId,
-          "metadata.createdBy": userId,
         },
         attributes: ["id", "title"],
         order: [["lastMessageAt", "DESC"]],

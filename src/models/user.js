@@ -28,7 +28,6 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-
     metadata: {
       type: DataTypes.JSONB,
       allowNull: false,
