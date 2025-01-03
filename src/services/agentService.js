@@ -66,7 +66,7 @@ class AgentService {
     }
   }
 
-  async setPrompt(body, userId) {
+  async updatePrompt(body, userId) {
     console.log("[AgentService] Attempting to set prompt", {
       userId,
       agentId: body.agentId,

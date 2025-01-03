@@ -68,7 +68,7 @@ const AgentController = {
     }
   },
 
-  async setPrompt(req, res) {
+  async updatePrompt(req, res) {
     console.log("[AgentController] Received set prompt request", {
       userId: req.user.id,
       agentId: req.body.agentId,
@@ -92,7 +92,7 @@ const AgentController = {
         });
       }
 
-      const response = await agentService.setPrompt(req.body, req.user.id);
+      const response = await agentService.updatePrompt(req.body, req.user.id);
 
       if (!response.success) {
         console.log("[AgentController] Set prompt failed", {
