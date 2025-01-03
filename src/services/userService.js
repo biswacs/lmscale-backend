@@ -215,60 +215,6 @@ class UserService {
       };
     }
   }
-
-  async getUserAgents(userId) {
-    console.log("[UserService] Fetching user agents", {
-      userId,
-    });
-
-    try {
-      const agents = await Agent.findAll({
-        where: { userId: userId },
-        attributes: [
-          "id",
-          "name",
-          "description",
-          "prompt",
-          "isActive",
-          "createdAt",
-          "updatedAt",
-        ],
-      });
-
-      if (!agents || agents.length === 0) {
-        console.log("[UserService] No agents found", {
-          userId,
-        });
-        return {
-          success: true,
-          message: "No agents found for user",
-          data: { agents: [] },
-        };
-      }
-
-      console.log("[UserService] Agents retrieved successfully", {
-        userId,
-        agentsCount: agents.length,
-      });
-
-      return {
-        success: true,
-        message: "Agents retrieved successfully",
-        data: { agents },
-      };
-    } catch (error) {
-      console.error("[UserService] Error fetching user agents:", {
-        userId,
-        error: error.message,
-        stack: error.stack,
-      });
-
-      return {
-        success: false,
-        message: "Failed to retrieve user agents",
-      };
-    }
-  }
 }
 
 module.exports = UserService;
