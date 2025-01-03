@@ -10,6 +10,19 @@ class AgentService {
       },
     });
 
+    const NewAgentName = body.name.trim().toLowerCase();
+
+    if (NewAgentName === "playground") {
+      console.log(
+        "[AgentService] Agent creation failed - 'Playground' is a reserved name"
+      );
+      return {
+        success: false,
+        message:
+          "'Playground' is a reserved name and cannot be used for agent creation",
+      };
+    }
+
     try {
       const agent = await Agent.create({
         name: body.name,
