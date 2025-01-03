@@ -25,11 +25,10 @@ class ConversationService {
 
       const conversation = await Conversation.create({
         agentId: agent.id,
-        type: agent.type,
         metadata: {
           createdBy: userId,
-          lastMessageAt: new Date(),
         },
+        lastMessageAt: new Date(),
       });
 
       return {
@@ -61,9 +60,10 @@ class ConversationService {
       const conversations = await Conversation.findAll({
         where: {
           agentId,
+          "metadata.createdBy": userId,
         },
         attributes: ["id", "title"],
-        order: [[sequelize.literal("\"metadata\"->'lastMessageAt'"), "DESC"]],
+        order: [["lastMessageAt", "DESC"]],
       });
 
       return {
@@ -159,10 +159,7 @@ class ConversationService {
 
       await conversation.update({
         title,
-        metadata: {
-          ...conversation.metadata,
-          lastMessageAt: new Date(),
-        },
+        lastMessageAt: new Date(),
       });
 
       return {

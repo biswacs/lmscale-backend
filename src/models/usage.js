@@ -18,10 +18,14 @@ Usage.init(
         key: "id",
       },
     },
-    type: {
-      type: DataTypes.ENUM("playground", "production"),
-      allowNull: false,
-      defaultValue: "production",
+    conversationId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      unique: true, 
+      references: {
+        model: "Conversations",
+        key: "id",
+      },
     },
     inputTokens: {
       type: DataTypes.INTEGER,
@@ -52,6 +56,10 @@ Usage.init(
     indexes: [
       {
         fields: ["agentId"],
+      },
+      {
+        unique: true,
+        fields: ["conversationId"], 
       },
     ],
   }

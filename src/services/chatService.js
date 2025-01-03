@@ -64,9 +64,16 @@ class ChatService {
         await Conversation.update(
           {
             title: messageData.text.slice(0, 100),
-            metadata: {
-              lastMessageAt: new Date(),
-            },
+            lastMessageAt: new Date(),
+          },
+          {
+            where: { id: messageData.conversationId },
+          }
+        );
+      } else {
+        await Conversation.update(
+          {
+            lastMessageAt: new Date(),
           },
           {
             where: { id: messageData.conversationId },
@@ -183,29 +190,35 @@ class ChatService {
     }
   }
 
-  async recordUsage({ agentId, type, input, output }) {
-    console.log("[ChatService] Recording usage", { agentId, type });
+  async recordUsage({ agentId, conversationId, input, output }) {
+    console.log("[ChatService] Recording usage", { agentId, conversationId });
 
     try {
       const inputTokens = await calculateTokens(input);
       const outputTokens = await calculateTokens(output);
 
-      const inputCost = inputTokens * 0.0001;
-      const outputCost = outputTokens * 0.0002;
-      const totalCost = (inputCost + outputCost).toFixed(6);
+      const totalCost = (inputTokens * 0.0001 + outputTokens * 0.0002).toFixed(
+        6
+      );
 
-      await Usage.create({
-        agentId,
-        type,
-        inputTokens,
-        outputTokens,
-        cost: totalCost,
-        metadata: {
-          timestamp: new Date(),
-          inputCost,
-          outputCost,
+      const [usage, created] = await Usage.findOrCreate({
+        where: { conversationId },
+        defaults: {
+          agentId,
+          conversationId,
+          inputTokens,
+          outputTokens,
+          cost: totalCost,
         },
       });
+
+      if (!created) {
+        await usage.update({
+          inputTokens: usage.inputTokens + inputTokens,
+          outputTokens: usage.outputTokens + outputTokens,
+          cost: (parseFloat(usage.cost) + parseFloat(totalCost)).toFixed(6),
+        });
+      }
 
       return {
         success: true,

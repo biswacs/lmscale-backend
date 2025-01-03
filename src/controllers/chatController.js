@@ -132,14 +132,7 @@ const ChatController = {
         ),
       ].join("\n");
 
-      console.log(
-        "[ChatController] Formatted conversation:",
-        formattedMessages
-      );
-
       const prompt = `${agent.prompt}\n\n${formattedMessages}\nUser: ${req.body.message}\nAgent:`;
-
-      console.log("[ChatController] Final prompt:", prompt);
 
       const gpuResponse = await axios({
         method: "post",
@@ -200,6 +193,7 @@ const ChatController = {
 
             await chatService.recordUsage({
               agentId: agent.id,
+              conversationId: conversationId,
               type: agent.type,
               input: req.body.message,
               output: aiResponse,
@@ -211,7 +205,7 @@ const ChatController = {
             res.end();
           }
         } catch (error) {
-          console.error("[ChatController] Stream end error:", error);
+          console.error("[ChatController] End handler error:", error);
           handleError(error);
         }
       });

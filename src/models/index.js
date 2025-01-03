@@ -68,6 +68,16 @@ Message.belongsTo(Conversation, {
   as: "conversation",
 });
 
+Conversation.hasOne(Usage, {
+  foreignKey: "conversationId",
+  as: "usage",
+});
+
+Usage.belongsTo(Conversation, {
+  foreignKey: "conversationId",
+  as: "conversation",
+});
+
 module.exports = {
   sequelize,
   User,

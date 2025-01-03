@@ -54,7 +54,6 @@ class UserService {
         {
           name: "Playground",
           description: "Default playground agent",
-          type: "playground",
           userId: user.id,
         },
         { transaction }

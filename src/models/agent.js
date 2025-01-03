@@ -27,6 +27,9 @@ Agent.init(
     name: {
       type: DataTypes.STRING,
       allowNull: false,
+      set(value) {
+        this.setDataValue("name", value.toLowerCase());
+      },
     },
     description: {
       type: DataTypes.STRING,
@@ -55,11 +58,6 @@ Agent.init(
         key: "id",
       },
     },
-    type: {
-      type: DataTypes.ENUM("playground", "production"),
-      allowNull: false,
-      defaultValue: "production",
-    },
     apiKey: {
       type: DataTypes.STRING(64),
       allowNull: false,
@@ -85,6 +83,11 @@ Agent.init(
     indexes: [
       {
         fields: ["userId"],
+      },
+      {
+        fields: ["name", "userId"],
+        unique: true,
+        name: "unique_name_per_user",
       },
     ],
   }

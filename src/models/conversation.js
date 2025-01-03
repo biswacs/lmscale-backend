@@ -22,15 +22,14 @@ Conversation.init(
         key: "id",
       },
     },
-    type: {
-      type: DataTypes.ENUM("playground", "production"),
-      allowNull: false,
-      defaultValue: "production",
-    },
     metadata: {
       type: DataTypes.JSONB,
       allowNull: false,
       defaultValue: {},
+    },
+    lastMessageAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
     isActive: {
       type: DataTypes.BOOLEAN,
@@ -46,6 +45,9 @@ Conversation.init(
     indexes: [
       {
         fields: ["agentId"],
+      },
+      {
+        fields: ["lastMessageAt"],
       },
     ],
   }

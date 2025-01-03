@@ -10,20 +10,26 @@ class AgentService {
       },
     });
 
-    const NewAgentName = body.name.trim().toLowerCase();
-
-    if (NewAgentName === "playground") {
-      console.log(
-        "[AgentService] Agent creation failed - 'Playground' is a reserved name"
-      );
-      return {
-        success: false,
-        message:
-          "'Playground' is a reserved name and cannot be used for agent creation",
-      };
-    }
-
     try {
+      const existingAgent = await Agent.findOne({
+        where: {
+          userId,
+          name: body.name.toLowerCase(),
+        },
+      });
+
+      if (existingAgent) {
+        console.log("[AgentService] Agent with same name already exists", {
+          userId,
+          name: body.name,
+        });
+
+        return {
+          success: false,
+          message: "An agent with this name already exists",
+        };
+      }
+
       const agent = await Agent.create({
         name: body.name,
         description: body.description,
