@@ -26,10 +26,6 @@ Agent.init(
         this.setDataValue("name", value.toLowerCase());
       },
     },
-    description: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     prompt: {
       type: DataTypes.TEXT,
       allowNull: false,

@@ -53,7 +53,6 @@ class UserService {
       const agent = await Agent.create(
         {
           name: "Playground",
-          description: "Default playground agent",
           userId: user.id,
         },
         { transaction }

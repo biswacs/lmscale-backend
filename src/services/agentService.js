@@ -1,4 +1,4 @@
-const { Agent, sequelize } = require("../models");
+const { Agent, sequelize, Instruction, Function } = require("../models");
 
 class AgentService {
   async createAgent(body, userId) {
@@ -6,7 +6,6 @@ class AgentService {
       userId,
       agentDetails: {
         name: body.name,
-        description: body.description,
       },
     });
 
@@ -32,7 +31,6 @@ class AgentService {
 
       const agent = await Agent.create({
         name: body.name,
-        description: body.description,
         userId: userId,
       });
 
@@ -175,6 +173,81 @@ class AgentService {
       return {
         success: false,
         message: "Failed to retrieve user agents",
+      };
+    }
+  }
+
+  async getAgentDatas(userId, agentId) {
+    console.log("[AgentService] Fetching agent details", {
+      userId,
+      agentId,
+    });
+
+    try {
+      const agent = await Agent.findOne({
+        where: {
+          id: agentId,
+          userId: userId,
+        },
+        attributes: ["id", "name", "prompt", "apiKey", "config", "isActive"],
+      });
+
+      if (!agent) {
+        console.log("[AgentService] Agent not found", {
+          userId,
+          agentId,
+        });
+        return {
+          success: false,
+          message: "Agent not found or unauthorized access",
+        };
+      }
+
+      const instructions = await Instruction.findAll({
+        where: { agentId: agentId },
+        attributes: ["id", "name", "content"],
+      });
+
+      const functions = await Function.findAll({
+        where: { agentId: agentId },
+        attributes: [
+          "name",
+          "endpoint",
+          "method",
+          "parameters",
+          "authType",
+          "isActive",
+        ],
+      });
+
+      console.log("[AgentService] Agent details retrieved successfully", {
+        userId,
+        agentId,
+        instructionsCount: instructions.length,
+        functionsCount: functions.length,
+      });
+
+      return {
+        success: true,
+        message: "Agent details retrieved successfully",
+        data: {
+          agent,
+          functions,
+          instructions,
+        },
+      };
+    } catch (error) {
+      console.error("[AgentService] Error fetching agent details:", {
+        userId,
+        agentId,
+        error: error.message,
+        stack: error.stack,
+      });
+
+      return {
+        success: false,
+        message: "Failed to retrieve agent details",
+        error: error.message,
       };
     }
   }

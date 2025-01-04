@@ -7,12 +7,11 @@ const AgentController = {
       userId: req.user.id,
       agentDetails: {
         name: req.body.name,
-        description: req.body.description,
       },
     });
 
     try {
-      const requiredFields = ["name", "description"];
+      const requiredFields = ["name"];
       const missingFields = requiredFields.filter((field) => !req.body[field]);
 
       if (missingFields.length > 0) {
@@ -167,6 +166,72 @@ const AgentController = {
     } catch (error) {
       console.error("[AgentController] Agents retrieval error:", {
         userId: req.user.id,
+        error: error.message,
+        stack: error.stack,
+      });
+
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  },
+
+  async getAgentDetails(req, res) {
+    console.log("[AgentController] Received agent details request", {
+      userId: req.user.id,
+      agentId: req.query.agentId,
+    });
+
+    try {
+      const requiredFields = ["agentId"];
+      const missingFields = requiredFields.filter((field) => !req.query[field]);
+
+      if (missingFields.length > 0) {
+        console.log(
+          "[AgentController] Agent details retrieval failed - missing required fields",
+          {
+            userId: req.user.id,
+            missingFields,
+          }
+        );
+        return res.status(400).json({
+          success: false,
+          message: `Missing required fields: ${missingFields.join(", ")}`,
+        });
+      }
+
+      const response = await agentService.getAgentDatas(
+        req.user.id,
+        req.query.agentId
+      );
+
+      if (!response.success) {
+        console.log("[AgentController] Agent details retrieval failed", {
+          userId: req.user.id,
+          agentId: req.query.agentId,
+          reason: response.message,
+        });
+        return res.status(404).json({
+          success: false,
+          message: response.message,
+        });
+      }
+
+      console.log("[AgentController] Agent details retrieved successfully", {
+        userId: req.user.id,
+        agentId: req.query.agentId,
+      });
+
+      return res.json({
+        success: true,
+        message: "Agent details retrieved successfully",
+        data: response.data,
+      });
+    } catch (error) {
+      console.error("[AgentController] Agent details retrieval error:", {
+        userId: req.user.id,
+        agentId: req.query.agentId,
         error: error.message,
         stack: error.stack,
       });
