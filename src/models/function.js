@@ -42,6 +42,11 @@ Function.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    metadata: {
+      type: DataTypes.JSONB,
+      allowNull: false,
+      defaultValue: {},
+    },
     isActive: {
       type: DataTypes.BOOLEAN,
       allowNull: false,

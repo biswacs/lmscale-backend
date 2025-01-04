@@ -139,7 +139,14 @@ class AgentService {
     try {
       const agents = await Agent.findAll({
         where: { userId: userId },
-        attributes: ["id", "name", "isActive", "createdAt", "updatedAt"],
+        attributes: [
+          "id",
+          "name",
+          "apiKey",
+          "isActive",
+          "createdAt",
+          "updatedAt",
+        ],
       });
 
       if (!agents || agents.length === 0) {

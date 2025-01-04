@@ -1,7 +1,33 @@
 const { Model, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
-class Usage extends Model {}
+class Usage extends Model {
+  static async getOrCreateDaily(agentId) {
+    const today = new Date().toISOString().split("T")[0];
+
+    const [usage] = await this.findOrCreate({
+      where: {
+        agentId,
+        date: today,
+      },
+      defaults: {
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+      },
+    });
+    return usage;
+  }
+
+  async incrementTokens(inputTokens, outputTokens) {
+    const totalTokens = inputTokens + outputTokens;
+    return this.increment({
+      inputTokens,
+      outputTokens,
+      totalTokens,
+    });
+  }
+}
 
 Usage.init(
   {
@@ -12,20 +38,15 @@ Usage.init(
     },
     agentId: {
       type: DataTypes.UUID,
-      allowNull: true,
+      allowNull: false,
       references: {
         model: "Agents",
         key: "id",
       },
     },
-    conversationId: {
-      type: DataTypes.UUID,
-      allowNull: true,
-      unique: true, 
-      references: {
-        model: "Conversations",
-        key: "id",
-      },
+    date: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
     },
     inputTokens: {
       type: DataTypes.INTEGER,
@@ -37,8 +58,8 @@ Usage.init(
       allowNull: false,
       defaultValue: 0,
     },
-    cost: {
-      type: DataTypes.DECIMAL(10, 6),
+    totalTokens: {
+      type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
     },
@@ -55,11 +76,8 @@ Usage.init(
     timestamps: true,
     indexes: [
       {
-        fields: ["agentId"],
-      },
-      {
+        fields: ["agentId", "date"],
         unique: true,
-        fields: ["conversationId"], 
       },
     ],
   }

@@ -5,8 +5,6 @@ const Function = require("./function");
 const Instruction = require("./instruction");
 const Gpu = require("./gpu");
 const Usage = require("./usage");
-const Conversation = require("./conversation");
-const Message = require("./message");
 
 User.hasMany(Agent, {
   foreignKey: "userId",
@@ -20,22 +18,7 @@ Agent.belongsTo(User, {
 
 Agent.hasMany(Instruction, {
   foreignKey: "agentId",
-  as: "instruction",
-});
-
-Agent.hasMany(Function, {
-  foreignKey: "agentId",
-  as: "functions",
-});
-
-Agent.hasMany(Usage, {
-  foreignKey: "agentId",
-  as: "usages",
-});
-
-Agent.hasMany(Conversation, {
-  foreignKey: "agentId",
-  as: "conversations",
+  as: "instructions",
 });
 
 Instruction.belongsTo(Agent, {
@@ -43,9 +26,19 @@ Instruction.belongsTo(Agent, {
   as: "agent",
 });
 
+Agent.hasMany(Function, {
+  foreignKey: "agentId",
+  as: "functions",
+});
+
 Function.belongsTo(Agent, {
   foreignKey: "agentId",
   as: "agent",
+});
+
+Agent.hasMany(Usage, {
+  foreignKey: "agentId",
+  as: "usages",
 });
 
 Usage.belongsTo(Agent, {
@@ -53,39 +46,12 @@ Usage.belongsTo(Agent, {
   as: "agent",
 });
 
-Conversation.belongsTo(Agent, {
-  foreignKey: "agentId",
-  as: "agent",
-});
-
-Conversation.hasMany(Message, {
-  foreignKey: "conversationId",
-  as: "messages",
-});
-
-Message.belongsTo(Conversation, {
-  foreignKey: "conversationId",
-  as: "conversation",
-});
-
-Conversation.hasOne(Usage, {
-  foreignKey: "conversationId",
-  as: "usage",
-});
-
-Usage.belongsTo(Conversation, {
-  foreignKey: "conversationId",
-  as: "conversation",
-});
-
 module.exports = {
   sequelize,
   User,
-  Function,
   Agent,
+  Function,
   Instruction,
   Gpu,
   Usage,
-  Conversation,
-  Message,
 };

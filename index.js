@@ -6,7 +6,6 @@ const userRoutes = require("./src/routes/userRoutes");
 const chatRoutes = require("./src/routes/chatRoutes");
 const gpuRoutes = require("./src/routes/gpuRoutes");
 const agentRoutes = require("./src/routes/agentRoutes");
-const conversationRoutes = require("./src/routes/conversationRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -25,7 +24,6 @@ if (Env == "Local") {
 app.use("/v1/user", userRoutes);
 app.use("/v1/chat", chatRoutes);
 app.use("/v1/agent", agentRoutes);
-app.use("/v1/conversation", conversationRoutes);
 
 app.get("/v1/lmscale", (req, res) => {
   res.json({ message: "LmScale" });

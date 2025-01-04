@@ -1,15 +1,9 @@
-const { Agent, Gpu, Message, Usage, Conversation } = require("../models");
-const { Op } = require("sequelize");
+const { Agent, Function, Instruction, Usage, Gpu } = require("../models");
 const { calculateTokens } = require("../utils/tokenizer");
-const ConversationService = require("./conversationService");
 
 class ChatService {
-  constructor() {
-    this.conversationService = new ConversationService();
-  }
-
-  async getAgent(agentId) {
-    console.log("[ChatService] Finding agent", { agentId });
+  async getAgentDetails(agentId) {
+    console.log("[ChatService] Fetching agent details", { agentId });
 
     try {
       const agent = await Agent.findOne({
@@ -17,163 +11,103 @@ class ChatService {
           id: agentId,
           isActive: true,
         },
+        include: [
+          {
+            model: Instruction,
+            as: "instructions",
+            attributes: ["name", "content"],
+            where: { isActive: true },
+            required: false,
+          },
+          {
+            model: Function,
+            as: "functions",
+            attributes: [
+              "name",
+              "endpoint",
+              "method",
+              "parameters",
+              "authType",
+            ],
+            where: { isActive: true },
+            required: false,
+          },
+        ],
+        attributes: ["id", "name", "prompt"],
       });
 
       if (!agent) {
+        console.log("[ChatService] Agent not found or inactive", { agentId });
         return {
           success: false,
           message: "Agent not found or inactive",
         };
       }
 
-      return {
-        success: true,
-        data: {
-          agent: {
-            id: agent.id,
-            name: agent.name,
-            prompt: agent.prompt,
-            type: agent.type,
-          },
-        },
+      const formattedData = {
+        name: agent.name,
+        prompt: agent.prompt,
+        instructions: agent.instructions
+          ? agent.instructions.map((inst) => ({
+              name: inst.name,
+              content: inst.content,
+            }))
+          : [],
+        functions: agent.functions
+          ? agent.functions.map((fn) => ({
+              name: fn.name,
+              endpoint: fn.endpoint,
+              method: fn.method,
+              parameters: fn.parameters,
+              authType: fn.authType,
+            }))
+          : [],
       };
-    } catch (error) {
-      console.error("[ChatService] Error finding agent:", error);
-      return {
-        success: false,
-        message: "Failed to retrieve agent",
-      };
-    }
-  }
 
-  async createMessage(messageData) {
-    console.log("[ChatService] Creating message", messageData);
-
-    try {
-      const tokens = await calculateTokens(messageData.text);
-      const message = await Message.create({
-        ...messageData,
-        tokens,
-      });
-
-      const messageCount = await Message.count({
-        where: { conversationId: messageData.conversationId },
-      });
-
-      if (messageCount === 1 && messageData.role === "user") {
-        await Conversation.update(
-          {
-            title: messageData.text.slice(0, 100),
-            lastMessageAt: new Date(),
-          },
-          {
-            where: { id: messageData.conversationId },
-          }
-        );
-      } else {
-        await Conversation.update(
-          {
-            lastMessageAt: new Date(),
-          },
-          {
-            where: { id: messageData.conversationId },
-          }
-        );
-      }
-
-      return {
-        success: true,
-        data: { message },
-      };
-    } catch (error) {
-      console.error("[ChatService] Error creating message:", error);
-      return {
-        success: false,
-        message: "Failed to create message",
-      };
-    }
-  }
-
-  async updateMessage(messageId, updates) {
-    console.log("[ChatService] Updating message", { messageId, updates });
-
-    try {
-      const message = await Message.findByPk(messageId);
-      if (!message) {
-        return {
-          success: false,
-          message: "Message not found",
-        };
-      }
-
-      if (updates.text) {
-        updates.tokens = await calculateTokens(updates.text);
-      }
-
-      await message.update(updates);
-
-      return {
-        success: true,
-        data: { message },
-      };
-    } catch (error) {
-      console.error("[ChatService] Error updating message:", error);
-      return {
-        success: false,
-        message: "Failed to update message",
-      };
-    }
-  }
-
-  async getConversationMessages(conversationId) {
-    console.log("[ChatService] Getting conversation messages", {
-      conversationId,
-    });
-
-    try {
-      const messages = await Message.findAll({
-        where: {
-          conversationId,
-          status: "completed",
-          role: {
-            [Op.ne]: "system",
-          },
-        },
-        order: [["createdAt", "ASC"]],
+      console.log("[ChatService] Agent details retrieved successfully", {
+        agentId,
+        name: agent.name,
+        instructionsCount: formattedData.instructions.length,
+        functionsCount: formattedData.functions.length,
       });
 
       return {
         success: true,
-        data: {
-          messages: messages.map((msg) => ({
-            role: msg.role,
-            content: msg.text,
-          })),
-        },
+        data: formattedData,
       };
     } catch (error) {
-      console.error("[ChatService] Error getting messages:", error);
+      console.error("[ChatService] Error finding agent:", {
+        agentId,
+        error: error.message,
+        stack: error.stack,
+      });
       return {
         success: false,
-        message: "Failed to get conversation messages",
+        message: "Failed to retrieve agent details",
       };
     }
   }
 
   async getGpu() {
-    console.log("[ChatService] Finding available GPU");
+    console.log("[ChatService] Looking for available GPU");
 
     try {
       const gpu = await Gpu.findOne({
         attributes: ["hostIp"],
+        where: { status: "available" },
       });
 
       if (!gpu) {
+        console.log("[ChatService] No available GPU found");
         return {
           success: false,
           message: "No GPU available",
         };
       }
+
+      console.log("[ChatService] Available GPU found", {
+        hostIp: gpu.hostIp,
+      });
 
       return {
         success: true,
@@ -182,7 +116,10 @@ class ChatService {
         },
       };
     } catch (error) {
-      console.error("[ChatService] Error finding GPU:", error);
+      console.error("[ChatService] Error finding GPU:", {
+        error: error.message,
+        stack: error.stack,
+      });
       return {
         success: false,
         message: "Failed to retrieve GPU information",
@@ -190,46 +127,44 @@ class ChatService {
     }
   }
 
-  async recordUsage({ agentId, conversationId, input, output }) {
-    console.log("[ChatService] Recording usage", { agentId, conversationId });
+  async recordUsage({ agentId, input, output }) {
+    console.log("[ChatService] Recording usage", { agentId });
 
     try {
-      const inputTokens = await calculateTokens(input);
-      const outputTokens = await calculateTokens(output);
+      const inputTokens = calculateTokens(input);
+      const outputTokens = calculateTokens(output);
 
-      const totalCost = (inputTokens * 0.0001 + outputTokens * 0.0002).toFixed(
-        6
-      );
-
-      const [usage, created] = await Usage.findOrCreate({
-        where: { conversationId },
-        defaults: {
-          agentId,
-          conversationId,
-          inputTokens,
-          outputTokens,
-          cost: totalCost,
-        },
+      console.log("[ChatService] Calculated tokens", {
+        agentId,
+        inputTokens,
+        outputTokens,
+        totalTokens: inputTokens + outputTokens,
       });
 
-      if (!created) {
-        await usage.update({
-          inputTokens: usage.inputTokens + inputTokens,
-          outputTokens: usage.outputTokens + outputTokens,
-          cost: (parseFloat(usage.cost) + parseFloat(totalCost)).toFixed(6),
-        });
-      }
+      const usage = await Usage.getOrCreateDaily(agentId);
+      await usage.incrementTokens(inputTokens, outputTokens);
+
+      console.log("[ChatService] Usage recorded successfully", {
+        agentId,
+        inputTokens,
+        outputTokens,
+        totalTokens: inputTokens + outputTokens,
+      });
 
       return {
         success: true,
         data: {
           inputTokens,
           outputTokens,
-          cost: totalCost,
+          totalTokens: inputTokens + outputTokens,
         },
       };
     } catch (error) {
-      console.error("[ChatService] Error recording usage:", error);
+      console.error("[ChatService] Error recording usage:", {
+        agentId,
+        error: error.message,
+        stack: error.stack,
+      });
       return {
         success: false,
         message: "Failed to record usage",

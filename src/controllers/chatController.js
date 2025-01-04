@@ -1,25 +1,19 @@
 const axios = require("axios");
 const ChatService = require("../services/chatService");
-const ConversationService = require("../services/conversationService");
-const { Conversation, Agent } = require("../models");
 const chatService = new ChatService();
-const conversationService = new ConversationService();
 
 const ChatController = {
   async chat(req, res) {
-    console.log("[ChatController] Received chat request", {
-      userId: req.user.id,
-      agentId: req.body.agentId,
-      conversationId: req.body.conversationId,
-      message: req.body.message,
-    });
+    console.log("[ChatController] Received chat request");
 
     if (!req.body.message) {
       return res.status(400).json({
         success: false,
-        message: "message is required",
+        message: "Message is required",
       });
     }
+
+    const history = req.body.history || [];
 
     res.writeHead(200, {
       "Content-Type": "text/event-stream",
@@ -28,79 +22,35 @@ const ChatController = {
       "Access-Control-Allow-Origin": "*",
     });
 
-    let pendingAiMessage = null;
     let aiResponse = "";
-    let agent = null;
 
     try {
-      let conversationId = req.body.conversationId;
+      console.log("[ChatController] Getting agent details");
+      const agentResult = await chatService.getAgentDetails(req.agentId);
+      console.log("[ChatController] Agent details result:", agentResult);
 
-      if (conversationId) {
-        const conversation = await Conversation.findByPk(conversationId);
-        if (!conversation) {
-          throw new Error("Conversation not found");
-        }
-        agent = await Agent.findByPk(conversation.agentId);
-        if (!agent) {
-          throw new Error("Agent not found");
-        }
-      } else {
-        if (!req.body.agentId) {
-          throw new Error("agentId is required for new conversation");
-        }
-
-        const agentResult = await chatService.getAgent(req.body.agentId);
-        if (!agentResult.success) {
-          throw new Error(agentResult.message);
-        }
-        agent = agentResult.data.agent;
-
-        const conversationResult = await conversationService.createConversation(
-          req.user.id,
-          agent.id
-        );
-
-        if (!conversationResult.success) {
-          throw new Error(
-            `Failed to create conversation: ${conversationResult.message}`
-          );
-        }
-
-        conversationId = conversationResult.data.conversation.id;
-
-        res.write(
-          `data: ${JSON.stringify({
-            conversationId,
-            isNewConversation: true,
-          })}\n\n`
-        );
+      if (!agentResult.success) {
+        throw new Error(agentResult.message);
       }
 
-      const messageResult = await chatService.createMessage({
-        conversationId,
-        role: "user",
-        text: req.body.message,
-        status: "completed",
+      const agent = agentResult.data;
+      console.log("[ChatController] Agent data received:", {
+        name: agent.name,
+        hasInstructions: agent.instructions?.length > 0,
+        hasFunctions: agent.functions?.length > 0,
       });
 
-      if (!messageResult.success) {
-        throw new Error(`Failed to create message: ${messageResult.message}`);
-      }
+      const formattedHistory = history
+        .map(
+          (msg) => `${msg.role === "user" ? "User" : "Agent"}: ${msg.content}`
+        )
+        .join("\n");
 
-      const pendingResult = await chatService.createMessage({
-        conversationId,
-        role: "ai",
-        text: "",
-        status: "pending",
-      });
-
-      if (!pendingResult.success) {
-        throw new Error(
-          `Failed to create pending message: ${pendingResult.message}`
-        );
-      }
-
-      pendingAiMessage = pendingResult.data.message;
+      const prompt = `${agent.prompt}\n\n${
+        agent.instructions.length > 0
+          ? agent.instructions.map((inst) => inst.content).join("\n\n")
+          : ""
+      }\n\n${formattedHistory}\nUser: ${req.body.message}\nAgent:`;
 
       const gpu = await chatService.getGpu();
       if (!gpu.success) {
@@ -115,31 +65,12 @@ const ChatController = {
         throw new Error(`GPU health check failed: ${error.message}`);
       }
 
-      const messagesResult = await chatService.getConversationMessages(
-        conversationId
-      );
-      if (!messagesResult.success) {
-        throw new Error(
-          `Failed to get conversation messages: ${messagesResult.message}`
-        );
-      }
-
-      const formattedMessages = [
-        ...new Set(
-          messagesResult.data.messages.map(
-            (msg) => `${msg.role === "user" ? "User" : "Agent"}: ${msg.content}`
-          )
-        ),
-      ].join("\n");
-
-      const prompt = `${agent.prompt}\n\n${formattedMessages}\nUser: ${req.body.message}\nAgent:`;
-
       const gpuResponse = await axios({
         method: "post",
         url: `http://${gpu.data.hostIp}:8000/chat/stream`,
         data: {
           message: prompt,
-          context: [],
+          functions: agent.functions,
         },
         responseType: "stream",
         timeout: 30000,
@@ -153,28 +84,20 @@ const ChatController = {
           for (const line of lines) {
             if (!line.trim() || !line.startsWith("data: ")) continue;
 
-            try {
-              const cleanedLine = line.replace(/^data:\s*/, "").trim();
-              if (!cleanedLine) continue;
+            const cleanedLine = line.replace(/^data:\s*/, "").trim();
+            if (!cleanedLine) continue;
 
-              const data = JSON.parse(cleanedLine);
+            const data = JSON.parse(cleanedLine);
 
-              if (data && typeof data === "object") {
-                if (data.response) {
-                  aiResponse += data.response;
-                  res.write(
-                    `data: ${JSON.stringify({ response: data.response })}\n\n`
-                  );
-                } else if (data.error) {
-                  console.error("[ChatController] GPU Error:", data.error);
-                  throw new Error(data.error);
-                }
+            if (data && typeof data === "object") {
+              if (data.response) {
+                aiResponse += data.response;
+                res.write(
+                  `data: ${JSON.stringify({ response: data.response })}\n\n`
+                );
+              } else if (data.error) {
+                throw new Error(data.error);
               }
-            } catch (parseError) {
-              console.error("[ChatController] Line parse error:", {
-                line: line.slice(0, 100) + "...",
-                error: parseError.message,
-              });
             }
           }
         } catch (error) {
@@ -185,16 +108,9 @@ const ChatController = {
 
       gpuResponse.data.on("end", async () => {
         try {
-          if (aiResponse && pendingAiMessage) {
-            await chatService.updateMessage(pendingAiMessage.id, {
-              text: aiResponse,
-              status: "completed",
-            });
-
+          if (aiResponse) {
             await chatService.recordUsage({
-              agentId: agent.id,
-              conversationId: conversationId,
-              type: agent.type,
+              agentId: req.agentId,
               input: req.body.message,
               output: aiResponse,
             });
@@ -210,31 +126,13 @@ const ChatController = {
         }
       });
 
-      gpuResponse.data.on("error", (error) => {
-        console.error("[ChatController] Stream error:", error);
-        handleError(error);
-      });
+      gpuResponse.data.on("error", handleError);
     } catch (error) {
       handleError(error);
     }
 
     function handleError(error) {
-      console.error("[ChatController] Error:", {
-        message: error.message,
-        stack: error.stack,
-      });
-
-      if (pendingAiMessage) {
-        chatService
-          .updateMessage(pendingAiMessage.id, {
-            status: "error",
-            metadata: {
-              error: error.message,
-              errorType: error.name,
-            },
-          })
-          .catch(console.error);
-      }
+      console.error("[ChatController] Error:", error);
 
       if (!res.writableEnded) {
         res.write(
