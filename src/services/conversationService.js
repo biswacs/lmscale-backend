@@ -58,7 +58,7 @@ class ConversationService {
         where: {
           agentId,
         },
-        attributes: ["id", "title"],
+        attributes: ["id", "title", "lastMessageAt"],
         order: [["lastMessageAt", "DESC"]],
       });
 
