@@ -1,4 +1,3 @@
-const axios = require("axios");
 const ChatService = require("../services/chatService");
 const chatService = new ChatService();
 
@@ -30,13 +29,11 @@ const ChatController = {
       "Access-Control-Allow-Origin": "*",
     });
 
-    let aiResponse = "";
-
     try {
       console.log("[ChatController] Fetching agent details", {
         agentId: req.agentId,
       });
-      const agentResult = await chatService.getAgentDetails(req.agentId);
+      const agentResult = await chatService.getAgent(req.agentId);
 
       if (!agentResult.success) {
         console.log("[ChatController] Failed to fetch agent details", {
@@ -72,128 +69,51 @@ const ChatController = {
         hasInstructionsInPrompt: agent.instructions.length > 0,
       });
 
-      const gpu = await chatService.getGpu();
-      if (!gpu.success) {
-        console.log("[ChatController] GPU fetch failed", {
-          error: gpu.message,
-        });
-        throw new Error(gpu.message);
-      }
+      let aiResponse = "";
 
-      console.log("[ChatController] GPU found, checking health", {
-        hostIp: gpu.data.hostIp,
-      });
+      // Process chat through GPU using service layer
+      await chatService.processChat(
+        prompt,
+        agent.functions,
+        async (message) => {
+          if (message.type === "response") {
+            aiResponse += message.content;
+            res.write(
+              `data: ${JSON.stringify({ response: message.content })}\n\n`
+            );
+          } else if (message.type === "error") {
+            if (!res.writableEnded) {
+              res.write(
+                `data: ${JSON.stringify({
+                  error: message.content,
+                  done: true,
+                })}\n\n`
+              );
+              res.end();
+            }
+          } else if (message.type === "done") {
+            if (message.content) {
+              console.log("[ChatController] Stream completed successfully", {
+                finalResponseLength: message.content.length,
+                agentId: req.agentId,
+              });
 
-      try {
-        await axios.get(`http://${gpu.data.hostIp}:8000/health`, {
-          timeout: 5000,
-        });
-        console.log("[ChatController] GPU health check passed");
-      } catch (error) {
-        console.error("[ChatController] GPU health check failed", {
-          error: error.message,
-          hostIp: gpu.data.hostIp,
-        });
-        throw new Error(`GPU health check failed: ${error.message}`);
-      }
+              await chatService.recordUsage({
+                agentId: req.agentId,
+                input: req.body.message,
+                output: message.content,
+              });
+            }
 
-      console.log("[ChatController] Sending request to GPU");
-      const gpuResponse = await axios({
-        method: "post",
-        url: `http://${gpu.data.hostIp}:8000/chat/stream`,
-        data: {
-          message: prompt,
-          functions: agent.functions,
-        },
-        responseType: "stream",
-        timeout: 30000,
-      });
-
-      gpuResponse.data.on("data", (chunk) => {
-        try {
-          const text = chunk.toString();
-          const lines = text.split("\n");
-
-          for (const line of lines) {
-            if (!line.trim() || !line.startsWith("data: ")) continue;
-
-            const cleanedLine = line.replace(/^data:\s*/, "").trim();
-            if (!cleanedLine) continue;
-
-            const data = JSON.parse(cleanedLine);
-
-            if (data && typeof data === "object") {
-              if (data.response) {
-                aiResponse += data.response;
-                res.write(
-                  `data: ${JSON.stringify({ response: data.response })}\n\n`
-                );
-              } else if (data.error) {
-                console.error("[ChatController] GPU returned error in stream", {
-                  error: data.error,
-                });
-                throw new Error(data.error);
-              }
+            if (!res.writableEnded) {
+              res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+              res.end();
             }
           }
-        } catch (error) {
-          console.error("[ChatController] Stream processing error:", {
-            error: error.message,
-            stack: error.stack,
-          });
-          handleError(error);
         }
-      });
-
-      gpuResponse.data.on("end", async () => {
-        try {
-          if (aiResponse) {
-            console.log("[ChatController] Stream completed successfully", {
-              finalResponseLength: aiResponse.length,
-              agentId: req.agentId,
-            });
-
-            console.log("[ChatController] Recording usage");
-            await chatService.recordUsage({
-              agentId: req.agentId,
-              input: req.body.message,
-              output: aiResponse,
-            });
-          }
-
-          if (!res.writableEnded) {
-            res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
-            res.end();
-            console.log(
-              "[ChatController] Response completed and connection closed"
-            );
-          }
-        } catch (error) {
-          console.error("[ChatController] Error in stream end handler:", {
-            error: error.message,
-            stack: error.stack,
-          });
-          handleError(error);
-        }
-      });
-
-      gpuResponse.data.on("error", (error) => {
-        console.error("[ChatController] GPU stream error:", {
-          error: error.message,
-          stack: error.stack,
-        });
-        handleError(error);
-      });
+      );
     } catch (error) {
       console.error("[ChatController] Request processing error:", {
-        error: error.message,
-        stack: error.stack,
-      });
-      handleError(error);
-    }
-
-    function handleError(error) {
-      console.error("[ChatController] Error handler triggered:", {
         error: error.message,
         stack: error.stack,
       });
@@ -206,9 +126,6 @@ const ChatController = {
           })}\n\n`
         );
         res.end();
-        console.log(
-          "[ChatController] Error response sent and connection closed"
-        );
       }
     }
   },

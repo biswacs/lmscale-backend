@@ -6,6 +6,9 @@ const userRoutes = require("./src/routes/userRoutes");
 const chatRoutes = require("./src/routes/chatRoutes");
 const gpuRoutes = require("./src/routes/gpuRoutes");
 const agentRoutes = require("./src/routes/agentRoutes");
+const promptRoutes = require("./src/routes/promptRoutes");
+const functionRoutes = require("./src/routes/functionRoutes");
+const instructionRoutes = require("./src/routes/instructionRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -24,6 +27,9 @@ if (Env == "Local") {
 app.use("/v1/user", userRoutes);
 app.use("/v1/chat", chatRoutes);
 app.use("/v1/agent", agentRoutes);
+app.use("/v1/prompt", promptRoutes);
+app.use("/v1/function", functionRoutes);
+app.use("/v1/instruction", instructionRoutes);
 
 app.get("/v1/lmscale", (req, res) => {
   res.json({ message: "LmScale" });

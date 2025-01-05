@@ -1,8 +1,9 @@
 const { Agent, Function, Instruction, Usage, Gpu } = require("../models");
 const { calculateTokens } = require("../utils/tokenizer");
+const axios = require("axios");
 
 class ChatService {
-  async getAgentDetails(agentId) {
+  async getAgent(agentId) {
     console.log("[ChatService] Fetching agent details", { agentId });
 
     try {
@@ -169,6 +170,123 @@ class ChatService {
         success: false,
         message: "Failed to record usage",
       };
+    }
+  }
+
+  async processChat(prompt, functions, messageCallback) {
+    console.log("[ChatService] Starting GPU chat processing");
+
+    try {
+      const gpu = await this.getGpu();
+      if (!gpu.success) {
+        console.log("[ChatService] GPU fetch failed", {
+          error: gpu.message,
+        });
+        throw new Error(gpu.message);
+      }
+
+      console.log("[ChatService] GPU found, checking health", {
+        hostIp: gpu.data.hostIp,
+      });
+
+      try {
+        await axios.get(`http://${gpu.data.hostIp}:8000/health`, {
+          timeout: 5000,
+        });
+        console.log("[ChatService] GPU health check passed");
+      } catch (error) {
+        console.error("[ChatService] GPU health check failed", {
+          error: error.message,
+          hostIp: gpu.data.hostIp,
+        });
+        throw new Error(`GPU health check failed: ${error.message}`);
+      }
+
+      console.log("[ChatService] Sending request to GPU");
+      const gpuResponse = await axios({
+        method: "post",
+        url: `http://${gpu.data.hostIp}:8000/chat/stream`,
+        data: {
+          message: prompt,
+          functions: functions,
+        },
+        responseType: "stream",
+        timeout: 30000,
+      });
+
+      let aiResponse = "";
+
+      gpuResponse.data.on("data", (chunk) => {
+        try {
+          const text = chunk.toString();
+          const lines = text.split("\n");
+
+          for (const line of lines) {
+            if (!line.trim() || !line.startsWith("data: ")) continue;
+
+            const cleanedLine = line.replace(/^data:\s*/, "").trim();
+            if (!cleanedLine) continue;
+
+            const data = JSON.parse(cleanedLine);
+
+            if (data && typeof data === "object") {
+              if (data.response) {
+                aiResponse += data.response;
+                messageCallback({
+                  type: "response",
+                  content: data.response,
+                });
+              } else if (data.error) {
+                console.error("[ChatService] GPU returned error in stream", {
+                  error: data.error,
+                });
+                throw new Error(data.error);
+              }
+            }
+          }
+        } catch (error) {
+          console.error("[ChatService] Stream processing error:", {
+            error: error.message,
+            stack: error.stack,
+          });
+          messageCallback({
+            type: "error",
+            content: error.message || "Stream processing failed",
+          });
+        }
+      });
+
+      gpuResponse.data.on("end", () => {
+        console.log("[ChatService] Final AI response completed", {
+          responseLength: aiResponse.length,
+          firstChars: aiResponse,
+        });
+
+        messageCallback({
+          type: "done",
+          content: aiResponse,
+        });
+      });
+
+      gpuResponse.data.on("error", (error) => {
+        console.error("[ChatService] GPU stream error:", {
+          error: error.message,
+          stack: error.stack,
+        });
+        messageCallback({
+          type: "error",
+          content: error.message || "Stream error occurred",
+        });
+      });
+    } catch (error) {
+      console.error("[ChatService] GPU chat processing error:", {
+        error: error.message,
+        stack: error.stack,
+      });
+      messageCallback({
+        type: "error",
+        content: error.message || "Chat processing failed",
+      });
     }
   }
 }

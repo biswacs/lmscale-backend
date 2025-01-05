@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const { Gpu, sequelize } = require("../models");
 
 class GpuService {
-  generateGpuAccessToken(gpuId) {
+  generateGpuToken(gpuId) {
     console.log("[GpuService] Generating GPU access token", {
       gpuId,
     });
@@ -17,7 +17,7 @@ class GpuService {
     return jwt.sign({ gpuId: gpuId }, process.env.GPU_JWT_SECRET);
   }
 
-  async createGpu(body, userEmail) {
+  async create(body, userEmail) {
     console.log("[GpuService] Attempting to create GPU", {
       userEmail,
       gpuDetails: {
@@ -64,7 +64,7 @@ class GpuService {
         name: gpu.name,
       });
 
-      const gpuAccessToken = this.generateGpuAccessToken(gpu.id);
+      const gpuAccessToken = this.generateGpuToken(gpu.id);
       gpu.gpuAccessToken = gpuAccessToken;
 
       await gpu.save({ transaction });

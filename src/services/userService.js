@@ -2,7 +2,7 @@ const { User, Agent, sequelize } = require("../models");
 const jwt = require("jsonwebtoken");
 
 class UserService {
-  generateAccessToken(userId) {
+  generateToken(userId) {
     console.log("[UserService] Generating lm_auth_token", {
       userId,
     });
@@ -16,7 +16,7 @@ class UserService {
     return jwt.sign({ id: userId }, process.env.JWT_SECRET);
   }
 
-  async createUser({ name = "", email, password }) {
+  async create({ name = "", email, password }) {
     console.log("[UserService] Attempting to create user", { email });
 
     const transaction = await sequelize.transaction();
@@ -65,7 +65,7 @@ class UserService {
 
       await transaction.commit();
 
-      const lm_auth_token = this.generateAccessToken(user.id);
+      const lm_auth_token = this.generateToken(user.id);
       return {
         success: true,
         data: { lm_auth_token, user },
@@ -87,7 +87,7 @@ class UserService {
     }
   }
 
-  async authenticateUser(email, password) {
+  async authenticate(email, password) {
     console.log("[UserService] Attempting to authenticate user", {
       email,
     });
@@ -140,7 +140,7 @@ class UserService {
         email: user.email,
       };
 
-      const lm_auth_token = this.generateAccessToken(userData.id);
+      const lm_auth_token = this.generateToken(userData.id);
 
       if (!lm_auth_token) {
         throw new Error("Failed to generate access token");
@@ -165,7 +165,7 @@ class UserService {
     }
   }
 
-  async getUserProfile(userId) {
+  async get(userId) {
     console.log("[UserService] Fetching user profile", {
       userId,
     });

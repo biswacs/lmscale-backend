@@ -10,7 +10,7 @@ const UserController = {
 
     try {
       const validatedData = userSchemas.register.parse(req.body);
-      const result = await userService.createUser(validatedData);
+      const result = await userService.create(validatedData);
 
       if (!result.success) {
         console.log("[UserController] Registration failed - validation error", {
@@ -57,7 +57,7 @@ const UserController = {
 
     try {
       const validatedData = userSchemas.login.parse(req.body);
-      const result = await userService.authenticateUser(
+      const result = await userService.authenticate(
         validatedData.email,
         validatedData.password
       );
@@ -104,7 +104,7 @@ const UserController = {
     });
 
     try {
-      const result = await userService.getUserProfile(req.user.id);
+      const result = await userService.get(req.user.id);
 
       if (!result.success) {
         console.log("[UserController] Profile retrieval failed", {
