@@ -3,9 +3,12 @@ const instructionService = new InstructionService();
 
 const InstructionController = {
   async createInstruction(req, res) {
+    const userId = req.user.id;
+    const { agentId, name, content } = req.body;
+
     console.log("[InstructionController] Received create instruction request", {
-      userId: req.user.id,
-      agentId: req.body.agentId,
+      userId,
+      agentId,
     });
 
     try {
@@ -16,7 +19,7 @@ const InstructionController = {
         console.log(
           "[InstructionController] Create instruction failed - missing required fields",
           {
-            userId: req.user.id,
+            userId,
             missingFields,
           }
         );
@@ -26,11 +29,18 @@ const InstructionController = {
         });
       }
 
-      const response = await instructionService.create(req.body, req.user.id);
+      const response = await instructionService.create(
+        {
+          agentId,
+          name,
+          content,
+        },
+        userId
+      );
 
       if (!response.success) {
         console.log("[InstructionController] Create instruction failed", {
-          userId: req.user.id,
+          userId,
           reason: response.message,
         });
         return res.status(400).json({
@@ -48,7 +58,7 @@ const InstructionController = {
       });
     } catch (error) {
       console.error("[InstructionController] Create instruction error:", {
-        userId: req.user.id,
+        userId,
         error: error.message,
         stack: error.stack,
       });
@@ -60,19 +70,29 @@ const InstructionController = {
     }
   },
 
-  async getInstruction(req, res) {
-    console.log("[InstructionController] Received get instruction request", {
-      userId: req.user.id,
-      instructionId: req.params.id,
+  async listInstructions(req, res) {
+    const userId = req.user.id;
+    const agentId = req.query.agentId;
+
+    console.log("[InstructionController] Received list instructions request", {
+      userId,
+      agentId,
     });
 
     try {
-      const response = await instructionService.get(req.params.id, req.user.id);
+      if (!agentId) {
+        return res.status(400).json({
+          success: false,
+          message: "agentId is required",
+        });
+      }
+
+      const response = await instructionService.list(agentId, userId);
 
       if (!response.success) {
-        console.log("[InstructionController] Get instruction failed", {
-          userId: req.user.id,
-          instructionId: req.params.id,
+        console.log("[InstructionController] List instructions failed", {
+          userId,
+          agentId,
           reason: response.message,
         });
         return res.status(400).json({
@@ -84,13 +104,13 @@ const InstructionController = {
       return res.status(200).json({
         success: true,
         data: {
-          instruction: response.data.instruction,
+          instructions: response.data.instructions,
         },
       });
     } catch (error) {
-      console.error("[InstructionController] Get instruction error:", {
-        userId: req.user.id,
-        instructionId: req.params.id,
+      console.error("[InstructionController] List instructions error:", {
+        userId,
+        agentId,
         error: error.message,
         stack: error.stack,
       });
@@ -103,22 +123,25 @@ const InstructionController = {
   },
 
   async updateInstruction(req, res) {
+    const userId = req.user.id;
+    const { instructionId, name, content, metadata, isActive } = req.body;
+
     console.log("[InstructionController] Received update instruction request", {
-      userId: req.user.id,
-      instructionId: req.params.id,
+      userId,
+      instructionId,
     });
 
     try {
       const response = await instructionService.update(
-        req.params.id,
-        req.body,
-        req.user.id
+        instructionId,
+        { name, content, metadata, isActive },
+        userId
       );
 
       if (!response.success) {
         console.log("[InstructionController] Update instruction failed", {
-          userId: req.user.id,
-          instructionId: req.params.id,
+          userId,
+          instructionId,
           reason: response.message,
         });
         return res.status(400).json({
@@ -136,8 +159,8 @@ const InstructionController = {
       });
     } catch (error) {
       console.error("[InstructionController] Update instruction error:", {
-        userId: req.user.id,
-        instructionId: req.params.id,
+        userId,
+        instructionId,
         error: error.message,
         stack: error.stack,
       });
@@ -150,21 +173,21 @@ const InstructionController = {
   },
 
   async deleteInstruction(req, res) {
+    const userId = req.user.id;
+    const instructionId = req.body.instructionId;
+
     console.log("[InstructionController] Received delete instruction request", {
-      userId: req.user.id,
-      instructionId: req.params.id,
+      userId,
+      instructionId,
     });
 
     try {
-      const response = await instructionService.delete(
-        req.params.id,
-        req.user.id
-      );
+      const response = await instructionService.delete(instructionId, userId);
 
       if (!response.success) {
         console.log("[InstructionController] Delete instruction failed", {
-          userId: req.user.id,
-          instructionId: req.params.id,
+          userId,
+          instructionId,
           reason: response.message,
         });
         return res.status(400).json({
@@ -179,60 +202,8 @@ const InstructionController = {
       });
     } catch (error) {
       console.error("[InstructionController] Delete instruction error:", {
-        userId: req.user.id,
-        instructionId: req.params.id,
-        error: error.message,
-        stack: error.stack,
-      });
-
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error",
-      });
-    }
-  },
-
-  async listInstructions(req, res) {
-    console.log("[InstructionController] Received list instructions request", {
-      userId: req.user.id,
-      agentId: req.query.agentId,
-    });
-
-    try {
-      if (!req.query.agentId) {
-        return res.status(400).json({
-          success: false,
-          message: "agentId is required",
-        });
-      }
-
-      const response = await instructionService.list(
-        req.query.agentId,
-        req.user.id
-      );
-
-      if (!response.success) {
-        console.log("[InstructionController] List instructions failed", {
-          userId: req.user.id,
-          agentId: req.query.agentId,
-          reason: response.message,
-        });
-        return res.status(400).json({
-          success: false,
-          message: response.message,
-        });
-      }
-
-      return res.status(200).json({
-        success: true,
-        data: {
-          instructions: response.data.instructions,
-        },
-      });
-    } catch (error) {
-      console.error("[InstructionController] List instructions error:", {
-        userId: req.user.id,
-        agentId: req.query.agentId,
+        userId,
+        instructionId,
         error: error.message,
         stack: error.stack,
       });

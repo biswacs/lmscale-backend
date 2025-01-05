@@ -1,26 +1,26 @@
-const { Agent, sequelize, Instruction, Function } = require("../models");
+const { Agent, sequelize } = require("../models");
 
 class AgentService {
-  async createAgent(body, userId) {
+  async create(agentData, userId) {
+    const { name } = agentData;
+
     console.log("[AgentService] Attempting to create agent", {
       userId,
-      agentDetails: {
-        name: body.name,
-      },
+      agentDetails: { name },
     });
 
     try {
       const existingAgent = await Agent.findOne({
         where: {
           userId,
-          name: body.name.toLowerCase(),
+          name: name,
         },
       });
 
       if (existingAgent) {
         console.log("[AgentService] Agent with same name already exists", {
           userId,
-          name: body.name,
+          name,
         });
 
         return {
@@ -30,8 +30,8 @@ class AgentService {
       }
 
       const agent = await Agent.create({
-        name: body.name,
-        userId: userId,
+        name,
+        userId,
       });
 
       console.log("[AgentService] Agent created successfully", {
@@ -64,14 +64,14 @@ class AgentService {
     }
   }
 
-  async getAllAgents(userId) {
+  async list(userId) {
     console.log("[AgentService] Fetching user agents", {
       userId,
     });
 
     try {
       const agents = await Agent.findAll({
-        where: { userId: userId },
+        where: { userId },
         attributes: [
           "id",
           "name",

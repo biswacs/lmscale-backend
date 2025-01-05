@@ -22,9 +22,6 @@ Agent.init(
     name: {
       type: DataTypes.STRING,
       allowNull: false,
-      set(value) {
-        this.setDataValue("name", value.toLowerCase());
-      },
     },
     prompt: {
       type: DataTypes.TEXT,
@@ -74,11 +71,6 @@ Agent.init(
     indexes: [
       {
         fields: ["userId"],
-      },
-      {
-        fields: ["name", "userId"],
-        unique: true,
-        name: "unique_name_per_user",
       },
     ],
   }

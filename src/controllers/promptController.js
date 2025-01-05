@@ -3,9 +3,12 @@ const promptService = new PromptService();
 
 const PromptController = {
   async getPrompt(req, res) {
+    const userId = req.user.id;
+    const agentId = req.query.agentId;
+
     console.log("[PromptController] Received get prompt request", {
-      userId: req.user.id,
-      agentId: req.query.agentId,
+      userId,
+      agentId,
     });
 
     try {
@@ -16,7 +19,7 @@ const PromptController = {
         console.log(
           "[PromptController] Get prompt failed - missing required fields",
           {
-            userId: req.user.id,
+            userId,
             missingFields,
           }
         );
@@ -26,12 +29,12 @@ const PromptController = {
         });
       }
 
-      const response = await promptService.get(req.query.agentId, req.user.id);
+      const response = await promptService.get(agentId, userId);
 
       if (!response.success) {
         console.log("[PromptController] Get prompt failed", {
-          userId: req.user.id,
-          agentId: req.query.agentId,
+          userId: userId,
+          agentId: agentId,
           reason: response.message,
         });
         return res.status(400).json({
@@ -41,8 +44,8 @@ const PromptController = {
       }
 
       console.log("[PromptController] Prompt retrieved successfully", {
-        userId: req.user.id,
-        agentId: req.query.agentId,
+        userId: userId,
+        agentId: agentId,
       });
 
       return res.status(200).json({
@@ -53,8 +56,8 @@ const PromptController = {
       });
     } catch (error) {
       console.error("[PromptController] Get prompt error:", {
-        userId: req.user.id,
-        agentId: req.query.agentId,
+        userId: userId,
+        agentId: agentId,
         error: error.message,
         stack: error.stack,
       });
@@ -67,9 +70,13 @@ const PromptController = {
   },
 
   async updatePrompt(req, res) {
+    const userId = req.user.id;
+    const agentId = req.body.agentId;
+    const prompt = req.body.prompt;
+
     console.log("[PromptController] Received update prompt request", {
-      userId: req.user.id,
-      agentId: req.body.agentId,
+      userId,
+      agentId,
     });
 
     try {
@@ -80,7 +87,7 @@ const PromptController = {
         console.log(
           "[PromptController] Update prompt failed - missing required fields",
           {
-            userId: req.user.id,
+            userId,
             missingFields,
           }
         );
@@ -90,12 +97,12 @@ const PromptController = {
         });
       }
 
-      const response = await promptService.update(req.body, req.user.id);
+      const response = await promptService.update(prompt, agentId, userId);
 
       if (!response.success) {
         console.log("[PromptController] Update prompt failed", {
-          userId: req.user.id,
-          agentId: req.body.agentId,
+          userId,
+          agentId,
           reason: response.message,
         });
         return res.status(400).json({
@@ -105,7 +112,7 @@ const PromptController = {
       }
 
       console.log("[PromptController] Prompt updated successfully", {
-        userId: req.user.id,
+        userId: userId,
         agent: response.data.agent,
       });
 
@@ -118,7 +125,7 @@ const PromptController = {
       });
     } catch (error) {
       console.error("[PromptController] Update prompt error:", {
-        userId: req.user.id,
+        userId: userId,
         agentId: req.body.agentId,
         error: error.message,
         stack: error.stack,

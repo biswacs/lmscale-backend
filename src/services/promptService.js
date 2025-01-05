@@ -4,7 +4,7 @@ class PromptService {
   async get(agentId, userId) {
     console.log("[PromptService] Attempting to get prompt", {
       userId,
-      agentId: agentId,
+      agentId,
     });
 
     try {
@@ -52,10 +52,10 @@ class PromptService {
     }
   }
 
-  async update(body, userId) {
+  async update(prompt, agentId, userId) {
     console.log("[PromptService] Attempting to update prompt", {
+      agentId,
       userId,
-      agentId: body.agentId,
     });
 
     const transaction = await sequelize.transaction();
@@ -63,7 +63,7 @@ class PromptService {
     try {
       const agent = await Agent.findOne({
         where: {
-          id: body.agentId,
+          id: agentId,
           userId: userId,
         },
         transaction,
@@ -71,7 +71,7 @@ class PromptService {
 
       if (!agent) {
         console.log("[PromptService] No agent found", {
-          agentId: body.agentId,
+          agentId: agentId,
           userId,
         });
         await transaction.rollback();
@@ -81,7 +81,7 @@ class PromptService {
         };
       }
 
-      agent.prompt = body.prompt;
+      agent.prompt = prompt;
       await agent.save({ transaction });
       await transaction.commit();
 
@@ -104,7 +104,7 @@ class PromptService {
     } catch (error) {
       console.error("[PromptService] Error updating prompt:", {
         userId,
-        agentId: body.agentId,
+        agentId,
         error: error.message,
         stack: error.stack,
       });

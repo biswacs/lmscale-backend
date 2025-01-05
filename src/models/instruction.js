@@ -45,7 +45,6 @@ Instruction.init(
     indexes: [
       {
         fields: ["agentId"],
-        unique: true,
       },
     ],
   }

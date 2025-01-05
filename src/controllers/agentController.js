@@ -3,11 +3,12 @@ const agentService = new AgentService();
 
 const AgentController = {
   async create(req, res) {
+    const userId = req.user.id;
+    const { name } = req.body;
+
     console.log("[AgentController] Received agent creation request", {
-      userId: req.user.id,
-      agentDetails: {
-        name: req.body.name,
-      },
+      userId,
+      agentDetails: { name },
     });
 
     try {
@@ -18,7 +19,7 @@ const AgentController = {
         console.log(
           "[AgentController] Creation failed - missing required fields",
           {
-            userId: req.user.id,
+            userId,
             missingFields,
           }
         );
@@ -28,11 +29,11 @@ const AgentController = {
         });
       }
 
-      const response = await agentService.createAgent(req.body, req.user.id);
+      const response = await agentService.create({ name }, userId);
 
       if (!response.success) {
         console.log("[AgentController] Agent creation failed", {
-          userId: req.user.id,
+          userId,
           reason: response.message,
         });
         return res.status(400).json({
@@ -42,7 +43,7 @@ const AgentController = {
       }
 
       console.log("[AgentController] Agent created successfully", {
-        userId: req.user.id,
+        userId,
         agent: response.data.agent,
       });
 
@@ -55,7 +56,7 @@ const AgentController = {
       });
     } catch (error) {
       console.error("[AgentController] Agent creation error:", {
-        userId: req.user.id,
+        userId,
         error: error.message,
         stack: error.stack,
       });
@@ -68,39 +69,41 @@ const AgentController = {
   },
 
   async getAgents(req, res) {
+    const userId = req.user.id;
+
     console.log("[AgentController] Received user agents request", {
-      userId: req.user.id,
+      userId,
     });
 
     try {
-      const result = await agentService.getAllAgents(req.user.id);
+      const response = await agentService.list(userId);
 
-      if (!result.success) {
+      if (!response.success) {
         console.log("[AgentController] Agents retrieval failed", {
-          userId: req.user.id,
-          reason: result.message,
+          userId,
+          reason: response.message,
         });
         return res.status(404).json({
           success: false,
-          message: result.message,
+          message: response.message,
         });
       }
 
       console.log("[AgentController] Agents retrieved successfully", {
-        userId: req.user.id,
-        agentsCount: result.data.agents.length,
+        userId,
+        agentsCount: response.data.agents.length,
       });
 
       return res.json({
         success: true,
-        message: result.message,
+        message: response.message,
         data: {
-          agents: result.data.agents,
+          agents: response.data.agents,
         },
       });
     } catch (error) {
       console.error("[AgentController] Agents retrieval error:", {
-        userId: req.user.id,
+        userId,
         error: error.message,
         stack: error.stack,
       });
