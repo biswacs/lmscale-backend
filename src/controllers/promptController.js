@@ -5,12 +5,12 @@ const PromptController = {
   async getPrompt(req, res) {
     console.log("[PromptController] Received get prompt request", {
       userId: req.user.id,
-      agentId: req.body.agentId,
+      agentId: req.query.agentId,
     });
 
     try {
       const requiredFields = ["agentId"];
-      const missingFields = requiredFields.filter((field) => !req.body[field]);
+      const missingFields = requiredFields.filter((field) => !req.query[field]);
 
       if (missingFields.length > 0) {
         console.log(
@@ -26,12 +26,12 @@ const PromptController = {
         });
       }
 
-      const response = await promptService.get(req.body, req.user.id);
+      const response = await promptService.get(req.query.agentId, req.user.id);
 
       if (!response.success) {
         console.log("[PromptController] Get prompt failed", {
           userId: req.user.id,
-          agentId: req.body.agentId,
+          agentId: req.query.agentId,
           reason: response.message,
         });
         return res.status(400).json({
@@ -42,7 +42,7 @@ const PromptController = {
 
       console.log("[PromptController] Prompt retrieved successfully", {
         userId: req.user.id,
-        agentId: req.body.agentId,
+        agentId: req.query.agentId,
       });
 
       return res.status(200).json({
@@ -54,7 +54,7 @@ const PromptController = {
     } catch (error) {
       console.error("[PromptController] Get prompt error:", {
         userId: req.user.id,
-        agentId: req.body.agentId,
+        agentId: req.query.agentId,
         error: error.message,
         stack: error.stack,
       });

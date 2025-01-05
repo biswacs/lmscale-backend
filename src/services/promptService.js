@@ -1,16 +1,16 @@
 const { Agent, sequelize } = require("../models");
 
 class PromptService {
-  async get(body, userId) {
+  async get(agentId, userId) {
     console.log("[PromptService] Attempting to get prompt", {
       userId,
-      agentId: body.agentId,
+      agentId: agentId,
     });
 
     try {
       const agent = await Agent.findOne({
         where: {
-          id: body.agentId,
+          id: agentId,
           userId: userId,
         },
         attributes: ["id", "prompt"],
@@ -18,7 +18,7 @@ class PromptService {
 
       if (!agent) {
         console.log("[PromptService] No agent found", {
-          agentId: body.agentId,
+          agentId: agentId,
           userId,
         });
         return {
@@ -39,7 +39,7 @@ class PromptService {
     } catch (error) {
       console.error("[PromptService] Error retrieving prompt:", {
         userId,
-        agentId: body.agentId,
+        agentId: agentId,
         error: error.message,
         stack: error.stack,
       });
