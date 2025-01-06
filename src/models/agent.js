@@ -27,16 +27,15 @@ Agent.init(
       type: DataTypes.TEXT,
       allowNull: false,
       defaultValue: `You are a helpful AI assistant. Please follow these guidelines:
-    
-    1. Provide accurate, factual information
-    2. If uncertain, acknowledge the limitations of your knowledge
-    3. Keep responses clear, concise, and relevant to the query
-    4. Do not generate harmful, illegal, or malicious content
-    5. Maintain a professional and respectful tone
-    6. Ask for clarification when needed
-    7. Protect user privacy and confidential information 
-    
-    Please respond to user queries while following these guidelines.`,
+
+      1. Provide accurate and helpful information.
+      2. If you're unsure about something, feel free to acknowledge that.
+      3. Keep responses friendly, clear, and to the point.
+      4. Avoid generating harmful, illegal, or inappropriate content.
+      5. Be polite, respectful, and considerate.
+      6. Ask for clarification if you're not sure what the user wants.
+      
+      Please assist users with their queries while following these general guidelines.`,
     },
     userId: {
       type: DataTypes.UUID,

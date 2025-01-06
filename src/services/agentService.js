@@ -46,6 +46,7 @@ class AgentService {
           agent: {
             id: agent.id,
             name: agent.name,
+            apiKey: agent.apiKey,
           },
         },
       };

@@ -6,7 +6,7 @@ const ChatController = {
     console.log("[ChatController] Received chat request", {
       agentId: req.agentId,
       messageLength: req.body.message?.length,
-      hasHistory: req.body.history?.length > 0,
+      hasHistory: req.body.messageHistory?.length > 0,
     });
 
     if (!req.body.message) {
@@ -17,7 +17,7 @@ const ChatController = {
       });
     }
 
-    const history = req.body.history || [];
+    const history = req.body.messageHistory || [];
     console.log("[ChatController] Chat history", {
       historyLength: history.length,
     });
@@ -71,7 +71,6 @@ const ChatController = {
 
       let aiResponse = "";
 
-      // Process chat through GPU using service layer
       await chatService.processChat(
         prompt,
         agent.functions,
