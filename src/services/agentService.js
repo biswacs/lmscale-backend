@@ -1,4 +1,4 @@
-const { Agent, sequelize } = require("../models");
+const { Agent } = require("../models");
 
 class AgentService {
   async create(agentData, userId) {
@@ -73,14 +73,7 @@ class AgentService {
     try {
       const agents = await Agent.findAll({
         where: { userId },
-        attributes: [
-          "id",
-          "name",
-          "apiKey",
-          "isActive",
-          "createdAt",
-          "updatedAt",
-        ],
+        attributes: ["id", "name", "isActive", "createdAt"],
       });
 
       if (!agents || agents.length === 0) {

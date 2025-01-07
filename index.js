@@ -9,6 +9,7 @@ const agentRoutes = require("./src/routes/agentRoutes");
 const promptRoutes = require("./src/routes/promptRoutes");
 const functionRoutes = require("./src/routes/functionRoutes");
 const instructionRoutes = require("./src/routes/instructionRoutes");
+const apiKeyRoutes = require("./src/routes/apiKeyRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -30,6 +31,7 @@ app.use("/v1/agent", agentRoutes);
 app.use("/v1/prompt", promptRoutes);
 app.use("/v1/function", functionRoutes);
 app.use("/v1/instruction", instructionRoutes);
+app.use("/v1/api", apiKeyRoutes);
 
 app.get("/v1/lmscale", (req, res) => {
   res.json({ message: "LmScale" });
