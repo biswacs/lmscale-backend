@@ -3,13 +3,16 @@ const chatService = new ChatService();
 
 const ChatController = {
   async chat(req, res) {
+    const { message, conversation = [] } = req.body;
+    const { agentId } = req;
+
     console.log("[ChatController] Received chat request", {
-      agentId: req.agentId,
-      messageLength: req.body.message?.length,
-      hasHistory: req.body.messageHistory?.length > 0,
+      agentId,
+      messageLength: message?.length,
+      hasConversation: conversation.length > 0,
     });
 
-    if (!req.body.message) {
+    if (!message) {
       console.log("[ChatController] Message missing in request");
       return res.status(400).json({
         success: false,
@@ -17,9 +20,8 @@ const ChatController = {
       });
     }
 
-    const history = req.body.messageHistory || [];
-    console.log("[ChatController] Chat history", {
-      historyLength: history.length,
+    console.log("[ChatController] Chat conversation", {
+      conversationLength: conversation.length,
     });
 
     res.writeHead(200, {
@@ -30,14 +32,12 @@ const ChatController = {
     });
 
     try {
-      console.log("[ChatController] Fetching agent details", {
-        agentId: req.agentId,
-      });
-      const agentResult = await chatService.getAgent(req.agentId);
+      console.log("[ChatController] Fetching agent details", { agentId });
+      const agentResult = await chatService.getAgent(agentId);
 
       if (!agentResult.success) {
         console.log("[ChatController] Failed to fetch agent details", {
-          agentId: req.agentId,
+          agentId,
           error: agentResult.message,
         });
         throw new Error(agentResult.message);
@@ -52,7 +52,7 @@ const ChatController = {
         functionsCount: agent.functions?.length,
       });
 
-      const formattedHistory = history
+      const formattedConversation = conversation
         .map(
           (msg) => `${msg.role === "user" ? "User" : "Agent"}: ${msg.content}`
         )
@@ -62,7 +62,7 @@ const ChatController = {
         agent.instructions.length > 0
           ? agent.instructions.map((inst) => inst.content).join("\n\n")
           : ""
-      }\n\n${formattedHistory}\nUser: ${req.body.message}\nAgent:`;
+      }\n\n${formattedConversation}\nUser: ${message}\nAgent:`;
 
       console.log("[ChatController] Constructed prompt", {
         promptLength: prompt.length,
@@ -94,12 +94,12 @@ const ChatController = {
             if (message.content) {
               console.log("[ChatController] Stream completed successfully", {
                 finalResponseLength: message.content.length,
-                agentId: req.agentId,
+                agentId,
               });
 
               await chatService.recordUsage({
-                agentId: req.agentId,
-                input: req.body.message,
+                agentId,
+                input: message,
                 output: message.content,
               });
             }
