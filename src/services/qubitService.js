@@ -46,7 +46,6 @@ class QubitService {
           qubit: {
             id: qubit.id,
             name: qubit.name,
-            apiKey: qubit.apiKey,
           },
         },
       };
