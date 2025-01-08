@@ -1,14 +1,14 @@
-const AgentService = require("../services/agentService");
-const agentService = new AgentService();
+const QubitService = require("../services/qubitService");
+const qubitService = new QubitService();
 
-const AgentController = {
+const QubitController = {
   async create(req, res) {
     const userId = req.user.id;
     const { name } = req.body;
 
-    console.log("[AgentController] Received agent creation request", {
+    console.log("[QubitController] Received qubit creation request", {
       userId,
-      agentDetails: { name },
+      qubitDetails: { name },
     });
 
     try {
@@ -17,7 +17,7 @@ const AgentController = {
 
       if (missingFields.length > 0) {
         console.log(
-          "[AgentController] Creation failed - missing required fields",
+          "[QubitController] Creation failed - missing required fields",
           {
             userId,
             missingFields,
@@ -29,10 +29,10 @@ const AgentController = {
         });
       }
 
-      const response = await agentService.create({ name }, userId);
+      const response = await qubitService.create({ name }, userId);
 
       if (!response.success) {
-        console.log("[AgentController] Agent creation failed", {
+        console.log("[QubitController] Qubit creation failed", {
           userId,
           reason: response.message,
         });
@@ -42,20 +42,20 @@ const AgentController = {
         });
       }
 
-      console.log("[AgentController] Agent created successfully", {
+      console.log("[QubitController] Qubit created successfully", {
         userId,
-        agent: response.data.agent,
+        qubit: response.data.qubit,
       });
 
       return res.status(201).json({
         success: true,
-        message: "Agent created successfully",
+        message: "Qubit created successfully",
         data: {
-          agent: response.data.agent,
+          qubit: response.data.qubit,
         },
       });
     } catch (error) {
-      console.error("[AgentController] Agent creation error:", {
+      console.error("[QubitController] Qubit creation error:", {
         userId,
         error: error.message,
         stack: error.stack,
@@ -68,18 +68,18 @@ const AgentController = {
     }
   },
 
-  async getAgents(req, res) {
+  async getQubits(req, res) {
     const userId = req.user.id;
 
-    console.log("[AgentController] Received user agents request", {
+    console.log("[QubitController] Received user qubits request", {
       userId,
     });
 
     try {
-      const response = await agentService.list(userId);
+      const response = await qubitService.list(userId);
 
       if (!response.success) {
-        console.log("[AgentController] Agents retrieval failed", {
+        console.log("[QubitController] Qubits retrieval failed", {
           userId,
           reason: response.message,
         });
@@ -89,20 +89,20 @@ const AgentController = {
         });
       }
 
-      console.log("[AgentController] Agents retrieved successfully", {
+      console.log("[QubitController] Qubits retrieved successfully", {
         userId,
-        agentsCount: response.data.agents.length,
+        qubitsCount: response.data.qubits.length,
       });
 
       return res.json({
         success: true,
         message: response.message,
         data: {
-          agents: response.data.agents,
+          qubits: response.data.qubits,
         },
       });
     } catch (error) {
-      console.error("[AgentController] Agents retrieval error:", {
+      console.error("[QubitController] Qubits retrieval error:", {
         userId,
         error: error.message,
         stack: error.stack,
@@ -116,4 +116,4 @@ const AgentController = {
   },
 };
 
-module.exports = AgentController;
+module.exports = QubitController;

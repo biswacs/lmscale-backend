@@ -2,12 +2,12 @@ const { Model, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
 class Usage extends Model {
-  static async getOrCreateDaily(agentId) {
+  static async getOrCreateDaily(qubitId) {
     const today = new Date().toISOString().split("T")[0];
 
     const [usage] = await this.findOrCreate({
       where: {
-        agentId,
+        qubitId,
         date: today,
       },
       defaults: {
@@ -36,11 +36,11 @@ Usage.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    agentId: {
+    qubitId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: "Agents",
+        model: "Qubits",
         key: "id",
       },
     },
@@ -76,7 +76,7 @@ Usage.init(
     timestamps: true,
     indexes: [
       {
-        fields: ["agentId", "date"],
+        fields: ["qubitId", "date"],
         unique: true,
       },
     ],

@@ -4,15 +4,15 @@ const promptService = new PromptService();
 const PromptController = {
   async getPrompt(req, res) {
     const userId = req.user.id;
-    const agentId = req.query.agentId;
+    const qubitId = req.query.qubitId;
 
     console.log("[PromptController] Received get prompt request", {
       userId,
-      agentId,
+      qubitId,
     });
 
     try {
-      const requiredFields = ["agentId"];
+      const requiredFields = ["qubitId"];
       const missingFields = requiredFields.filter((field) => !req.query[field]);
 
       if (missingFields.length > 0) {
@@ -29,12 +29,12 @@ const PromptController = {
         });
       }
 
-      const response = await promptService.get(agentId, userId);
+      const response = await promptService.get(qubitId, userId);
 
       if (!response.success) {
         console.log("[PromptController] Get prompt failed", {
           userId: userId,
-          agentId: agentId,
+          qubitId: qubitId,
           reason: response.message,
         });
         return res.status(400).json({
@@ -45,7 +45,7 @@ const PromptController = {
 
       console.log("[PromptController] Prompt retrieved successfully", {
         userId: userId,
-        agentId: agentId,
+        qubitId: qubitId,
       });
 
       return res.status(200).json({
@@ -57,7 +57,7 @@ const PromptController = {
     } catch (error) {
       console.error("[PromptController] Get prompt error:", {
         userId: userId,
-        agentId: agentId,
+        qubitId: qubitId,
         error: error.message,
         stack: error.stack,
       });
@@ -71,16 +71,16 @@ const PromptController = {
 
   async updatePrompt(req, res) {
     const userId = req.user.id;
-    const agentId = req.body.agentId;
+    const qubitId = req.body.qubitId;
     const prompt = req.body.prompt;
 
     console.log("[PromptController] Received update prompt request", {
       userId,
-      agentId,
+      qubitId,
     });
 
     try {
-      const requiredFields = ["agentId", "prompt"];
+      const requiredFields = ["qubitId", "prompt"];
       const missingFields = requiredFields.filter((field) => !req.body[field]);
 
       if (missingFields.length > 0) {
@@ -97,12 +97,12 @@ const PromptController = {
         });
       }
 
-      const response = await promptService.update(prompt, agentId, userId);
+      const response = await promptService.update(prompt, qubitId, userId);
 
       if (!response.success) {
         console.log("[PromptController] Update prompt failed", {
           userId,
-          agentId,
+          qubitId,
           reason: response.message,
         });
         return res.status(400).json({
@@ -113,20 +113,20 @@ const PromptController = {
 
       console.log("[PromptController] Prompt updated successfully", {
         userId: userId,
-        agent: response.data.agent,
+        qubit: response.data.qubit,
       });
 
       return res.status(200).json({
         success: true,
         message: "Prompt updated successfully",
         data: {
-          agent: response.data.agent,
+          qubit: response.data.qubit,
         },
       });
     } catch (error) {
       console.error("[PromptController] Update prompt error:", {
         userId: userId,
-        agentId: req.body.agentId,
+        qubitId: req.body.qubitId,
         error: error.message,
         stack: error.stack,
       });

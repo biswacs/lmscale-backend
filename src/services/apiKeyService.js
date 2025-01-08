@@ -1,52 +1,52 @@
-const { Agent } = require("../models");
+const { Qubit } = require("../models");
 
 class ApiKeyService {
-  async get(userId, agentId) {
+  async get(userId, qubitId) {
     console.log("[ApiKeyService] Attempting to fetch API key", {
       userId,
-      agentId,
+      qubitId,
     });
 
     try {
-      const agent = await Agent.findOne({
+      const qubit = await Qubit.findOne({
         where: {
-          id: agentId,
+          id: qubitId,
           userId: userId,
         },
         attributes: ["id", "name", "apiKey"],
       });
 
-      if (!agent) {
-        console.log("[ApiKeyService] No agent found", {
+      if (!qubit) {
+        console.log("[ApiKeyService] No qubit found", {
           userId,
-          agentId,
+          qubitId,
         });
         return {
           success: false,
-          message: "Agent not found",
+          message: "Qubit not found",
         };
       }
 
       console.log("[ApiKeyService] API key retrieved successfully", {
         userId,
-        agentId,
+        qubitId,
       });
 
       return {
         success: true,
         message: "API key retrieved successfully",
         data: {
-          agent: {
-            id: agent.id,
-            name: agent.name,
-            apiKey: agent.apiKey,
+          qubit: {
+            id: qubit.id,
+            name: qubit.name,
+            apiKey: qubit.apiKey,
           },
         },
       };
     } catch (error) {
       console.error("[ApiKeyService] Error fetching API key:", {
         userId,
-        agentId,
+        qubitId,
         error: error.message,
         stack: error.stack,
       });

@@ -1,55 +1,55 @@
 const sequelize = require("../config/database");
 const User = require("./user");
-const Agent = require("./agent");
+const Qubit = require("./qubit");
 const Function = require("./function");
 const Instruction = require("./instruction");
 const Gpu = require("./gpu");
 const Usage = require("./usage");
 
-User.hasMany(Agent, {
+User.hasMany(Qubit, {
   foreignKey: "userId",
-  as: "agents",
+  as: "qubits",
 });
 
-Agent.belongsTo(User, {
+Qubit.belongsTo(User, {
   foreignKey: "userId",
   as: "user",
 });
 
-Agent.hasMany(Instruction, {
-  foreignKey: "agentId",
+Qubit.hasMany(Instruction, {
+  foreignKey: "qubitId",
   as: "instructions",
 });
 
-Instruction.belongsTo(Agent, {
-  foreignKey: "agentId",
-  as: "agent",
+Instruction.belongsTo(Qubit, {
+  foreignKey: "qubitId",
+  as: "qubit",
 });
 
-Agent.hasMany(Function, {
-  foreignKey: "agentId",
+Qubit.hasMany(Function, {
+  foreignKey: "qubitId",
   as: "functions",
 });
 
-Function.belongsTo(Agent, {
-  foreignKey: "agentId",
-  as: "agent",
+Function.belongsTo(Qubit, {
+  foreignKey: "qubitId",
+  as: "qubit",
 });
 
-Agent.hasMany(Usage, {
-  foreignKey: "agentId",
+Qubit.hasMany(Usage, {
+  foreignKey: "qubitId",
   as: "usages",
 });
 
-Usage.belongsTo(Agent, {
-  foreignKey: "agentId",
-  as: "agent",
+Usage.belongsTo(Qubit, {
+  foreignKey: "qubitId",
+  as: "qubit",
 });
 
 module.exports = {
   sequelize,
   User,
-  Agent,
+  Qubit,
   Function,
   Instruction,
   Gpu,

@@ -4,30 +4,30 @@ const apiKeyService = new ApiKeyService();
 const ApiKeyController = {
   async getApiKey(req, res) {
     const userId = req.user.id;
-    const agentId = req.query.agentId;
+    const qubitId = req.query.qubitId;
 
     console.log("[ApiKeyController] Received API key fetch request", {
       userId,
-      agentId,
+      qubitId,
     });
 
     try {
-      if (!agentId) {
-        console.log("[ApiKeyController] Missing agent ID", {
+      if (!qubitId) {
+        console.log("[ApiKeyController] Missing qubit ID", {
           userId,
         });
         return res.status(400).json({
           success: false,
-          message: "Missing required parameter: agentId",
+          message: "Missing required parameter: qubitId",
         });
       }
 
-      const response = await apiKeyService.get(userId, agentId);
+      const response = await apiKeyService.get(userId, qubitId);
 
       if (!response.success) {
         console.log("[ApiKeyController] API key fetch failed", {
           userId,
-          agentId,
+          qubitId,
           reason: response.message,
         });
         return res.status(404).json({
@@ -38,7 +38,7 @@ const ApiKeyController = {
 
       console.log("[ApiKeyController] API key fetched successfully", {
         userId,
-        agentId,
+        qubitId,
       });
 
       return res.status(200).json({
@@ -49,7 +49,7 @@ const ApiKeyController = {
     } catch (error) {
       console.error("[ApiKeyController] API key fetch error:", {
         userId,
-        agentId,
+        qubitId,
         error: error.message,
         stack: error.stack,
       });

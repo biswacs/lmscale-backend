@@ -1,12 +1,12 @@
-const { Instruction, Agent, sequelize } = require("../models");
+const { Instruction, Qubit, sequelize } = require("../models");
 
 class InstructionService {
   async create(instructionData, userId) {
-    const { agentId, name, content } = instructionData;
+    const { qubitId, name, content } = instructionData;
 
     console.log("[InstructionService] Attempting to create instruction", {
       userId,
-      agentId,
+      qubitId,
       name,
     });
 
@@ -23,33 +23,33 @@ class InstructionService {
         };
       }
 
-      const agent = await Agent.findOne({
-        where: { id: agentId, userId },
+      const qubit = await Qubit.findOne({
+        where: { id: qubitId, userId },
       });
 
-      if (!agent) {
-        console.log("[InstructionService] No agent found or unauthorized", {
-          agentId,
+      if (!qubit) {
+        console.log("[InstructionService] No qubit found or unauthorized", {
+          qubitId,
           userId,
         });
         return {
           success: false,
-          message: "Agent not found or unauthorized access",
+          message: "Qubit not found or unauthorized access",
         };
       }
 
       const existingInstruction = await Instruction.findOne({
         where: {
-          agentId,
+          qubitId,
           name,
         },
       });
 
       if (existingInstruction) {
         console.log(
-          "[InstructionService] Instruction name already exists for agent",
+          "[InstructionService] Instruction name already exists for qubit",
           {
-            agentId,
+            qubitId,
             name,
           }
         );
@@ -62,7 +62,7 @@ class InstructionService {
       const newInstruction = await Instruction.create({
         name,
         content,
-        agentId,
+        qubitId,
       });
 
       console.log("[InstructionService] Instruction created successfully", {
@@ -89,32 +89,32 @@ class InstructionService {
       };
     }
   }
-  
-  async list(agentId, userId) {
+
+  async list(qubitId, userId) {
     console.log("[InstructionService] Attempting to list instructions", {
-      agentId,
+      qubitId,
       userId,
     });
 
     try {
-      const agent = await Agent.findOne({
-        where: { id: agentId, userId },
+      const qubit = await Qubit.findOne({
+        where: { id: qubitId, userId },
       });
 
-      if (!agent) {
-        console.log("[InstructionService] Agent not found or unauthorized", {
-          agentId,
+      if (!qubit) {
+        console.log("[InstructionService] Qubit not found or unauthorized", {
+          qubitId,
           userId,
         });
         return {
           success: false,
-          message: "Agent not found or unauthorized access",
+          message: "Qubit not found or unauthorized access",
         };
       }
 
       const instructions = await Instruction.findAll({
         where: {
-          agentId,
+          qubitId,
           isActive: true,
         },
         order: [["createdAt", "DESC"]],
@@ -128,7 +128,7 @@ class InstructionService {
       };
     } catch (error) {
       console.error("[InstructionService] Error listing instructions:", {
-        agentId,
+        qubitId,
         userId,
         error: error.message,
         stack: error.stack,
@@ -163,14 +163,14 @@ class InstructionService {
         };
       }
 
-      const agent = await Agent.findOne({
+      const qubit = await Qubit.findOne({
         where: {
-          id: instruction.agentId,
+          id: instruction.qubitId,
           userId,
         },
       });
 
-      if (!agent) {
+      if (!qubit) {
         console.log("[InstructionService] Unauthorized access", {
           instructionId,
           userId,
@@ -240,14 +240,14 @@ class InstructionService {
         };
       }
 
-      const agent = await Agent.findOne({
+      const qubit = await Qubit.findOne({
         where: {
-          id: instruction.agentId,
+          id: instruction.qubitId,
           userId,
         },
       });
 
-      if (!agent) {
+      if (!qubit) {
         console.log("[InstructionService] Unauthorized access", {
           instructionId,
           userId,

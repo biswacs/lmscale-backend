@@ -4,15 +4,15 @@ const instructionService = new InstructionService();
 const InstructionController = {
   async createInstruction(req, res) {
     const userId = req.user.id;
-    const { agentId, name, content } = req.body;
+    const { qubitId, name, content } = req.body;
 
     console.log("[InstructionController] Received create instruction request", {
       userId,
-      agentId,
+      qubitId,
     });
 
     try {
-      const requiredFields = ["agentId", "name", "content"];
+      const requiredFields = ["qubitId", "name", "content"];
       const missingFields = requiredFields.filter((field) => !req.body[field]);
 
       if (missingFields.length > 0) {
@@ -31,7 +31,7 @@ const InstructionController = {
 
       const response = await instructionService.create(
         {
-          agentId,
+          qubitId,
           name,
           content,
         },
@@ -72,27 +72,27 @@ const InstructionController = {
 
   async listInstructions(req, res) {
     const userId = req.user.id;
-    const agentId = req.query.agentId;
+    const qubitId = req.query.qubitId;
 
     console.log("[InstructionController] Received list instructions request", {
       userId,
-      agentId,
+      qubitId,
     });
 
     try {
-      if (!agentId) {
+      if (!qubitId) {
         return res.status(400).json({
           success: false,
-          message: "agentId is required",
+          message: "qubitId is required",
         });
       }
 
-      const response = await instructionService.list(agentId, userId);
+      const response = await instructionService.list(qubitId, userId);
 
       if (!response.success) {
         console.log("[InstructionController] List instructions failed", {
           userId,
-          agentId,
+          qubitId,
           reason: response.message,
         });
         return res.status(400).json({
@@ -110,7 +110,7 @@ const InstructionController = {
     } catch (error) {
       console.error("[InstructionController] List instructions error:", {
         userId,
-        agentId,
+        qubitId,
         error: error.message,
         stack: error.stack,
       });

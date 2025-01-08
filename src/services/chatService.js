@@ -1,15 +1,15 @@
-const { Agent, Function, Instruction, Usage, Gpu } = require("../models");
+const { Qubit, Function, Instruction, Usage, Gpu } = require("../models");
 const { calculateTokens } = require("../utils/tokenizer");
 const axios = require("axios");
 
 class ChatService {
-  async getAgent(agentId) {
-    console.log("[ChatService] Fetching agent details", { agentId });
+  async getQubit(qubitId) {
+    console.log("[ChatService] Fetching qubit details", { qubitId });
 
     try {
-      const agent = await Agent.findOne({
+      const qubit = await Qubit.findOne({
         where: {
-          id: agentId,
+          id: qubitId,
           isActive: true,
         },
         include: [
@@ -37,25 +37,25 @@ class ChatService {
         attributes: ["id", "name", "prompt"],
       });
 
-      if (!agent) {
-        console.log("[ChatService] Agent not found or inactive", { agentId });
+      if (!qubit) {
+        console.log("[ChatService] Qubit not found or inactive", { qubitId });
         return {
           success: false,
-          message: "Agent not found or inactive",
+          message: "Qubit not found or inactive",
         };
       }
 
       const formattedData = {
-        name: agent.name,
-        prompt: agent.prompt,
-        instructions: agent.instructions
-          ? agent.instructions.map((inst) => ({
+        name: qubit.name,
+        prompt: qubit.prompt,
+        instructions: qubit.instructions
+          ? qubit.instructions.map((inst) => ({
               name: inst.name,
               content: inst.content,
             }))
           : [],
-        functions: agent.functions
-          ? agent.functions.map((fn) => ({
+        functions: qubit.functions
+          ? qubit.functions.map((fn) => ({
               name: fn.name,
               endpoint: fn.endpoint,
               method: fn.method,
@@ -65,9 +65,9 @@ class ChatService {
           : [],
       };
 
-      console.log("[ChatService] Agent details retrieved successfully", {
-        agentId,
-        name: agent.name,
+      console.log("[ChatService] Qubit details retrieved successfully", {
+        qubitId,
+        name: qubit.name,
         instructionsCount: formattedData.instructions.length,
         functionsCount: formattedData.functions.length,
       });
@@ -77,14 +77,14 @@ class ChatService {
         data: formattedData,
       };
     } catch (error) {
-      console.error("[ChatService] Error finding agent:", {
-        agentId,
+      console.error("[ChatService] Error finding qubit:", {
+        qubitId,
         error: error.message,
         stack: error.stack,
       });
       return {
         success: false,
-        message: "Failed to retrieve agent details",
+        message: "Failed to retrieve qubit details",
       };
     }
   }
@@ -128,25 +128,25 @@ class ChatService {
     }
   }
 
-  async recordUsage({ agentId, input, output }) {
-    console.log("[ChatService] Recording usage", { agentId });
+  async recordUsage({ qubitId, input, output }) {
+    console.log("[ChatService] Recording usage", { qubitId });
 
     try {
       const inputTokens = calculateTokens(input);
       const outputTokens = calculateTokens(output);
 
       console.log("[ChatService] Calculated tokens", {
-        agentId,
+        qubitId,
         inputTokens,
         outputTokens,
         totalTokens: inputTokens + outputTokens,
       });
 
-      const usage = await Usage.getOrCreateDaily(agentId);
+      const usage = await Usage.getOrCreateDaily(qubitId);
       await usage.incrementTokens(inputTokens, outputTokens);
 
       console.log("[ChatService] Usage recorded successfully", {
-        agentId,
+        qubitId,
         inputTokens,
         outputTokens,
         totalTokens: inputTokens + outputTokens,
@@ -162,7 +162,7 @@ class ChatService {
       };
     } catch (error) {
       console.error("[ChatService] Error recording usage:", {
-        agentId,
+        qubitId,
         error: error.message,
         stack: error.stack,
       });

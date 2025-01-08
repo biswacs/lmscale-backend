@@ -1,4 +1,4 @@
-const { User, Agent, sequelize } = require("../models");
+const { User, Qubit, sequelize } = require("../models");
 const jwt = require("jsonwebtoken");
 
 class UserService {
@@ -50,7 +50,7 @@ class UserService {
         email: user.email,
       });
 
-      const agent = await Agent.create(
+      const qubit = await Qubit.create(
         {
           name: "Playground",
           userId: user.id,
@@ -58,8 +58,8 @@ class UserService {
         { transaction }
       );
 
-      console.log("[UserService] Playground agent created", {
-        agentId: agent.id,
+      console.log("[UserService] Playground qubit created", {
+        qubitId: qubit.id,
         userId: user.id,
       });
 
