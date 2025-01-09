@@ -3,7 +3,6 @@ const { User } = require("../models");
 
 const auth = async (req, res, next) => {
   console.log("[auth] Checking JWT authentication");
-
   try {
     const authHeader = req.header("Authorization");
     console.log(
@@ -13,7 +12,10 @@ const auth = async (req, res, next) => {
 
     if (!authHeader) {
       console.log("[auth] No authorization header found");
-      return res.status(401).json({ message: "Authorization header missing" });
+      return res.status(401).json({
+        message: "Authorization header missing",
+        shouldLogout: true,
+      });
     }
 
     const lm_auth_token = authHeader.replace("Bearer ", "");
@@ -33,19 +35,26 @@ const auth = async (req, res, next) => {
 
     if (!user) {
       console.log("[auth] No active user found");
-      throw new Error();
+      return res.status(401).json({
+        message: "User not found or inactive",
+        shouldLogout: true,
+      });
     }
 
     console.log("[auth] User authenticated:", {
       userId: user.id,
       email: user.email,
     });
+
     req.user = user;
     req.lm_auth_token = lm_auth_token;
     next();
   } catch (error) {
     console.error("[auth] Authentication error:", error);
-    res.status(401).json({ message: "Please authenticate" });
+    res.status(401).json({
+      message: "Please authenticate",
+      shouldLogout: true,
+    });
   }
 };
 
