@@ -29,6 +29,19 @@ const QubitController = {
         });
       }
 
+      if (name.toLowerCase() === "playground") {
+        console.log(
+          "[QubitController] Creation failed - 'playground' is a reserved name",
+          {
+            userId,
+          }
+        );
+        return res.status(400).json({
+          success: false,
+          message: "'playground' is a reserved name and cannot be used",
+        });
+      }
+
       const response = await qubitService.create({ name }, userId);
 
       if (!response.success) {
