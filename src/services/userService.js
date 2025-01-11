@@ -171,7 +171,7 @@ class UserService {
     });
 
     try {
-      const userProfile = await User.findOne({
+      const user = await User.findOne({
         where: { id: userId },
         attributes: [
           "id",
@@ -183,7 +183,7 @@ class UserService {
         ],
       });
 
-      if (!userProfile) {
+      if (!user) {
         console.log("[UserService] Profile not found", {
           userId,
         });
@@ -199,7 +199,7 @@ class UserService {
 
       return {
         success: true,
-        data: { user: userProfile },
+        data: { user },
         message: "Profile retrieved successfully",
       };
     } catch (error) {

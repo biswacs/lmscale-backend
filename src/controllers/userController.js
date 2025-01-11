@@ -120,7 +120,9 @@ const UserController = {
 
       res.json({
         message: result.message,
-        user: result.data.user,
+        data: {
+          user: result.data.user,
+        },
       });
     } catch (error) {
       console.error("[UserController] Profile retrieval error:", {

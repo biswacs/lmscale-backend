@@ -13,7 +13,7 @@ class PromptService {
           id: qubitId,
           userId: userId,
         },
-        attributes: ["id", "prompt"],
+        attributes: ["id", "name", "prompt"],
       });
 
       if (!qubit) {
@@ -34,7 +34,9 @@ class PromptService {
 
       return {
         success: true,
-        prompt: qubit.prompt,
+        data: {
+          qubit,
+        },
       };
     } catch (error) {
       console.error("[PromptService] Error retrieving prompt:", {
@@ -81,7 +83,12 @@ class PromptService {
         };
       }
 
-      qubit.prompt = prompt;
+      const updatedPrompt =
+        prompt.trim() === ""
+          ? Qubit.getAttributes().prompt.defaultValue
+          : prompt;
+
+      qubit.prompt = updatedPrompt;
       await qubit.save({ transaction });
       await transaction.commit();
 

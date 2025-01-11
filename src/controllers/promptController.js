@@ -35,7 +35,6 @@ const PromptController = {
         console.log("[PromptController] Get prompt failed", {
           userId: userId,
           qubitId: qubitId,
-          reason: response.message,
         });
         return res.status(400).json({
           success: false,
@@ -51,7 +50,7 @@ const PromptController = {
       return res.status(200).json({
         success: true,
         data: {
-          prompt: response.prompt,
+          data: response.data.qubit,
         },
       });
     } catch (error) {
@@ -80,7 +79,7 @@ const PromptController = {
     });
 
     try {
-      const requiredFields = ["qubitId", "prompt"];
+      const requiredFields = ["qubitId"];
       const missingFields = requiredFields.filter((field) => !req.body[field]);
 
       if (missingFields.length > 0) {
