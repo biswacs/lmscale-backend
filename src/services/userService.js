@@ -68,7 +68,7 @@ class UserService {
       const lm_auth_token = this.generateToken(user.id);
       return {
         success: true,
-        data: { lm_auth_token, user },
+        data: { lm_auth_token, assistantId: assistant.id },
         message: "User created successfully",
       };
     } catch (error) {
@@ -134,13 +134,15 @@ class UserService {
         email,
       });
 
-      const userData = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      };
+      const assistant = await Assistant.findOne({
+        where: {
+          userId: user.id,
+        },
+        order: [["createdAt", "ASC"]],
+        attributes: ["id"],
+      });
 
-      const lm_auth_token = this.generateToken(userData.id);
+      const lm_auth_token = this.generateToken(user.id);
 
       if (!lm_auth_token) {
         throw new Error("Failed to generate access token");
@@ -148,7 +150,7 @@ class UserService {
 
       return {
         success: true,
-        data: { lm_auth_token },
+        data: { lm_auth_token, assistantId: assistant.id },
         message: "Login successful",
       };
     } catch (error) {

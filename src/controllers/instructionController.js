@@ -29,7 +29,7 @@ const InstructionController = {
         });
       }
 
-      const response = await instructionService.create(
+      const result = await instructionService.create(
         {
           assistantId,
           name,
@@ -38,14 +38,14 @@ const InstructionController = {
         userId
       );
 
-      if (!response.success) {
+      if (!result.success) {
         console.log("[InstructionController] Create instruction failed", {
           userId,
-          reason: response.message,
+          reason: result.message,
         });
         return res.status(400).json({
           success: false,
-          message: response.message,
+          message: result.message,
         });
       }
 
@@ -53,7 +53,7 @@ const InstructionController = {
         success: true,
         message: "Instruction created successfully",
         data: {
-          instruction: response.data.instruction,
+          instruction: result.data.instruction,
         },
       });
     } catch (error) {
@@ -87,24 +87,24 @@ const InstructionController = {
         });
       }
 
-      const response = await instructionService.list(assistantId, userId);
+      const result = await instructionService.list(assistantId, userId);
 
-      if (!response.success) {
+      if (!result.success) {
         console.log("[InstructionController] List instructions failed", {
           userId,
           assistantId,
-          reason: response.message,
+          reason: result.message,
         });
         return res.status(400).json({
           success: false,
-          message: response.message,
+          message: result.message,
         });
       }
 
       return res.status(200).json({
         success: true,
         data: {
-          instructions: response.data.instructions,
+          instructions: result.data.instructions,
         },
       });
     } catch (error) {
@@ -132,21 +132,21 @@ const InstructionController = {
     });
 
     try {
-      const response = await instructionService.update(
+      const result = await instructionService.update(
         instructionId,
         { name, content, metadata, isActive },
         userId
       );
 
-      if (!response.success) {
+      if (!result.success) {
         console.log("[InstructionController] Update instruction failed", {
           userId,
           instructionId,
-          reason: response.message,
+          reason: result.message,
         });
         return res.status(400).json({
           success: false,
-          message: response.message,
+          message: result.message,
         });
       }
 
@@ -154,7 +154,7 @@ const InstructionController = {
         success: true,
         message: "Instruction updated successfully",
         data: {
-          instruction: response.data.instruction,
+          instruction: result.data.instruction,
         },
       });
     } catch (error) {
@@ -182,17 +182,17 @@ const InstructionController = {
     });
 
     try {
-      const response = await instructionService.delete(instructionId, userId);
+      const result = await instructionService.delete(instructionId, userId);
 
-      if (!response.success) {
+      if (!result.success) {
         console.log("[InstructionController] Delete instruction failed", {
           userId,
           instructionId,
-          reason: response.message,
+          reason: result.message,
         });
         return res.status(400).json({
           success: false,
-          message: response.message,
+          message: result.message,
         });
       }
 

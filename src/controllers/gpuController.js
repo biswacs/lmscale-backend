@@ -30,29 +30,29 @@ const GpuController = {
         });
       }
 
-      const response = await gpuService.create(req.body, req.user.email);
+      const result = await gpuService.create(req.body, req.user.email);
 
-      if (!response.success) {
+      if (!result.success) {
         console.log("[GpuController] GPU creation failed", {
           userEmail: req.user.email,
-          reason: response.message,
+          reason: result.message,
         });
         return res.status(400).json({
           success: false,
-          message: response.message,
+          message: result.message,
         });
       }
 
       console.log("[GpuController] GPU created successfully", {
         userEmail: req.user.email,
-        gpu: response.data.gpu,
+        gpu: result.data.gpu,
       });
 
       return res.status(201).json({
         success: true,
         message: "GPU created successfully",
         data: {
-          gpu: response.data.gpu,
+          gpu: result.data.gpu,
         },
       });
     } catch (error) {

@@ -20,14 +20,13 @@ const UserController = {
       }
 
       console.log("[UserController] Registration successful", {
-        userId: result.data.user.id,
-        email: result.data.user.email,
+        email: req.body.email,
       });
 
       res.status(201).json({
         message: result.message,
         lm_auth_token: result.data.lm_auth_token,
-        user: result.data.user,
+        assistantId: result.data.assistantId,
       });
     } catch (error) {
       console.error("[UserController] Registration error:", {
@@ -76,6 +75,7 @@ const UserController = {
       res.json({
         message: result.message,
         lm_auth_token: result.data.lm_auth_token,
+        assistantId: result.data.assistantId,
       });
     } catch (error) {
       console.error("[UserController] Login error:", {

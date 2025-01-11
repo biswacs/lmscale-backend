@@ -78,10 +78,10 @@ const ChatController = {
         prompt,
         assistant.functions,
         async (message) => {
-          if (message.type === "response") {
+          if (message.type === "result") {
             aiResponse += message.content;
             res.write(
-              `data: ${JSON.stringify({ response: message.content })}\n\n`
+              `data: ${JSON.stringify({ result: message.content })}\n\n`
             );
           } else if (message.type === "error") {
             if (!res.writableEnded) {
