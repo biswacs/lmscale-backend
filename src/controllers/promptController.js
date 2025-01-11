@@ -29,16 +29,16 @@ const PromptController = {
         });
       }
 
-      const result = await promptService.get(assistantId, userId);
+      const response = await promptService.get(assistantId, userId);
 
-      if (!result.success) {
+      if (!response.success) {
         console.log("[PromptController] Get prompt failed", {
           userId: userId,
           assistantId: assistantId,
         });
         return res.status(400).json({
           success: false,
-          message: result.message,
+          message: response.message,
         });
       }
 
@@ -50,7 +50,7 @@ const PromptController = {
       return res.status(200).json({
         success: true,
         data: {
-          data: result.data.assistant,
+          data: response.data.assistant,
         },
       });
     } catch (error) {
@@ -96,30 +96,30 @@ const PromptController = {
         });
       }
 
-      const result = await promptService.update(prompt, assistantId, userId);
+      const response = await promptService.update(prompt, assistantId, userId);
 
-      if (!result.success) {
+      if (!response.success) {
         console.log("[PromptController] Update prompt failed", {
           userId,
           assistantId,
-          reason: result.message,
+          reason: response.message,
         });
         return res.status(400).json({
           success: false,
-          message: result.message,
+          message: response.message,
         });
       }
 
       console.log("[PromptController] Prompt updated successfully", {
         userId: userId,
-        assistant: result.data.assistant,
+        assistant: response.data.assistant,
       });
 
       return res.status(200).json({
         success: true,
         message: "Prompt updated successfully",
         data: {
-          assistant: result.data.assistant,
+          assistant: response.data.assistant,
         },
       });
     } catch (error) {

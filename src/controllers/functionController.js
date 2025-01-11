@@ -55,29 +55,29 @@ const FunctionController = {
         isActive,
       };
 
-      const result = await functionService.create(functionData, userId);
+      const response = await functionService.create(functionData, userId);
 
-      if (!result.success) {
+      if (!response.success) {
         console.log("[FunctionController] Create function failed", {
           userId,
-          reason: result.message,
+          reason: response.message,
         });
         return res.status(400).json({
           success: false,
-          message: result.message,
+          message: response.message,
         });
       }
 
       console.log("[FunctionController] Function created successfully", {
         userId,
-        functionId: result.data.function.id,
+        functionId: response.data.function.id,
       });
 
       return res.status(201).json({
         success: true,
         message: "Function created successfully",
         data: {
-          function: result.data.function,
+          function: response.data.function,
         },
       });
     } catch (error) {
@@ -104,24 +104,24 @@ const FunctionController = {
     });
 
     try {
-      const result = await functionService.list(assistantId, userId);
+      const response = await functionService.list(assistantId, userId);
 
-      if (!result.success) {
+      if (!response.success) {
         console.log("[FunctionController] List functions failed", {
           userId,
           assistantId,
-          reason: result.message,
+          reason: response.message,
         });
         return res.status(400).json({
           success: false,
-          message: result.message,
+          message: response.message,
         });
       }
 
       return res.status(200).json({
         success: true,
         data: {
-          functions: result.data.functions,
+          functions: response.data.functions,
         },
       });
     } catch (error) {
@@ -149,17 +149,17 @@ const FunctionController = {
     });
 
     try {
-      const result = await functionService.delete(functionId, userId);
+      const response = await functionService.delete(functionId, userId);
 
-      if (!result.success) {
+      if (!response.success) {
         console.log("[FunctionController] Delete function failed", {
           userId,
           functionId,
-          reason: result.message,
+          reason: response.message,
         });
         return res.status(400).json({
           success: false,
-          message: result.message,
+          message: response.message,
         });
       }
 

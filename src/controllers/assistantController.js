@@ -42,29 +42,29 @@ const AssistantController = {
         });
       }
 
-      const result = await assistantService.create({ name }, userId);
+      const response = await assistantService.create({ name }, userId);
 
-      if (!result.success) {
+      if (!response.success) {
         console.log("[AssistantController] Assistant creation failed", {
           userId,
-          reason: result.message,
+          reason: response.message,
         });
         return res.status(400).json({
           success: false,
-          message: result.message,
+          message: response.message,
         });
       }
 
       console.log("[AssistantController] Assistant created successfully", {
         userId,
-        assistant: result.data.assistant,
+        assistant: response.data.assistant,
       });
 
       return res.status(201).json({
         success: true,
         message: "Assistant created successfully",
         data: {
-          assistant: result.data.assistant,
+          assistant: response.data.assistant,
         },
       });
     } catch (error) {
@@ -89,29 +89,29 @@ const AssistantController = {
     });
 
     try {
-      const result = await assistantService.list(userId);
+      const response = await assistantService.list(userId);
 
-      if (!result.success) {
+      if (!response.success) {
         console.log("[AssistantController] Assistants retrieval failed", {
           userId,
-          reason: result.message,
+          reason: response.message,
         });
         return res.status(404).json({
           success: false,
-          message: result.message,
+          message: response.message,
         });
       }
 
       console.log("[AssistantController] Assistants retrieved successfully", {
         userId,
-        assistantsCount: result.data.assistants.length,
+        assistantsCount: response.data.assistants.length,
       });
 
       return res.json({
         success: true,
-        message: result.message,
+        message: response.message,
         data: {
-          assistants: result.data.assistants,
+          assistants: response.data.assistants,
         },
       });
     } catch (error) {
@@ -138,25 +138,25 @@ const AssistantController = {
     });
 
     try {
-      const result = await assistantService.getOne(assistantId, userId);
+      const response = await assistantService.getOne(assistantId, userId);
 
-      if (!result.success) {
+      if (!response.success) {
         console.log("[AssistantController] Assistant retrieval failed", {
           userId,
           assistantId,
-          reason: result.message,
+          reason: response.message,
         });
         return res.status(404).json({
           success: false,
-          message: result.message,
+          message: response.message,
         });
       }
 
       return res.json({
         success: true,
-        message: result.message,
+        message: response.message,
         data: {
-          assistant: result.data.assistant,
+          assistant: response.data.assistant,
         },
       });
     } catch (error) {

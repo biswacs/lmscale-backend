@@ -10,13 +10,13 @@ const UserController = {
 
     try {
       const validatedData = userSchemas.register.parse(req.body);
-      const result = await userService.create(validatedData);
+      const response = await userService.create(validatedData);
 
-      if (!result.success) {
+      if (!response.success) {
         console.log("[UserController] Registration failed - validation error", {
           email: req.body.email,
         });
-        return res.status(400).json({ message: result.message });
+        return res.status(400).json({ message: response.message });
       }
 
       console.log("[UserController] Registration successful", {
@@ -24,9 +24,9 @@ const UserController = {
       });
 
       res.status(201).json({
-        message: result.message,
-        lm_auth_token: result.data.lm_auth_token,
-        assistantId: result.data.assistantId,
+        message: response.message,
+        lm_auth_token: response.data.lm_auth_token,
+        assistantId: response.data.assistantId,
       });
     } catch (error) {
       console.error("[UserController] Registration error:", {
@@ -56,16 +56,16 @@ const UserController = {
 
     try {
       const validatedData = userSchemas.login.parse(req.body);
-      const result = await userService.authenticate(
+      const response = await userService.authenticate(
         validatedData.email,
         validatedData.password
       );
 
-      if (!result.success) {
+      if (!response.success) {
         console.log("[UserController] Login failed", {
           email: req.body.email,
         });
-        return res.status(401).json({ message: result.message });
+        return res.status(401).json({ message: response.message });
       }
 
       console.log("[UserController] Login successful", {
@@ -73,9 +73,9 @@ const UserController = {
       });
 
       res.json({
-        message: result.message,
-        lm_auth_token: result.data.lm_auth_token,
-        assistantId: result.data.assistantId,
+        message: response.message,
+        lm_auth_token: response.data.lm_auth_token,
+        assistantId: response.data.assistantId,
       });
     } catch (error) {
       console.error("[UserController] Login error:", {
@@ -104,14 +104,14 @@ const UserController = {
     });
 
     try {
-      const result = await userService.get(req.user.id);
+      const response = await userService.get(req.user.id);
 
-      if (!result.success) {
+      if (!response.success) {
         console.log("[UserController] Profile retrieval failed", {
           userId: req.user.id,
-          reason: result.message,
+          reason: response.message,
         });
-        return res.status(404).json({ message: result.message });
+        return res.status(404).json({ message: response.message });
       }
 
       console.log("[UserController] Profile retrieved successfully", {
@@ -119,9 +119,9 @@ const UserController = {
       });
 
       res.json({
-        message: result.message,
+        message: response.message,
         data: {
-          user: result.data.user,
+          user: response.data.user,
         },
       });
     } catch (error) {

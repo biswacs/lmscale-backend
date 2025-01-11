@@ -22,17 +22,17 @@ const ApiKeyController = {
         });
       }
 
-      const result = await apiKeyService.get(userId, assistantId);
+      const response = await apiKeyService.get(userId, assistantId);
 
-      if (!result.success) {
+      if (!response.success) {
         console.log("[ApiKeyController] API key fetch failed", {
           userId,
           assistantId,
-          reason: result.message,
+          reason: response.message,
         });
         return res.status(404).json({
           success: false,
-          message: result.message,
+          message: response.message,
         });
       }
 
@@ -44,7 +44,7 @@ const ApiKeyController = {
       return res.status(200).json({
         success: true,
         message: "API key retrieved successfully",
-        data: result.data,
+        data: response.data,
       });
     } catch (error) {
       console.error("[ApiKeyController] API key fetch error:", {
