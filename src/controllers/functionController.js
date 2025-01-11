@@ -5,7 +5,7 @@ const FunctionController = {
   async createFunction(req, res) {
     const userId = req.user.id;
     const {
-      qubitId,
+      assistantId,
       name,
       endpoint,
       method,
@@ -17,12 +17,12 @@ const FunctionController = {
 
     console.log("[FunctionController] Received create function request", {
       userId,
-      qubitId,
+      assistantId,
     });
 
     try {
       const requiredFields = [
-        "qubitId",
+        "assistantId",
         "name",
         "endpoint",
         "method",
@@ -45,7 +45,7 @@ const FunctionController = {
       }
 
       const functionData = {
-        qubitId,
+        assistantId,
         name,
         endpoint,
         method,
@@ -96,20 +96,20 @@ const FunctionController = {
 
   async listFunctions(req, res) {
     const userId = req.user.id;
-    const qubitId = req.query.qubitId;
+    const assistantId = req.query.assistantId;
 
     console.log("[FunctionController] Received list functions request", {
       userId,
-      qubitId,
+      assistantId,
     });
 
     try {
-      const response = await functionService.list(qubitId, userId);
+      const response = await functionService.list(assistantId, userId);
 
       if (!response.success) {
         console.log("[FunctionController] List functions failed", {
           userId,
-          qubitId,
+          assistantId,
           reason: response.message,
         });
         return res.status(400).json({
@@ -127,7 +127,7 @@ const FunctionController = {
     } catch (error) {
       console.error("[FunctionController] List functions error:", {
         userId,
-        qubitId,
+        assistantId,
         error: error.message,
         stack: error.stack,
       });

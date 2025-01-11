@@ -4,15 +4,15 @@ const instructionService = new InstructionService();
 const InstructionController = {
   async createInstruction(req, res) {
     const userId = req.user.id;
-    const { qubitId, name, content } = req.body;
+    const { assistantId, name, content } = req.body;
 
     console.log("[InstructionController] Received create instruction request", {
       userId,
-      qubitId,
+      assistantId,
     });
 
     try {
-      const requiredFields = ["qubitId", "name", "content"];
+      const requiredFields = ["assistantId", "name", "content"];
       const missingFields = requiredFields.filter((field) => !req.body[field]);
 
       if (missingFields.length > 0) {
@@ -31,7 +31,7 @@ const InstructionController = {
 
       const response = await instructionService.create(
         {
-          qubitId,
+          assistantId,
           name,
           content,
         },
@@ -72,27 +72,27 @@ const InstructionController = {
 
   async listInstructions(req, res) {
     const userId = req.user.id;
-    const qubitId = req.query.qubitId;
+    const assistantId = req.query.assistantId;
 
     console.log("[InstructionController] Received list instructions request", {
       userId,
-      qubitId,
+      assistantId,
     });
 
     try {
-      if (!qubitId) {
+      if (!assistantId) {
         return res.status(400).json({
           success: false,
-          message: "qubitId is required",
+          message: "assistantId is required",
         });
       }
 
-      const response = await instructionService.list(qubitId, userId);
+      const response = await instructionService.list(assistantId, userId);
 
       if (!response.success) {
         console.log("[InstructionController] List instructions failed", {
           userId,
-          qubitId,
+          assistantId,
           reason: response.message,
         });
         return res.status(400).json({
@@ -110,7 +110,7 @@ const InstructionController = {
     } catch (error) {
       console.error("[InstructionController] List instructions error:", {
         userId,
-        qubitId,
+        assistantId,
         error: error.message,
         stack: error.stack,
       });

@@ -1,52 +1,52 @@
-const { Qubit } = require("../models");
+const { Assistant } = require("../models");
 
 class ApiKeyService {
-  async get(userId, qubitId) {
+  async get(userId, assistantId) {
     console.log("[ApiKeyService] Attempting to fetch API key", {
       userId,
-      qubitId,
+      assistantId,
     });
 
     try {
-      const qubit = await Qubit.findOne({
+      const assistant = await Assistant.findOne({
         where: {
-          id: qubitId,
+          id: assistantId,
           userId: userId,
         },
         attributes: ["id", "name", "apiKey"],
       });
 
-      if (!qubit) {
-        console.log("[ApiKeyService] No qubit found", {
+      if (!assistant) {
+        console.log("[ApiKeyService] No assistant found", {
           userId,
-          qubitId,
+          assistantId,
         });
         return {
           success: false,
-          message: "Qubit not found",
+          message: "Assistant not found",
         };
       }
 
       console.log("[ApiKeyService] API key retrieved successfully", {
         userId,
-        qubitId,
+        assistantId,
       });
 
       return {
         success: true,
         message: "API key retrieved successfully",
         data: {
-          qubit: {
-            id: qubit.id,
-            name: qubit.name,
-            apiKey: qubit.apiKey,
+          assistant: {
+            id: assistant.id,
+            name: assistant.name,
+            apiKey: assistant.apiKey,
           },
         },
       };
     } catch (error) {
       console.error("[ApiKeyService] Error fetching API key:", {
         userId,
-        qubitId,
+        assistantId,
         error: error.message,
         stack: error.stack,
       });

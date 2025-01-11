@@ -4,10 +4,10 @@ const chatService = new ChatService();
 const ChatController = {
   async chat(req, res) {
     const { message, conversation = [] } = req.body;
-    const { qubitId } = req;
+    const { assistantId } = req;
 
     console.log("[ChatController] Received chat request", {
-      qubitId,
+      assistantId,
       messageLength: message?.length,
       hasConversation: conversation.length > 0,
     });
@@ -32,48 +32,51 @@ const ChatController = {
     });
 
     try {
-      console.log("[ChatController] Fetching qubit details", { qubitId });
-      const qubitResult = await chatService.getQubit(qubitId);
+      console.log("[ChatController] Fetching assistant details", {
+        assistantId,
+      });
+      const assistantResult = await chatService.getAssistant(assistantId);
 
-      if (!qubitResult.success) {
-        console.log("[ChatController] Failed to fetch qubit details", {
-          qubitId,
-          error: qubitResult.message,
+      if (!assistantResult.success) {
+        console.log("[ChatController] Failed to fetch assistant details", {
+          assistantId,
+          error: assistantResult.message,
         });
-        throw new Error(qubitResult.message);
+        throw new Error(assistantResult.message);
       }
 
-      const qubit = qubitResult.data;
-      console.log("[ChatController] Qubit details retrieved", {
-        name: qubit.name,
-        hasInstructions: qubit.instructions?.length > 0,
-        instructionsCount: qubit.instructions?.length,
-        hasFunctions: qubit.functions?.length > 0,
-        functionsCount: qubit.functions?.length,
+      const assistant = assistantResult.data;
+      console.log("[ChatController] Assistant details retrieved", {
+        name: assistant.name,
+        hasInstructions: assistant.instructions?.length > 0,
+        instructionsCount: assistant.instructions?.length,
+        hasFunctions: assistant.functions?.length > 0,
+        functionsCount: assistant.functions?.length,
       });
 
       const formattedConversation = conversation
         .map(
-          (msg) => `${msg.role === "user" ? "User" : "Qubit"}: ${msg.content}`
+          (msg) =>
+            `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`
         )
         .join("\n");
 
-      const prompt = `${qubit.prompt}\n\n${
-        qubit.instructions.length > 0
-          ? qubit.instructions.map((inst) => inst.content).join("\n\n")
+      const prompt = `${assistant.prompt}\n\n${
+        assistant.instructions.length > 0
+          ? assistant.instructions.map((inst) => inst.content).join("\n\n")
           : ""
-      }\n\n${formattedConversation}\nUser: ${message}\nQubit:`;
+      }\n\n${formattedConversation}\nUser: ${message}\nAssistant:`;
 
       console.log("[ChatController] Constructed prompt", {
         promptLength: prompt.length,
-        hasInstructionsInPrompt: qubit.instructions.length > 0,
+        hasInstructionsInPrompt: assistant.instructions.length > 0,
       });
 
       let aiResponse = "";
 
       await chatService.processChat(
         prompt,
-        qubit.functions,
+        assistant.functions,
         async (message) => {
           if (message.type === "response") {
             aiResponse += message.content;
@@ -94,11 +97,11 @@ const ChatController = {
             if (message.content) {
               console.log("[ChatController] Stream completed successfully", {
                 finalResponseLength: message.content.length,
-                qubitId,
+                assistantId,
               });
 
               await chatService.recordUsage({
-                qubitId,
+                assistantId,
                 input: message,
                 output: message.content,
               });

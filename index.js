@@ -5,7 +5,7 @@ const { sequelize } = require("./src/models");
 const userRoutes = require("./src/routes/userRoutes");
 const chatRoutes = require("./src/routes/chatRoutes");
 const gpuRoutes = require("./src/routes/gpuRoutes");
-const qubitRoutes = require("./src/routes/qubitRoutes");
+const assistantRoutes = require("./src/routes/assistantRoutes");
 const promptRoutes = require("./src/routes/promptRoutes");
 const functionRoutes = require("./src/routes/functionRoutes");
 const instructionRoutes = require("./src/routes/instructionRoutes");
@@ -27,7 +27,7 @@ if (Env == "Local") {
 
 app.use("/v1/user", userRoutes);
 app.use("/v1/chat", chatRoutes);
-app.use("/v1/qubit", qubitRoutes);
+app.use("/v1/assistant", assistantRoutes);
 app.use("/v1/prompt", promptRoutes);
 app.use("/v1/function", functionRoutes);
 app.use("/v1/instruction", instructionRoutes);

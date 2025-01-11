@@ -1,15 +1,15 @@
-const { Qubit, Function, Instruction, Usage, Gpu } = require("../models");
+const { Assistant, Function, Instruction, Usage, Gpu } = require("../models");
 const { calculateTokens } = require("../utils/tokenizer");
 const axios = require("axios");
 
 class ChatService {
-  async getQubit(qubitId) {
-    console.log("[ChatService] Fetching qubit details", { qubitId });
+  async getAssistant(assistantId) {
+    console.log("[ChatService] Fetching assistant details", { assistantId });
 
     try {
-      const qubit = await Qubit.findOne({
+      const assistant = await Assistant.findOne({
         where: {
-          id: qubitId,
+          id: assistantId,
           isActive: true,
         },
         include: [
@@ -37,25 +37,27 @@ class ChatService {
         attributes: ["id", "name", "prompt"],
       });
 
-      if (!qubit) {
-        console.log("[ChatService] Qubit not found or inactive", { qubitId });
+      if (!assistant) {
+        console.log("[ChatService] Assistant not found or inactive", {
+          assistantId,
+        });
         return {
           success: false,
-          message: "Qubit not found or inactive",
+          message: "Assistant not found or inactive",
         };
       }
 
       const formattedData = {
-        name: qubit.name,
-        prompt: qubit.prompt,
-        instructions: qubit.instructions
-          ? qubit.instructions.map((inst) => ({
+        name: assistant.name,
+        prompt: assistant.prompt,
+        instructions: assistant.instructions
+          ? assistant.instructions.map((inst) => ({
               name: inst.name,
               content: inst.content,
             }))
           : [],
-        functions: qubit.functions
-          ? qubit.functions.map((fn) => ({
+        functions: assistant.functions
+          ? assistant.functions.map((fn) => ({
               name: fn.name,
               endpoint: fn.endpoint,
               method: fn.method,
@@ -65,9 +67,9 @@ class ChatService {
           : [],
       };
 
-      console.log("[ChatService] Qubit details retrieved successfully", {
-        qubitId,
-        name: qubit.name,
+      console.log("[ChatService] Assistant details retrieved successfully", {
+        assistantId,
+        name: assistant.name,
         instructionsCount: formattedData.instructions.length,
         functionsCount: formattedData.functions.length,
       });
@@ -77,14 +79,14 @@ class ChatService {
         data: formattedData,
       };
     } catch (error) {
-      console.error("[ChatService] Error finding qubit:", {
-        qubitId,
+      console.error("[ChatService] Error finding assistant:", {
+        assistantId,
         error: error.message,
         stack: error.stack,
       });
       return {
         success: false,
-        message: "Failed to retrieve qubit details",
+        message: "Failed to retrieve assistant details",
       };
     }
   }
@@ -128,25 +130,25 @@ class ChatService {
     }
   }
 
-  async recordUsage({ qubitId, input, output }) {
-    console.log("[ChatService] Recording usage", { qubitId });
+  async recordUsage({ assistantId, input, output }) {
+    console.log("[ChatService] Recording usage", { assistantId });
 
     try {
       const inputTokens = calculateTokens(input);
       const outputTokens = calculateTokens(output);
 
       console.log("[ChatService] Calculated tokens", {
-        qubitId,
+        assistantId,
         inputTokens,
         outputTokens,
         totalTokens: inputTokens + outputTokens,
       });
 
-      const usage = await Usage.getOrCreateDaily(qubitId);
+      const usage = await Usage.getOrCreateDaily(assistantId);
       await usage.incrementTokens(inputTokens, outputTokens);
 
       console.log("[ChatService] Usage recorded successfully", {
-        qubitId,
+        assistantId,
         inputTokens,
         outputTokens,
         totalTokens: inputTokens + outputTokens,
@@ -162,7 +164,7 @@ class ChatService {
       };
     } catch (error) {
       console.error("[ChatService] Error recording usage:", {
-        qubitId,
+        assistantId,
         error: error.message,
         stack: error.stack,
       });

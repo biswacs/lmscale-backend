@@ -1,9 +1,9 @@
-const { Function, Qubit, sequelize } = require("../models");
+const { Function, Assistant, sequelize } = require("../models");
 
 class FunctionService {
   async create(functionData, userId) {
     const {
-      qubitId,
+      assistantId,
       name,
       endpoint,
       method,
@@ -15,50 +15,51 @@ class FunctionService {
 
     console.log("[FunctionService] Attempting to create function", {
       userId,
-      qubitId,
+      assistantId,
       name,
     });
 
     const transaction = await sequelize.transaction();
 
     try {
-      const qubit = await Qubit.findOne({
-        where: { id: qubitId, userId },
+      const assistant = await Assistant.findOne({
+        where: { id: assistantId, userId },
         transaction,
       });
 
-      if (!qubit) {
-        console.log("[FunctionService] No qubit found or unauthorized", {
-          qubitId,
+      if (!assistant) {
+        console.log("[FunctionService] No assistant found or unauthorized", {
+          assistantId,
           userId,
         });
         await transaction.rollback();
         return {
           success: false,
-          message: "Qubit not found or unauthorized access",
+          message: "Assistant not found or unauthorized access",
         };
       }
 
       const existingFunction = await Function.findOne({
-        where: { qubitId, name },
+        where: { assistantId, name },
         transaction,
       });
 
       if (existingFunction) {
         console.log("[FunctionService] Function name already exists", {
-          qubitId,
+          assistantId,
           name,
         });
         await transaction.rollback();
         return {
           success: false,
-          message: "A function with this name already exists for this qubit",
+          message:
+            "A function with this name already exists for this assistant",
         };
       }
 
       const newFunction = await Function.create(
         {
-          qubitId,
+          assistantId,
           name,
           endpoint,
           method: method.toUpperCase(),
@@ -74,7 +75,7 @@ class FunctionService {
 
       console.log("[FunctionService] Function created successfully", {
         functionId: newFunction.id,
-        qubitId,
+        assistantId,
         userId,
       });
 
@@ -87,7 +88,7 @@ class FunctionService {
     } catch (error) {
       console.error("[FunctionService] Error creating function:", {
         userId,
-        qubitId,
+        assistantId,
         error: error.message,
         stack: error.stack,
       });
@@ -100,38 +101,38 @@ class FunctionService {
     }
   }
 
-  async list(qubitId, userId) {
+  async list(assistantId, userId) {
     console.log("[FunctionService] Attempting to list functions", {
-      qubitId,
+      assistantId,
       userId,
     });
 
     try {
-      const qubit = await Qubit.findOne({
-        where: { id: qubitId, userId },
+      const assistant = await Assistant.findOne({
+        where: { id: assistantId, userId },
       });
 
-      if (!qubit) {
-        console.log("[FunctionService] Qubit not found or unauthorized", {
-          qubitId,
+      if (!assistant) {
+        console.log("[FunctionService] Assistant not found or unauthorized", {
+          assistantId,
           userId,
         });
         return {
           success: false,
-          message: "Qubit not found or unauthorized access",
+          message: "Assistant not found or unauthorized access",
         };
       }
 
       const functions = await Function.findAll({
         where: {
-          qubitId,
+          assistantId,
           isActive: true,
         },
         order: [["createdAt", "DESC"]],
       });
 
       console.log("[FunctionService] Functions retrieved successfully", {
-        qubitId,
+        assistantId,
         count: functions.length,
       });
 
@@ -143,7 +144,7 @@ class FunctionService {
       };
     } catch (error) {
       console.error("[FunctionService] Error listing functions:", {
-        qubitId,
+        assistantId,
         userId,
         error: error.message,
         stack: error.stack,
@@ -178,14 +179,14 @@ class FunctionService {
         };
       }
 
-      const qubit = await Qubit.findOne({
+      const assistant = await Assistant.findOne({
         where: {
-          id: functionItem.qubitId,
+          id: functionItem.assistantId,
           userId,
         },
       });
 
-      if (!qubit) {
+      if (!assistant) {
         console.log("[FunctionService] Unauthorized access", {
           functionId,
           userId,

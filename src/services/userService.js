@@ -1,4 +1,4 @@
-const { User, Qubit, sequelize } = require("../models");
+const { User, Assistant, sequelize } = require("../models");
 const jwt = require("jsonwebtoken");
 
 class UserService {
@@ -50,7 +50,7 @@ class UserService {
         email: user.email,
       });
 
-      const qubit = await Qubit.create(
+      const assistant = await Assistant.create(
         {
           name: "Playground",
           userId: user.id,
@@ -58,8 +58,8 @@ class UserService {
         { transaction }
       );
 
-      console.log("[UserService] Playground qubit created", {
-        qubitId: qubit.id,
+      console.log("[UserService] Playground assistant created", {
+        assistantId: assistant.id,
         userId: user.id,
       });
 

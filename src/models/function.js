@@ -14,11 +14,11 @@ Function.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    qubitId: {
+    assistantId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: "Qubits",
+        model: "Assistants",
         key: "id",
       },
     },
@@ -60,7 +60,7 @@ Function.init(
     timestamps: true,
     indexes: [
       {
-        fields: ["qubitId"],
+        fields: ["assistantId"],
       },
       {
         using: "gin",

@@ -2,7 +2,7 @@ const { Model, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 const crypto = require("crypto");
 
-class Qubit extends Model {
+class Assistant extends Model {
   async generateNewApiKey() {
     const newApiKey = crypto.randomBytes(32).toString("hex");
     await this.update({
@@ -12,7 +12,7 @@ class Qubit extends Model {
   }
 }
 
-Qubit.init(
+Assistant.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -64,7 +64,7 @@ Qubit.init(
   },
   {
     sequelize,
-    modelName: "Qubit",
+    modelName: "Assistant",
     paranoid: true,
     timestamps: true,
     indexes: [
@@ -75,4 +75,4 @@ Qubit.init(
   }
 );
 
-module.exports = Qubit;
+module.exports = Assistant;

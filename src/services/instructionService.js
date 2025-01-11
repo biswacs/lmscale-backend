@@ -1,12 +1,12 @@
-const { Instruction, Qubit, sequelize } = require("../models");
+const { Instruction, Assistant, sequelize } = require("../models");
 
 class InstructionService {
   async create(instructionData, userId) {
-    const { qubitId, name, content } = instructionData;
+    const { assistantId, name, content } = instructionData;
 
     console.log("[InstructionService] Attempting to create instruction", {
       userId,
-      qubitId,
+      assistantId,
       name,
     });
 
@@ -23,33 +23,33 @@ class InstructionService {
         };
       }
 
-      const qubit = await Qubit.findOne({
-        where: { id: qubitId, userId },
+      const assistant = await Assistant.findOne({
+        where: { id: assistantId, userId },
       });
 
-      if (!qubit) {
-        console.log("[InstructionService] No qubit found or unauthorized", {
-          qubitId,
+      if (!assistant) {
+        console.log("[InstructionService] No assistant found or unauthorized", {
+          assistantId,
           userId,
         });
         return {
           success: false,
-          message: "Qubit not found or unauthorized access",
+          message: "Assistant not found or unauthorized access",
         };
       }
 
       const existingInstruction = await Instruction.findOne({
         where: {
-          qubitId,
+          assistantId,
           name,
         },
       });
 
       if (existingInstruction) {
         console.log(
-          "[InstructionService] Instruction name already exists for qubit",
+          "[InstructionService] Instruction name already exists for assistant",
           {
-            qubitId,
+            assistantId,
             name,
           }
         );
@@ -62,7 +62,7 @@ class InstructionService {
       const newInstruction = await Instruction.create({
         name,
         content,
-        qubitId,
+        assistantId,
       });
 
       console.log("[InstructionService] Instruction created successfully", {
@@ -90,31 +90,34 @@ class InstructionService {
     }
   }
 
-  async list(qubitId, userId) {
+  async list(assistantId, userId) {
     console.log("[InstructionService] Attempting to list instructions", {
-      qubitId,
+      assistantId,
       userId,
     });
 
     try {
-      const qubit = await Qubit.findOne({
-        where: { id: qubitId, userId },
+      const assistant = await Assistant.findOne({
+        where: { id: assistantId, userId },
       });
 
-      if (!qubit) {
-        console.log("[InstructionService] Qubit not found or unauthorized", {
-          qubitId,
-          userId,
-        });
+      if (!assistant) {
+        console.log(
+          "[InstructionService] Assistant not found or unauthorized",
+          {
+            assistantId,
+            userId,
+          }
+        );
         return {
           success: false,
-          message: "Qubit not found or unauthorized access",
+          message: "Assistant not found or unauthorized access",
         };
       }
 
       const instructions = await Instruction.findAll({
         where: {
-          qubitId,
+          assistantId,
           isActive: true,
         },
         order: [["createdAt", "DESC"]],
@@ -128,7 +131,7 @@ class InstructionService {
       };
     } catch (error) {
       console.error("[InstructionService] Error listing instructions:", {
-        qubitId,
+        assistantId,
         userId,
         error: error.message,
         stack: error.stack,
@@ -163,14 +166,14 @@ class InstructionService {
         };
       }
 
-      const qubit = await Qubit.findOne({
+      const assistant = await Assistant.findOne({
         where: {
-          id: instruction.qubitId,
+          id: instruction.assistantId,
           userId,
         },
       });
 
-      if (!qubit) {
+      if (!assistant) {
         console.log("[InstructionService] Unauthorized access", {
           instructionId,
           userId,
@@ -240,14 +243,14 @@ class InstructionService {
         };
       }
 
-      const qubit = await Qubit.findOne({
+      const assistant = await Assistant.findOne({
         where: {
-          id: instruction.qubitId,
+          id: instruction.assistantId,
           userId,
         },
       });
 
-      if (!qubit) {
+      if (!assistant) {
         console.log("[InstructionService] Unauthorized access", {
           instructionId,
           userId,

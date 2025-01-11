@@ -1,14 +1,14 @@
-const QubitService = require("../services/qubitService");
-const qubitService = new QubitService();
+const AssistantService = require("../services/assistantService");
+const assistantService = new AssistantService();
 
-const QubitController = {
+const AssistantController = {
   async create(req, res) {
     const userId = req.user.id;
     const { name } = req.body;
 
-    console.log("[QubitController] Received qubit creation request", {
+    console.log("[AssistantController] Received assistant creation request", {
       userId,
-      qubitDetails: { name },
+      assistantDetails: { name },
     });
 
     try {
@@ -17,7 +17,7 @@ const QubitController = {
 
       if (missingFields.length > 0) {
         console.log(
-          "[QubitController] Creation failed - missing required fields",
+          "[AssistantController] Creation failed - missing required fields",
           {
             userId,
             missingFields,
@@ -31,7 +31,7 @@ const QubitController = {
 
       if (name.toLowerCase() === "playground") {
         console.log(
-          "[QubitController] Creation failed - 'playground' is a reserved name",
+          "[AssistantController] Creation failed - 'playground' is a reserved name",
           {
             userId,
           }
@@ -42,10 +42,10 @@ const QubitController = {
         });
       }
 
-      const response = await qubitService.create({ name }, userId);
+      const response = await assistantService.create({ name }, userId);
 
       if (!response.success) {
-        console.log("[QubitController] Qubit creation failed", {
+        console.log("[AssistantController] Assistant creation failed", {
           userId,
           reason: response.message,
         });
@@ -55,20 +55,20 @@ const QubitController = {
         });
       }
 
-      console.log("[QubitController] Qubit created successfully", {
+      console.log("[AssistantController] Assistant created successfully", {
         userId,
-        qubit: response.data.qubit,
+        assistant: response.data.assistant,
       });
 
       return res.status(201).json({
         success: true,
-        message: "Qubit created successfully",
+        message: "Assistant created successfully",
         data: {
-          qubit: response.data.qubit,
+          assistant: response.data.assistant,
         },
       });
     } catch (error) {
-      console.error("[QubitController] Qubit creation error:", {
+      console.error("[AssistantController] Assistant creation error:", {
         userId,
         error: error.message,
         stack: error.stack,
@@ -81,18 +81,18 @@ const QubitController = {
     }
   },
 
-  async getQubits(req, res) {
+  async getAssistants(req, res) {
     const userId = req.user.id;
 
-    console.log("[QubitController] Received user qubits request", {
+    console.log("[AssistantController] Received user assistants request", {
       userId,
     });
 
     try {
-      const response = await qubitService.list(userId);
+      const response = await assistantService.list(userId);
 
       if (!response.success) {
-        console.log("[QubitController] Qubits retrieval failed", {
+        console.log("[AssistantController] Assistants retrieval failed", {
           userId,
           reason: response.message,
         });
@@ -102,20 +102,20 @@ const QubitController = {
         });
       }
 
-      console.log("[QubitController] Qubits retrieved successfully", {
+      console.log("[AssistantController] Assistants retrieved successfully", {
         userId,
-        qubitsCount: response.data.qubits.length,
+        assistantsCount: response.data.assistants.length,
       });
 
       return res.json({
         success: true,
         message: response.message,
         data: {
-          qubits: response.data.qubits,
+          assistants: response.data.assistants,
         },
       });
     } catch (error) {
-      console.error("[QubitController] Qubits retrieval error:", {
+      console.error("[AssistantController] Assistants retrieval error:", {
         userId,
         error: error.message,
         stack: error.stack,
@@ -129,4 +129,4 @@ const QubitController = {
   },
 };
 
-module.exports = QubitController;
+module.exports = AssistantController;

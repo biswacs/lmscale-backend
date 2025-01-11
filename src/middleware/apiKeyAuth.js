@@ -1,4 +1,4 @@
-const { Qubit } = require("../models");
+const { Assistant } = require("../models");
 
 const apiKeyAuth = async (req, res, next) => {
   console.log("[apiKeyAuth] Checking API key authentication");
@@ -18,24 +18,26 @@ const apiKeyAuth = async (req, res, next) => {
   }
 
   try {
-    console.log("[apiKeyAuth] Looking up qubit with API key");
-    const qubit = await Qubit.findOne({
+    console.log("[apiKeyAuth] Looking up assistant with API key");
+    const assistant = await Assistant.findOne({
       where: {
         apiKey,
         isActive: true,
       },
     });
 
-    if (!qubit) {
-      console.log("[apiKeyAuth] No active qubit found with provided API key");
+    if (!assistant) {
+      console.log(
+        "[apiKeyAuth] No active assistant found with provided API key"
+      );
       return res.status(401).json({
         success: false,
-        message: "Invalid API key or inactive qubit",
+        message: "Invalid API key or inactive assistant",
       });
     }
 
-    console.log("[apiKeyAuth] Qubit found:", { qubitId: qubit.id });
-    req.qubitId = qubit.id;
+    console.log("[apiKeyAuth] Assistant found:", { assistantId: assistant.id });
+    req.assistantId = assistant.id;
     next();
   } catch (error) {
     console.error("[apiKeyAuth] Error during authentication:", error);

@@ -18,11 +18,11 @@ Instruction.init(
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    qubitId: {
+    assistantId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: "Qubits",
+        model: "Assistants",
         key: "id",
       },
     },
@@ -44,7 +44,7 @@ Instruction.init(
     timestamps: true,
     indexes: [
       {
-        fields: ["qubitId"],
+        fields: ["assistantId"],
       },
     ],
   }

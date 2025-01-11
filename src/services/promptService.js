@@ -1,47 +1,47 @@
-const { Qubit, sequelize } = require("../models");
+const { Assistant, sequelize } = require("../models");
 
 class PromptService {
-  async get(qubitId, userId) {
+  async get(assistantId, userId) {
     console.log("[PromptService] Attempting to get prompt", {
       userId,
-      qubitId,
+      assistantId,
     });
 
     try {
-      const qubit = await Qubit.findOne({
+      const assistant = await Assistant.findOne({
         where: {
-          id: qubitId,
+          id: assistantId,
           userId: userId,
         },
         attributes: ["id", "name", "prompt"],
       });
 
-      if (!qubit) {
-        console.log("[PromptService] No qubit found", {
-          qubitId: qubitId,
+      if (!assistant) {
+        console.log("[PromptService] No assistant found", {
+          assistantId: assistantId,
           userId,
         });
         return {
           success: false,
-          message: "Qubit not found or unauthorized access",
+          message: "Assistant not found or unauthorized access",
         };
       }
 
       console.log("[PromptService] Prompt retrieved successfully", {
-        qubitId: qubit.id,
+        assistantId: assistant.id,
         userId,
       });
 
       return {
         success: true,
         data: {
-          qubit,
+          assistant,
         },
       };
     } catch (error) {
       console.error("[PromptService] Error retrieving prompt:", {
         userId,
-        qubitId: qubitId,
+        assistantId: assistantId,
         error: error.message,
         stack: error.stack,
       });
@@ -54,46 +54,46 @@ class PromptService {
     }
   }
 
-  async update(prompt, qubitId, userId) {
+  async update(prompt, assistantId, userId) {
     console.log("[PromptService] Attempting to update prompt", {
-      qubitId,
+      assistantId,
       userId,
     });
 
     const transaction = await sequelize.transaction();
 
     try {
-      const qubit = await Qubit.findOne({
+      const assistant = await Assistant.findOne({
         where: {
-          id: qubitId,
+          id: assistantId,
           userId: userId,
         },
         transaction,
       });
 
-      if (!qubit) {
-        console.log("[PromptService] No qubit found", {
-          qubitId: qubitId,
+      if (!assistant) {
+        console.log("[PromptService] No assistant found", {
+          assistantId: assistantId,
           userId,
         });
         await transaction.rollback();
         return {
           success: false,
-          message: "Qubit not found or unauthorized access",
+          message: "Assistant not found or unauthorized access",
         };
       }
 
       const updatedPrompt =
         prompt.trim() === ""
-          ? Qubit.getAttributes().prompt.defaultValue
+          ? Assistant.getAttributes().prompt.defaultValue
           : prompt;
 
-      qubit.prompt = updatedPrompt;
-      await qubit.save({ transaction });
+      assistant.prompt = updatedPrompt;
+      await assistant.save({ transaction });
       await transaction.commit();
 
       console.log("[PromptService] Prompt updated successfully", {
-        qubitId: qubit.id,
+        assistantId: assistant.id,
         userId,
       });
 
@@ -101,17 +101,17 @@ class PromptService {
         success: true,
         message: "Prompt updated successfully",
         data: {
-          qubit: {
-            id: qubit.id,
-            name: qubit.name,
-            prompt: qubit.prompt,
+          assistant: {
+            id: assistant.id,
+            name: assistant.name,
+            prompt: assistant.prompt,
           },
         },
       };
     } catch (error) {
       console.error("[PromptService] Error updating prompt:", {
         userId,
-        qubitId,
+        assistantId,
         error: error.message,
         stack: error.stack,
       });
