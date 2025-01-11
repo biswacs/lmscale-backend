@@ -1,4 +1,4 @@
-const { Assistant } = require("../models");
+const { Assistant, Instruction, Function } = require("../models");
 
 class AssistantService {
   async create(assistantData, userId) {
@@ -109,6 +109,99 @@ class AssistantService {
       return {
         success: false,
         message: "Failed to retrieve user assistants",
+      };
+    }
+  }
+
+  async getOne(assistantId, userId) {
+    console.log("[AssistantService] Fetching assistant details", {
+      assistantId,
+      userId,
+    });
+
+    try {
+      const assistant = await Assistant.findOne({
+        where: {
+          id: assistantId,
+          userId,
+        },
+        include: [
+          {
+            model: Instruction,
+            as: "instructions",
+            where: { isActive: true },
+            required: false,
+            attributes: ["id", "name", "content", "metadata", "createdAt"],
+          },
+          {
+            model: Function,
+            as: "functions",
+            where: { isActive: true },
+            required: false,
+            attributes: [
+              "id",
+              "name",
+              "endpoint",
+              "method",
+              "parameters",
+              "authType",
+              "metadata",
+              "createdAt",
+            ],
+          },
+        ],
+        attributes: [
+          "id",
+          "name",
+          "prompt",
+          "apiKey",
+          "config",
+          "isActive",
+          "createdAt",
+        ],
+      });
+
+      if (!assistant) {
+        console.log("[AssistantService] Assistant not found", {
+          assistantId,
+          userId,
+        });
+        return {
+          success: false,
+          message: "Assistant not found",
+        };
+      }
+
+      const formattedAssistant = {
+        id: assistant.id,
+        name: assistant.name,
+        prompt: assistant.prompt,
+        apiKey: assistant.apiKey,
+        config: assistant.config,
+        isActive: assistant.isActive,
+        createdAt: assistant.createdAt,
+        instructions: assistant.instructions || [],
+        functions: assistant.functions || [],
+      };
+
+      return {
+        success: true,
+        message: "Assistant retrieved successfully",
+        data: {
+          assistant: formattedAssistant,
+        },
+      };
+    } catch (error) {
+      console.error("[AssistantService] Error fetching assistant:", {
+        assistantId,
+        userId,
+        error: error.message,
+        stack: error.stack,
+      });
+
+      return {
+        success: false,
+        message: "Failed to retrieve assistant",
       };
     }
   }
