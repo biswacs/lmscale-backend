@@ -1,4 +1,4 @@
-const { Assistant, Instruction, Function } = require("../models");
+const { Assistant, Instruction, Function, Usage } = require("../models");
 
 class AssistantService {
   async create(assistantData, userId) {
@@ -172,6 +172,13 @@ class AssistantService {
         };
       }
 
+      const usages = await Usage.findAll({
+        where: {
+          assistantId: assistant.id,
+        },
+        order: [["createdAt", "DESC"]],
+      });
+
       const formattedAssistant = {
         id: assistant.id,
         name: assistant.name,
@@ -182,6 +189,7 @@ class AssistantService {
         createdAt: assistant.createdAt,
         instructions: assistant.instructions || [],
         functions: assistant.functions || [],
+        usages: usages || [],
       };
 
       return {
