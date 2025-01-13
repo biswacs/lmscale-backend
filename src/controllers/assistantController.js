@@ -41,7 +41,18 @@ const AssistantController = {
           message: "'playground' is a reserved name and cannot be used",
         });
       }
-
+      if (name.length > 14) {
+        console.log(
+          "[AssistantController] Creation failed - The assistant name cannot exceed 14 characters in length",
+          {
+            userId,
+          }
+        );
+        return res.status(400).json({
+          success: false,
+          message: "The assistant name cannot exceed 14 characters in length",
+        });
+      }
       const response = await assistantService.create({ name }, userId);
 
       if (!response.success) {
