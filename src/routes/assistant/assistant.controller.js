@@ -1,4 +1,4 @@
-const AssistantService = require("../services/assistantService");
+const AssistantService = require("../../models/assistant/assistant.service");
 const assistantService = new AssistantService();
 
 const AssistantController = {
@@ -174,6 +174,134 @@ const AssistantController = {
       });
     } catch (error) {
       console.error("[AssistantController] Assistant retrieval error:", {
+        userId,
+        assistantId,
+        error: error.message,
+        stack: error.stack,
+      });
+
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  },
+
+  async updatePrompt(req, res) {
+    const userId = req.user.id;
+    const assistantId = req.body.assistantId;
+    const prompt = req.body.prompt;
+
+    console.log("[PromptController] Received update prompt request", {
+      userId,
+      assistantId,
+    });
+
+    try {
+      const requiredFields = ["assistantId"];
+      const missingFields = requiredFields.filter((field) => !req.body[field]);
+
+      if (missingFields.length > 0) {
+        console.log(
+          "[PromptController] Update prompt failed - missing required fields",
+          {
+            userId,
+            missingFields,
+          }
+        );
+        return res.status(400).json({
+          success: false,
+          message: `Missing required fields: ${missingFields.join(", ")}`,
+        });
+      }
+
+      const response = await promptService.update(prompt, assistantId, userId);
+
+      if (!response.success) {
+        console.log("[PromptController] Update prompt failed", {
+          userId,
+          assistantId,
+          reason: response.message,
+        });
+        return res.status(400).json({
+          success: false,
+          message: response.message,
+        });
+      }
+
+      console.log("[PromptController] Prompt updated successfully", {
+        userId: userId,
+        assistant: response.data.assistant,
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Prompt updated successfully",
+        data: {
+          assistant: response.data.assistant,
+        },
+      });
+    } catch (error) {
+      console.error("[PromptController] Update prompt error:", {
+        userId: userId,
+        assistantId: req.body.assistantId,
+        error: error.message,
+        stack: error.stack,
+      });
+
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  },
+
+  async getApiKey(req, res) {
+    const userId = req.user.id;
+    const assistantId = req.query.assistantId;
+
+    console.log("[ApiKeyController] Received API key fetch request", {
+      userId,
+      assistantId,
+    });
+
+    try {
+      if (!assistantId) {
+        console.log("[ApiKeyController] Missing assistant ID", {
+          userId,
+        });
+        return res.status(400).json({
+          success: false,
+          message: "Missing required parameter: assistantId",
+        });
+      }
+
+      const response = await apiKeyService.get(userId, assistantId);
+
+      if (!response.success) {
+        console.log("[ApiKeyController] API key fetch failed", {
+          userId,
+          assistantId,
+          reason: response.message,
+        });
+        return res.status(404).json({
+          success: false,
+          message: response.message,
+        });
+      }
+
+      console.log("[ApiKeyController] API key fetched successfully", {
+        userId,
+        assistantId,
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "API key retrieved successfully",
+        data: response.data,
+      });
+    } catch (error) {
+      console.error("[ApiKeyController] API key fetch error:", {
         userId,
         assistantId,
         error: error.message,

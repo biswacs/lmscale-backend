@@ -1,4 +1,4 @@
-const { Assistant, Instruction, Function, Usage } = require("../models");
+const { Assistant, Instruction, Function, Usage } = require("..");
 
 class AssistantService {
   async create(assistantData, userId) {
@@ -150,15 +150,7 @@ class AssistantService {
             ],
           },
         ],
-        attributes: [
-          "id",
-          "name",
-          "prompt",
-          "apiKey",
-          "config",
-          "isActive",
-          "createdAt",
-        ],
+        attributes: ["id", "name", "prompt", "config", "isActive", "createdAt"],
       });
 
       if (!assistant) {
@@ -210,6 +202,136 @@ class AssistantService {
       return {
         success: false,
         message: "Failed to retrieve assistant",
+      };
+    }
+  }
+
+  async getApi(userId, assistantId) {
+    console.log("[ApiKeyService] Attempting to fetch API key", {
+      userId,
+      assistantId,
+    });
+
+    try {
+      const assistant = await Assistant.findOne({
+        where: {
+          id: assistantId,
+          userId: userId,
+        },
+        attributes: ["id", "name", "apiKey"],
+      });
+
+      if (!assistant) {
+        console.log("[ApiKeyService] No assistant found", {
+          userId,
+          assistantId,
+        });
+        return {
+          success: false,
+          message: "Assistant not found",
+        };
+      }
+
+      console.log("[ApiKeyService] API key retrieved successfully", {
+        userId,
+        assistantId,
+      });
+
+      return {
+        success: true,
+        message: "API key retrieved successfully",
+        data: {
+          assistant: {
+            id: assistant.id,
+            name: assistant.name,
+            apiKey: assistant.apiKey,
+          },
+        },
+      };
+    } catch (error) {
+      console.error("[ApiKeyService] Error fetching API key:", {
+        userId,
+        assistantId,
+        error: error.message,
+        stack: error.stack,
+      });
+
+      return {
+        success: false,
+        message: "Failed to retrieve API key",
+        error: error.message,
+      };
+    }
+  }
+
+  async update(prompt, assistantId, userId) {
+    console.log("[PromptService] Attempting to update prompt", {
+      assistantId,
+      userId,
+    });
+
+    const transaction = await sequelize.transaction();
+
+    try {
+      const assistant = await Assistant.findOne({
+        where: {
+          id: assistantId,
+          userId: userId,
+        },
+        transaction,
+      });
+
+      if (!assistant) {
+        console.log("[PromptService] No assistant found", {
+          assistantId: assistantId,
+          userId,
+        });
+        await transaction.rollback();
+        return {
+          success: false,
+          message: "Assistant not found or unauthorized access",
+        };
+      }
+
+      const updatedPrompt =
+        prompt.trim() === ""
+          ? Assistant.getAttributes().prompt.defaultValue
+          : prompt;
+
+      assistant.prompt = updatedPrompt;
+      await assistant.save({ transaction });
+      await transaction.commit();
+
+      console.log("[PromptService] Prompt updated successfully", {
+        assistantId: assistant.id,
+        userId,
+      });
+
+      return {
+        success: true,
+        message: "Prompt updated successfully",
+        data: {
+          assistant: {
+            id: assistant.id,
+            name: assistant.name,
+            prompt: assistant.prompt,
+          },
+        },
+      };
+    } catch (error) {
+      console.error("[PromptService] Error updating prompt:", {
+        userId,
+        assistantId,
+        error: error.message,
+        stack: error.stack,
+      });
+
+      await transaction.rollback();
+
+      return {
+        success: false,
+        message: "Failed to update prompt",
+        error: error.message,
       };
     }
   }

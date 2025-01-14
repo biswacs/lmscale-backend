@@ -1,10 +1,10 @@
 const sequelize = require("../config/database");
-const User = require("./user");
-const Assistant = require("./assistant");
-const Function = require("./function");
-const Instruction = require("./instruction");
-const Gpu = require("./gpu");
-const Usage = require("./usage");
+const User = require("./user/user.schema");
+const Assistant = require("./assistant/assistant.schema");
+const Function = require("./function/function.schema");
+const Instruction = require("./instruction/instruction.schema");
+const Gpu = require("./gpu/gpu.schema");
+const Usage = require("./usage/usage.schema");
 
 User.hasMany(Assistant, {
   foreignKey: "userId",

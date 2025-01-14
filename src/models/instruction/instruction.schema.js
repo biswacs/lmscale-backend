@@ -1,9 +1,9 @@
 const { Model, DataTypes } = require("sequelize");
-const sequelize = require("../config/database");
+const sequelize = require("../../config/database");
 
-class Function extends Model {}
+class Instruction extends Model {}
 
-Function.init(
+Instruction.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -14,6 +14,10 @@ Function.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    content: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
     assistantId: {
       type: DataTypes.UUID,
       allowNull: false,
@@ -21,26 +25,6 @@ Function.init(
         model: "Assistants",
         key: "id",
       },
-    },
-    endpoint: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    method: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        isIn: [["GET", "POST"]],
-      },
-    },
-    parameters: {
-      type: DataTypes.JSONB,
-      allowNull: false,
-      defaultValue: {},
-    },
-    authType: {
-      type: DataTypes.STRING,
-      allowNull: false,
     },
     metadata: {
       type: DataTypes.JSONB,
@@ -55,19 +39,15 @@ Function.init(
   },
   {
     sequelize,
-    modelName: "Function",
+    modelName: "Instruction",
     paranoid: true,
     timestamps: true,
     indexes: [
       {
         fields: ["assistantId"],
       },
-      {
-        using: "gin",
-        fields: ["parameters"],
-      },
     ],
   }
 );
 
-module.exports = Function;
+module.exports = Instruction;
