@@ -1,7 +1,7 @@
-const { Function, Assistant, sequelize } = require("../models");
+const { Function, Assistant, sequelize } = require("../index");
 
 class FunctionService {
-  async create(functionData, userId) {
+  async createFunction(functionData, userId) {
     const {
       assistantId,
       name,
@@ -101,63 +101,7 @@ class FunctionService {
     }
   }
 
-  async list(assistantId, userId) {
-    console.log("[FunctionService] Attempting to list functions", {
-      assistantId,
-      userId,
-    });
-
-    try {
-      const assistant = await Assistant.findOne({
-        where: { id: assistantId, userId },
-      });
-
-      if (!assistant) {
-        console.log("[FunctionService] Assistant not found or unauthorized", {
-          assistantId,
-          userId,
-        });
-        return {
-          success: false,
-          message: "Assistant not found or unauthorized access",
-        };
-      }
-
-      const functions = await Function.findAll({
-        where: {
-          assistantId,
-          isActive: true,
-        },
-        order: [["createdAt", "DESC"]],
-      });
-
-      console.log("[FunctionService] Functions retrieved successfully", {
-        assistantId,
-        count: functions.length,
-      });
-
-      return {
-        success: true,
-        data: {
-          functions,
-        },
-      };
-    } catch (error) {
-      console.error("[FunctionService] Error listing functions:", {
-        assistantId,
-        userId,
-        error: error.message,
-        stack: error.stack,
-      });
-
-      return {
-        success: false,
-        message: "Failed to list functions",
-      };
-    }
-  }
-
-  async delete(functionId, userId) {
+  async deleteFunction(functionId, userId) {
     console.log("[FunctionService] Attempting to delete function", {
       functionId,
       userId,

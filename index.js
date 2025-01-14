@@ -3,7 +3,6 @@ const express = require("express");
 const cors = require("cors");
 const { sequelize } = require("./src/models");
 const userRoutes = require("./src/routes/user/user.routes");
-const chatRoutes = require("./src/routes/chat/chat.routes");
 const gpuRoutes = require("./src/routes/gpu/gpu.routes");
 const assistantRoutes = require("./src/routes/assistant/assistant.routes");
 const functionRoutes = require("./src/routes/function/function.routes");
@@ -24,7 +23,6 @@ if (Env == "Local") {
 }
 
 app.use("/v1/user", userRoutes);
-app.use("/v1/chat", chatRoutes);
 app.use("/v1/assistant", assistantRoutes);
 app.use("/v1/function", functionRoutes);
 app.use("/v1/instruction", instructionRoutes);

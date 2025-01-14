@@ -1,4 +1,4 @@
-const { User, Assistant, sequelize } = require("../models");
+const { User, Assistant, sequelize } = require("../index");
 const jwt = require("jsonwebtoken");
 
 class UserService {

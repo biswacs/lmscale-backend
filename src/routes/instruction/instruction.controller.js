@@ -1,4 +1,4 @@
-const InstructionService = require("../services/instructionService");
+const InstructionService = require("../../models/instruction/instruction.service");
 const instructionService = new InstructionService();
 
 const InstructionController = {

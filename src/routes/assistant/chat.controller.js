@@ -1,4 +1,4 @@
-const ChatService = require("../services/chatService");
+const ChatService = require("../../models/assistant/chat.service");
 const chatService = new ChatService();
 
 const ChatController = {

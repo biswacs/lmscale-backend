@@ -1,4 +1,4 @@
-const GpuService = require("../services/gpuService");
+const GpuService = require("../../models/gpu/gpu.service");
 const gpuService = new GpuService();
 
 const GpuController = {
@@ -30,7 +30,7 @@ const GpuController = {
         });
       }
 
-      const response = await gpuService.create(req.body, req.user.email);
+      const response = await gpuService.createGpu(req.body, req.user.email);
 
       if (!response.success) {
         console.log("[GpuController] GPU creation failed", {

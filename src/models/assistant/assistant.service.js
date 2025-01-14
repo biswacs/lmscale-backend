@@ -1,7 +1,7 @@
-const { Assistant, Instruction, Function, Usage } = require("..");
+const { Assistant, Instruction, Function, Usage } = require("../index");
 
 class AssistantService {
-  async create(assistantData, userId) {
+  async createAssistant(assistantData, userId) {
     const { name } = assistantData;
 
     console.log("[AssistantService] Attempting to create assistant", {
@@ -67,7 +67,7 @@ class AssistantService {
     }
   }
 
-  async list(userId) {
+  async allAssistants(userId) {
     console.log("[AssistantService] Fetching user assistants", {
       userId,
     });
@@ -113,7 +113,7 @@ class AssistantService {
     }
   }
 
-  async getOne(assistantId, userId) {
+  async getAssistant(assistantId, userId) {
     console.log("[AssistantService] Fetching assistant details", {
       assistantId,
       userId,
@@ -206,7 +206,7 @@ class AssistantService {
     }
   }
 
-  async getApi(userId, assistantId) {
+  async getApiKey(userId, assistantId) {
     console.log("[ApiKeyService] Attempting to fetch API key", {
       userId,
       assistantId,
@@ -264,7 +264,7 @@ class AssistantService {
     }
   }
 
-  async update(prompt, assistantId, userId) {
+  async updatePrompt(prompt, assistantId, userId) {
     console.log("[PromptService] Attempting to update prompt", {
       assistantId,
       userId,

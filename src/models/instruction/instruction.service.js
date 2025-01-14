@@ -1,4 +1,4 @@
-const { Instruction, Assistant, sequelize } = require("../models");
+const { Instruction, Assistant } = require("../index");
 
 class InstructionService {
   async create(instructionData, userId) {

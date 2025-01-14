@@ -1,5 +1,5 @@
-const { Assistant, Function, Instruction, Usage, Gpu } = require("../models");
-const { calculateTokens } = require("../utils/tokenizer");
+const { Assistant, Function, Instruction, Usage, Gpu } = require("../index");
+const { calculateTokens } = require("../../utils/tokenizer");
 const axios = require("axios");
 
 class ChatService {

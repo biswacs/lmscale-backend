@@ -1,4 +1,4 @@
-const FunctionService = require("../services/functionService");
+const FunctionService = require("../../models/function/function.service");
 const functionService = new FunctionService();
 
 const FunctionController = {
@@ -55,7 +55,10 @@ const FunctionController = {
         isActive,
       };
 
-      const response = await functionService.create(functionData, userId);
+      const response = await functionService.createFunction(
+        functionData,
+        userId
+      );
 
       if (!response.success) {
         console.log("[FunctionController] Create function failed", {
@@ -94,51 +97,6 @@ const FunctionController = {
     }
   },
 
-  async listFunctions(req, res) {
-    const userId = req.user.id;
-    const assistantId = req.query.assistantId;
-
-    console.log("[FunctionController] Received list functions request", {
-      userId,
-      assistantId,
-    });
-
-    try {
-      const response = await functionService.list(assistantId, userId);
-
-      if (!response.success) {
-        console.log("[FunctionController] List functions failed", {
-          userId,
-          assistantId,
-          reason: response.message,
-        });
-        return res.status(400).json({
-          success: false,
-          message: response.message,
-        });
-      }
-
-      return res.status(200).json({
-        success: true,
-        data: {
-          functions: response.data.functions,
-        },
-      });
-    } catch (error) {
-      console.error("[FunctionController] List functions error:", {
-        userId,
-        assistantId,
-        error: error.message,
-        stack: error.stack,
-      });
-
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error",
-      });
-    }
-  },
-
   async deleteFunction(req, res) {
     const userId = req.user.id;
     const functionId = req.query.functionId;
@@ -149,7 +107,7 @@ const FunctionController = {
     });
 
     try {
-      const response = await functionService.delete(functionId, userId);
+      const response = await functionService.deleteFunction(functionId, userId);
 
       if (!response.success) {
         console.log("[FunctionController] Delete function failed", {

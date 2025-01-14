@@ -2,7 +2,7 @@ const AssistantService = require("../../models/assistant/assistant.service");
 const assistantService = new AssistantService();
 
 const AssistantController = {
-  async createAssistants(req, res) {
+  async createAssistant(req, res) {
     const userId = req.user.id;
     const { name } = req.body;
 
@@ -55,7 +55,7 @@ const AssistantController = {
         });
       }
 
-      const response = await assistantService.create({ name }, userId);
+      const response = await assistantService.createAssistant({ name }, userId);
 
       if (!response.success) {
         console.log("[AssistantController] Assistant creation failed", {
@@ -94,7 +94,7 @@ const AssistantController = {
     }
   },
 
-  async getAllAssistants(req, res) {
+  async allAssistants(req, res) {
     const userId = req.user.id;
 
     console.log("[AssistantController] Received user assistants request", {
@@ -102,7 +102,7 @@ const AssistantController = {
     });
 
     try {
-      const response = await assistantService.list(userId);
+      const response = await assistantService.allAssistants(userId);
 
       if (!response.success) {
         console.log("[AssistantController] Assistants retrieval failed", {
@@ -151,7 +151,7 @@ const AssistantController = {
     });
 
     try {
-      const response = await assistantService.getOne(assistantId, userId);
+      const response = await assistantService.getAssistant(assistantId, userId);
 
       if (!response.success) {
         console.log("[AssistantController] Assistant retrieval failed", {
@@ -174,6 +174,65 @@ const AssistantController = {
       });
     } catch (error) {
       console.error("[AssistantController] Assistant retrieval error:", {
+        userId,
+        assistantId,
+        error: error.message,
+        stack: error.stack,
+      });
+
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  },
+
+  async getApiKey(req, res) {
+    const userId = req.user.id;
+    const assistantId = req.query.assistantId;
+
+    console.log("[ApiKeyController] Received API key fetch request", {
+      userId,
+      assistantId,
+    });
+
+    try {
+      if (!assistantId) {
+        console.log("[ApiKeyController] Missing assistant ID", {
+          userId,
+        });
+        return res.status(400).json({
+          success: false,
+          message: "Missing required parameter: assistantId",
+        });
+      }
+
+      const response = await assistantService.getApiKey(userId, assistantId);
+
+      if (!response.success) {
+        console.log("[ApiKeyController] API key fetch failed", {
+          userId,
+          assistantId,
+          reason: response.message,
+        });
+        return res.status(404).json({
+          success: false,
+          message: response.message,
+        });
+      }
+
+      console.log("[ApiKeyController] API key fetched successfully", {
+        userId,
+        assistantId,
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "API key retrieved successfully",
+        data: response.data,
+      });
+    } catch (error) {
+      console.error("[ApiKeyController] API key fetch error:", {
         userId,
         assistantId,
         error: error.message,
@@ -215,7 +274,11 @@ const AssistantController = {
         });
       }
 
-      const response = await promptService.update(prompt, assistantId, userId);
+      const response = await assistantService.updatePrompt(
+        prompt,
+        assistantId,
+        userId
+      );
 
       if (!response.success) {
         console.log("[PromptController] Update prompt failed", {
@@ -245,65 +308,6 @@ const AssistantController = {
       console.error("[PromptController] Update prompt error:", {
         userId: userId,
         assistantId: req.body.assistantId,
-        error: error.message,
-        stack: error.stack,
-      });
-
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error",
-      });
-    }
-  },
-
-  async getApiKey(req, res) {
-    const userId = req.user.id;
-    const assistantId = req.query.assistantId;
-
-    console.log("[ApiKeyController] Received API key fetch request", {
-      userId,
-      assistantId,
-    });
-
-    try {
-      if (!assistantId) {
-        console.log("[ApiKeyController] Missing assistant ID", {
-          userId,
-        });
-        return res.status(400).json({
-          success: false,
-          message: "Missing required parameter: assistantId",
-        });
-      }
-
-      const response = await apiKeyService.get(userId, assistantId);
-
-      if (!response.success) {
-        console.log("[ApiKeyController] API key fetch failed", {
-          userId,
-          assistantId,
-          reason: response.message,
-        });
-        return res.status(404).json({
-          success: false,
-          message: response.message,
-        });
-      }
-
-      console.log("[ApiKeyController] API key fetched successfully", {
-        userId,
-        assistantId,
-      });
-
-      return res.status(200).json({
-        success: true,
-        message: "API key retrieved successfully",
-        data: response.data,
-      });
-    } catch (error) {
-      console.error("[ApiKeyController] API key fetch error:", {
-        userId,
-        assistantId,
         error: error.message,
         stack: error.stack,
       });

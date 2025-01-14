@@ -1,5 +1,5 @@
-const userSchemas = require("../validation/userSchemas");
-const UserService = require("../services/userService");
+const userSchemas = require("../../validation/user.validation.schema");
+const UserService = require("../../models/user/user.service");
 const userService = new UserService();
 
 const UserController = {
