@@ -2,14 +2,12 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { sequelize } = require("./src/models");
-const userRoutes = require("./src/routes/userRoutes");
-const chatRoutes = require("./src/routes/chatRoutes");
-const gpuRoutes = require("./src/routes/gpuRoutes");
-const assistantRoutes = require("./src/routes/assistantRoutes");
-const promptRoutes = require("./src/routes/promptRoutes");
-const functionRoutes = require("./src/routes/functionRoutes");
-const instructionRoutes = require("./src/routes/instructionRoutes");
-const apiKeyRoutes = require("./src/routes/apiKeyRoutes");
+const userRoutes = require("./src/routes/user/user.routes");
+const chatRoutes = require("./src/routes/chat/chat.routes");
+const gpuRoutes = require("./src/routes/gpu/gpu.routes");
+const assistantRoutes = require("./src/routes/assistant/assistant.routes");
+const functionRoutes = require("./src/routes/function/function.routes");
+const instructionRoutes = require("./src/routes/instruction/instruction.routes");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -28,10 +26,8 @@ if (Env == "Local") {
 app.use("/v1/user", userRoutes);
 app.use("/v1/chat", chatRoutes);
 app.use("/v1/assistant", assistantRoutes);
-app.use("/v1/prompt", promptRoutes);
 app.use("/v1/function", functionRoutes);
 app.use("/v1/instruction", instructionRoutes);
-app.use("/v1/api", apiKeyRoutes);
 
 app.get("/v1/lmscale", (req, res) => {
   res.json({ message: "LmScale" });
