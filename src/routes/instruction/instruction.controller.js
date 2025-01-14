@@ -29,7 +29,7 @@ const InstructionController = {
         });
       }
 
-      const response = await instructionService.create(
+      const response = await instructionService.createInstruction(
         {
           assistantId,
           name,
@@ -70,58 +70,6 @@ const InstructionController = {
     }
   },
 
-  async listInstructions(req, res) {
-    const userId = req.user.id;
-    const assistantId = req.query.assistantId;
-
-    console.log("[InstructionController] Received list instructions request", {
-      userId,
-      assistantId,
-    });
-
-    try {
-      if (!assistantId) {
-        return res.status(400).json({
-          success: false,
-          message: "assistantId is required",
-        });
-      }
-
-      const response = await instructionService.list(assistantId, userId);
-
-      if (!response.success) {
-        console.log("[InstructionController] List instructions failed", {
-          userId,
-          assistantId,
-          reason: response.message,
-        });
-        return res.status(400).json({
-          success: false,
-          message: response.message,
-        });
-      }
-
-      return res.status(200).json({
-        success: true,
-        data: {
-          instructions: response.data.instructions,
-        },
-      });
-    } catch (error) {
-      console.error("[InstructionController] List instructions error:", {
-        userId,
-        assistantId,
-        error: error.message,
-        stack: error.stack,
-      });
-
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error",
-      });
-    }
-  },
-
   async updateInstruction(req, res) {
     const userId = req.user.id;
     const { instructionId, name, content, metadata, isActive } = req.body;
@@ -132,7 +80,7 @@ const InstructionController = {
     });
 
     try {
-      const response = await instructionService.update(
+      const response = await instructionService.updateInstruction(
         instructionId,
         { name, content, metadata, isActive },
         userId
@@ -159,49 +107,6 @@ const InstructionController = {
       });
     } catch (error) {
       console.error("[InstructionController] Update instruction error:", {
-        userId,
-        instructionId,
-        error: error.message,
-        stack: error.stack,
-      });
-
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error",
-      });
-    }
-  },
-
-  async deleteInstruction(req, res) {
-    const userId = req.user.id;
-    const instructionId = req.body.instructionId;
-
-    console.log("[InstructionController] Received delete instruction request", {
-      userId,
-      instructionId,
-    });
-
-    try {
-      const response = await instructionService.delete(instructionId, userId);
-
-      if (!response.success) {
-        console.log("[InstructionController] Delete instruction failed", {
-          userId,
-          instructionId,
-          reason: response.message,
-        });
-        return res.status(400).json({
-          success: false,
-          message: response.message,
-        });
-      }
-
-      return res.status(200).json({
-        success: true,
-        message: "Instruction deleted successfully",
-      });
-    } catch (error) {
-      console.error("[InstructionController] Delete instruction error:", {
         userId,
         instructionId,
         error: error.message,

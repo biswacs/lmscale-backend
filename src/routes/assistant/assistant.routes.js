@@ -10,6 +10,8 @@ const router = express.Router();
 router.post("/create", auth, AssistantController.createAssistant);
 router.get("/list", auth, AssistantController.allAssistants);
 router.get("/get", auth, AssistantController.getAssistant);
+router.get("/api", auth, AssistantController.getApiKey);
+router.post("/update/prompt", auth, AssistantController.updatePrompt);
 
 router.post(
   "/chat/completion",

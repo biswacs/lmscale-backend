@@ -16,7 +16,7 @@ class UserService {
     return jwt.sign({ id: userId }, process.env.JWT_SECRET);
   }
 
-  async create({ name = "", email, password }) {
+  async register({ name = "", email, password }) {
     console.log("[UserService] Attempting to create user", { email });
 
     const transaction = await sequelize.transaction();
@@ -87,7 +87,7 @@ class UserService {
     }
   }
 
-  async authenticate(email, password) {
+  async login(email, password) {
     console.log("[UserService] Attempting to authenticate user", {
       email,
     });
@@ -167,7 +167,7 @@ class UserService {
     }
   }
 
-  async get(userId) {
+  async getProfile(userId) {
     console.log("[UserService] Fetching user profile", {
       userId,
     });

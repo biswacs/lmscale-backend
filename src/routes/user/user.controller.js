@@ -1,4 +1,4 @@
-const userSchemas = require("../../validation/user.validation.schema");
+const userSchemas = require("../../validation/user/schema");
 const UserService = require("../../models/user/user.service");
 const userService = new UserService();
 
@@ -10,7 +10,7 @@ const UserController = {
 
     try {
       const validatedData = userSchemas.register.parse(req.body);
-      const response = await userService.create(validatedData);
+      const response = await userService.register(validatedData);
 
       if (!response.success) {
         console.log("[UserController] Registration failed - validation error", {
@@ -56,7 +56,7 @@ const UserController = {
 
     try {
       const validatedData = userSchemas.login.parse(req.body);
-      const response = await userService.authenticate(
+      const response = await userService.login(
         validatedData.email,
         validatedData.password
       );
@@ -104,7 +104,7 @@ const UserController = {
     });
 
     try {
-      const response = await userService.get(req.user.id);
+      const response = await userService.getProfile(req.user.id);
 
       if (!response.success) {
         console.log("[UserController] Profile retrieval failed", {
