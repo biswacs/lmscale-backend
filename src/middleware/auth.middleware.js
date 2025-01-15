@@ -1,17 +1,17 @@
 const jwt = require("jsonwebtoken");
 const { User } = require("../models");
 
-const auth = async (req, res, next) => {
-  console.log("[auth] Checking JWT authentication");
+const authMiddleware = async (req, res, next) => {
+  console.log("[authMiddleware] Checking JWT authentication");
   try {
     const authHeader = req.header("Authorization");
     console.log(
-      "[auth] Authorization header:",
+      "[authMiddleware] Authorization header:",
       authHeader ? "Present" : "Missing"
     );
 
     if (!authHeader) {
-      console.log("[auth] No authorization header found");
+      console.log("[authMiddleware] No authorization header found");
       return res.status(401).json({
         message: "Authorization header missing",
         shouldLogout: true,
@@ -19,12 +19,12 @@ const auth = async (req, res, next) => {
     }
 
     const lm_auth_token = authHeader.replace("Bearer ", "");
-    console.log("[auth] Token extracted, verifying...");
+    console.log("[authMiddleware] Token extracted, verifying...");
 
     const decoded = jwt.verify(lm_auth_token, process.env.JWT_SECRET);
-    console.log("[auth] Token verified, user id:", decoded.id);
+    console.log("[authMiddleware] Token verified, user id:", decoded.id);
 
-    console.log("[auth] Looking up user");
+    console.log("[authMiddleware] Looking up user");
     const user = await User.findOne({
       where: {
         id: decoded.id,
@@ -34,14 +34,14 @@ const auth = async (req, res, next) => {
     });
 
     if (!user) {
-      console.log("[auth] No active user found");
+      console.log("[authMiddleware] No active user found");
       return res.status(401).json({
         message: "User not found or inactive",
         shouldLogout: true,
       });
     }
 
-    console.log("[auth] User authenticated:", {
+    console.log("[authMiddleware] User authenticated:", {
       userId: user.id,
       email: user.email,
     });
@@ -50,7 +50,7 @@ const auth = async (req, res, next) => {
     req.lm_auth_token = lm_auth_token;
     next();
   } catch (error) {
-    console.error("[auth] Authentication error:", error);
+    console.error("[authMiddleware] Authentication error:", error);
     res.status(401).json({
       message: "Please authenticate",
       shouldLogout: true,
@@ -58,4 +58,4 @@ const auth = async (req, res, next) => {
   }
 };
 
-module.exports = auth;
+module.exports = authMiddleware;

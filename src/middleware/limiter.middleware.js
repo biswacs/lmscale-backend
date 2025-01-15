@@ -120,7 +120,7 @@ const createApiKeyRateLimiter = (windowMs, max, message) => {
   };
 };
 
-const rateLimiters = {
+const limiterMiddlewares = {
   login: createIPRateLimiter(
     2 * 60 * 1000,
     10,
@@ -146,4 +146,4 @@ const rateLimiters = {
   ),
 };
 
-module.exports = rateLimiters;
+module.exports = limiterMiddlewares;

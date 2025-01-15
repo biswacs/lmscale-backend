@@ -1,16 +1,16 @@
 const { Assistant } = require("../models");
 
-const apiKeyAuth = async (req, res, next) => {
-  console.log("[apiKeyAuth] Checking API key authentication");
+const apiMiddleware = async (req, res, next) => {
+  console.log("[apiMiddleware] Checking API key authentication");
 
   const apiKey = req.headers["x-api-key"];
   console.log(
-    "[apiKeyAuth] API Key received:",
+    "[apiMiddleware] API Key received:",
     apiKey ? `${apiKey.substring(0, 8)}...` : "none"
   );
 
   if (!apiKey) {
-    console.log("[apiKeyAuth] No API key provided");
+    console.log("[apiMiddleware] No API key provided");
     return res.status(401).json({
       success: false,
       message: "API key is required",
@@ -18,7 +18,7 @@ const apiKeyAuth = async (req, res, next) => {
   }
 
   try {
-    console.log("[apiKeyAuth] Looking up assistant with API key");
+    console.log("[apiMiddleware] Looking up assistant with API key");
     const assistant = await Assistant.findOne({
       where: {
         apiKey,
@@ -28,7 +28,7 @@ const apiKeyAuth = async (req, res, next) => {
 
     if (!assistant) {
       console.log(
-        "[apiKeyAuth] No active assistant found with provided API key"
+        "[apiMiddleware] No active assistant found with provided API key"
       );
       return res.status(401).json({
         success: false,
@@ -36,11 +36,13 @@ const apiKeyAuth = async (req, res, next) => {
       });
     }
 
-    console.log("[apiKeyAuth] Assistant found:", { assistantId: assistant.id });
+    console.log("[apiMiddleware] Assistant found:", {
+      assistantId: assistant.id,
+    });
     req.assistantId = assistant.id;
     next();
   } catch (error) {
-    console.error("[apiKeyAuth] Error during authentication:", error);
+    console.error("[apiMiddleware] Error during authentication:", error);
     return res.status(500).json({
       success: false,
       message: "Authentication failed",
@@ -48,4 +50,4 @@ const apiKeyAuth = async (req, res, next) => {
   }
 };
 
-module.exports = apiKeyAuth;
+module.exports = apiMiddleware;
