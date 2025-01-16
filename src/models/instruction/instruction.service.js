@@ -1,4 +1,5 @@
 const { Instruction, Assistant } = require("../index");
+const { Op } = require("sequelize");
 
 class InstructionService {
   async createInstruction(instructionData, userId) {
@@ -42,12 +43,13 @@ class InstructionService {
         where: {
           assistantId,
           name,
+          isActive: true,
         },
       });
 
       if (existingInstruction) {
         console.log(
-          "[InstructionService] Instruction name already exists for assistant",
+          "[InstructionService] Active instruction with this name already exists",
           {
             assistantId,
             name,
@@ -55,7 +57,7 @@ class InstructionService {
         );
         return {
           success: false,
-          message: "This name is already used for another instruction",
+          message: "This name is already used for another active instruction",
         };
       }
 
@@ -63,6 +65,7 @@ class InstructionService {
         name,
         content,
         assistantId,
+        isActive: true,
       });
 
       console.log("[InstructionService] Instruction created successfully", {
@@ -128,6 +131,33 @@ class InstructionService {
           success: false,
           message: "Unauthorized access",
         };
+      }
+
+      if (updateData.name && updateData.name !== instruction.name) {
+        const existingInstruction = await Instruction.findOne({
+          where: {
+            assistantId: instruction.assistantId,
+            name: updateData.name,
+            isActive: true,
+            id: {
+              [Op.ne]: instructionId,
+            },
+          },
+        });
+
+        if (existingInstruction) {
+          console.log(
+            "[InstructionService] Active instruction with this name already exists",
+            {
+              assistantId: instruction.assistantId,
+              name: updateData.name,
+            }
+          );
+          return {
+            success: false,
+            message: "This name is already used for another active instruction",
+          };
+        }
       }
 
       const updatedFields = {
