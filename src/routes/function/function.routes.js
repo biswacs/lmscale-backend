@@ -5,6 +5,6 @@ const auth = require("../../middleware/auth.middleware");
 const router = express.Router();
 
 router.post("/create", auth, FunctionController.createFunction);
-router.post("/delete", auth, FunctionController.deleteFunction);
+router.post("/update", auth, FunctionController.updateFunction);
 
 module.exports = router;

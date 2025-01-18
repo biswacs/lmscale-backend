@@ -101,8 +101,8 @@ class FunctionService {
     }
   }
 
-  async deleteFunction(functionId, userId) {
-    console.log("[FunctionService] Attempting to delete function", {
+  async updateFunction(functionId, updateData, userId) {
+    console.log("[FunctionService] Attempting to update function", {
       functionId,
       userId,
     });
@@ -117,17 +117,11 @@ class FunctionService {
           functionId,
           userId,
         });
-        return {
-          success: false,
-          message: "Function not found",
-        };
+        return { success: false, message: "Function not found" };
       }
 
       const assistant = await Assistant.findOne({
-        where: {
-          id: functionItem.assistantId,
-          userId,
-        },
+        where: { id: functionItem.assistantId, userId },
       });
 
       if (!assistant) {
@@ -135,36 +129,74 @@ class FunctionService {
           functionId,
           userId,
         });
-        return {
-          success: false,
-          message: "Unauthorized access",
-        };
+        return { success: false, message: "Unauthorized access" };
       }
 
-      await Function.destroy({
-        where: { id: functionId },
-      });
+      if (updateData.name && updateData.name !== functionItem.name) {
+        const existingFunction = await Function.findOne({
+          where: {
+            assistantId: functionItem.assistantId,
+            name: updateData.name,
+            id: { [Op.ne]: functionId },
+          },
+        });
 
-      console.log("[FunctionService] Function deleted successfully", {
+        if (existingFunction) {
+          console.log("[FunctionService] Function name already exists", {
+            assistantId: functionItem.assistantId,
+            name: updateData.name,
+          });
+          return {
+            success: false,
+            message:
+              "A function with this name already exists for this assistant",
+          };
+        }
+      }
+
+      if (
+        updateData.method &&
+        !["GET", "POST"].includes(updateData.method.toUpperCase())
+      ) {
+        console.log("[FunctionService] Invalid HTTP method provided", {
+          functionId,
+          method: updateData.method,
+        });
+        return { success: false, message: "Invalid HTTP method" };
+      }
+
+      const updatedFields = {
+        ...(updateData.name && { name: updateData.name }),
+        ...(updateData.endpoint && { endpoint: updateData.endpoint }),
+        ...(updateData.method && { method: updateData.method.toUpperCase() }),
+        ...(updateData.authType && { authType: updateData.authType }),
+        ...(updateData.parameters && { parameters: updateData.parameters }),
+        ...(updateData.metadata && { metadata: updateData.metadata }),
+        ...(updateData.isActive !== undefined && {
+          isActive: updateData.isActive,
+        }),
+      };
+
+      await functionItem.update(updatedFields);
+
+      console.log("[FunctionService] Function updated successfully", {
         functionId,
         userId,
+        updatedFields: Object.keys(updatedFields),
       });
 
       return {
         success: true,
+        data: { function: functionItem },
       };
     } catch (error) {
-      console.error("[FunctionService] Error deleting function:", {
+      console.error("[FunctionService] Error updating function:", {
         functionId,
         userId,
         error: error.message,
         stack: error.stack,
       });
-
-      return {
-        success: false,
-        message: "Failed to delete function",
-      };
+      return { success: false, message: "Failed to update function" };
     }
   }
 }

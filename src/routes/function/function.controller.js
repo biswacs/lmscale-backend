@@ -97,20 +97,46 @@ const FunctionController = {
     }
   },
 
-  async deleteFunction(req, res) {
+  async updateFunction(req, res) {
     const userId = req.user.id;
-    const functionId = req.query.functionId;
+    const {
+      functionId,
+      name,
+      endpoint,
+      method,
+      authType,
+      parameters,
+      metadata,
+      isActive,
+    } = req.body;
 
-    console.log("[FunctionController] Received delete function request", {
+    console.log("[FunctionController] Received update function request", {
       userId,
       functionId,
     });
 
     try {
-      const response = await functionService.deleteFunction(functionId, userId);
+      if (!functionId) {
+        console.log(
+          "[FunctionController] Update function failed - missing functionId",
+          {
+            userId,
+          }
+        );
+        return res.status(400).json({
+          success: false,
+          message: "Function ID is required",
+        });
+      }
+
+      const response = await functionService.updateFunction(
+        functionId,
+        { name, endpoint, method, authType, parameters, metadata, isActive },
+        userId
+      );
 
       if (!response.success) {
-        console.log("[FunctionController] Delete function failed", {
+        console.log("[FunctionController] Update function failed", {
           userId,
           functionId,
           reason: response.message,
@@ -121,17 +147,18 @@ const FunctionController = {
         });
       }
 
-      console.log("[FunctionController] Function deleted successfully", {
+      console.log("[FunctionController] Function updated successfully", {
         userId,
         functionId,
       });
 
       return res.status(200).json({
         success: true,
-        message: "Function deleted successfully",
+        message: "Function updated successfully",
+        data: { function: response.data.function },
       });
     } catch (error) {
-      console.error("[FunctionController] Delete function error:", {
+      console.error("[FunctionController] Update function error:", {
         userId,
         functionId,
         error: error.message,
