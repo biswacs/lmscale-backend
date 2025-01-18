@@ -10,7 +10,6 @@ class FunctionService {
       authType,
       parameters,
       metadata,
-      isActive = true,
     } = functionData;
 
     console.log("[FunctionService] Attempting to create function", {
@@ -40,7 +39,7 @@ class FunctionService {
       }
 
       const existingFunction = await Function.findOne({
-        where: { assistantId, name },
+        where: { assistantId, name, isActive: true },
         transaction,
       });
 
@@ -66,7 +65,7 @@ class FunctionService {
           authType,
           parameters: parameters || {},
           metadata: metadata || {},
-          isActive,
+          isActive: true,
         },
         { transaction }
       );
