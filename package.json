@@ -19,6 +19,7 @@
     "express-rate-limit": "^7.5.0",
     "jsonwebtoken": "^9.0.0",
     "node-stream": "^1.7.0",
+    "openai": "^4.79.3",
     "pg": "^8.11.0",
     "pg-hstore": "^2.3.4",
     "puppeteer": "^23.10.2",

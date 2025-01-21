@@ -1,6 +1,11 @@
 const { Assistant, Function, Instruction, Usage, Gpu } = require("../index");
 const { calculateTokens } = require("../../utils/tokenizer");
+const OpenAI = require("openai");
 const axios = require("axios");
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API,
+});
 
 class ChatService {
   async getAssistant(assistantId) {
@@ -176,112 +181,97 @@ class ChatService {
   }
 
   async processChat(prompt, functions, messageCallback) {
-    console.log("[ChatService] Starting GPU chat processing");
+    console.log("[ChatService] Starting OpenAI chat processing");
 
     try {
-      const gpu = await this.getGpu();
-      if (!gpu.success) {
-        console.log("[ChatService] GPU fetch failed", {
-          error: gpu.message,
-        });
-        throw new Error(gpu.message);
-      }
+      const messages = [{ role: "system", content: prompt }];
 
-      console.log("[ChatService] GPU found, checking health", {
-        hostIp: gpu.data.hostIp,
-      });
+      const formattedFunctions = functions.map((fn) => ({
+        name: fn.name,
+        description: fn.description || "Function to call external API",
+        parameters: fn.parameters,
+      }));
 
-      try {
-        await axios.get(`http://${gpu.data.hostIp}:8000/health`, {
-          timeout: 5000,
-        });
-        console.log("[ChatService] GPU health check passed");
-      } catch (error) {
-        console.error("[ChatService] GPU health check failed", {
-          error: error.message,
-          hostIp: gpu.data.hostIp,
-        });
-        throw new Error(`GPU health check failed: ${error.message}`);
-      }
-
-      console.log("[ChatService] Sending request to GPU");
-      const gpuResponse = await axios({
-        method: "post",
-        url: `http://${gpu.data.hostIp}:8000/chat/stream`,
-        data: {
-          message: prompt,
-          functions: functions,
-        },
-        responseType: "stream",
-        timeout: 30000,
+      const stream = await openai.chat.completions.create({
+        model: "gpt-4-0125-preview",
+        messages: messages,
+        functions:
+          formattedFunctions.length > 0 ? formattedFunctions : undefined,
+        function_call: formattedFunctions.length > 0 ? "auto" : undefined,
+        stream: true,
       });
 
       let aiResponse = "";
 
-      gpuResponse.data.on("data", (chunk) => {
-        try {
-          const text = chunk.toString();
-          const lines = text.split("\n");
-
-          for (const line of lines) {
-            if (!line.trim() || !line.startsWith("data: ")) continue;
-
-            const cleanedLine = line.replace(/^data:\s*/, "").trim();
-            if (!cleanedLine) continue;
-
-            const data = JSON.parse(cleanedLine);
-
-            if (data && typeof data === "object") {
-              if (data.response) {
-                aiResponse += data.response;
-                messageCallback({
-                  type: "response",
-                  content: data.response,
-                });
-              } else if (data.error) {
-                console.error("[ChatService] GPU returned error in stream", {
-                  error: data.error,
-                });
-                throw new Error(data.error);
-              }
-            }
-          }
-        } catch (error) {
-          console.error("[ChatService] Stream processing error:", {
-            error: error.message,
-            stack: error.stack,
-          });
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content || "";
+        if (content) {
+          aiResponse += content;
           messageCallback({
-            type: "error",
-            content: error.message || "Stream processing failed",
+            type: "response",
+            content: content,
           });
         }
-      });
 
-      gpuResponse.data.on("end", () => {
-        console.log("[ChatService] Final AI response completed", {
-          responseLength: aiResponse.length,
-          firstChars: aiResponse,
-        });
+        if (chunk.choices[0]?.delta?.function_call) {
+          const functionCall = chunk.choices[0].delta.function_call;
 
-        messageCallback({
-          type: "done",
-          content: aiResponse,
-        });
-      });
+          try {
+            const functionName = functionCall.name;
+            const functionArgs = JSON.parse(functionCall.arguments);
+            const matchedFunction = functions.find(
+              (f) => f.name === functionName
+            );
 
-      gpuResponse.data.on("error", (error) => {
-        console.error("[ChatService] GPU stream error:", {
-          error: error.message,
-          stack: error.stack,
-        });
-        messageCallback({
-          type: "error",
-          content: error.message || "Stream error occurred",
-        });
+            if (matchedFunction) {
+              const functionResponse = await axios({
+                method: matchedFunction.method || "get",
+                url: matchedFunction.endpoint,
+                data: functionArgs,
+              });
+
+              const functionResponseCompletion =
+                await openai.chat.completions.create({
+                  model: "gpt-4-0125-preview",
+                  messages: [
+                    ...messages,
+                    {
+                      role: "function",
+                      name: functionName,
+                      content: JSON.stringify(functionResponse.data),
+                    },
+                  ],
+                  stream: true,
+                });
+
+              for await (const functionChunk of functionResponseCompletion) {
+                const functionContent =
+                  functionChunk.choices[0]?.delta?.content || "";
+                if (functionContent) {
+                  aiResponse += functionContent;
+                  messageCallback({
+                    type: "response",
+                    content: functionContent,
+                  });
+                }
+              }
+            }
+          } catch (error) {
+            console.error("[ChatService] Function call error:", error);
+            messageCallback({
+              type: "error",
+              content: error.message || "Function call failed",
+            });
+          }
+        }
+      }
+
+      messageCallback({
+        type: "done",
+        content: aiResponse,
       });
     } catch (error) {
-      console.error("[ChatService] GPU chat processing error:", {
+      console.error("[ChatService] OpenAI chat processing error:", {
         error: error.message,
         stack: error.stack,
       });
