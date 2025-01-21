@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const { Function, Assistant, sequelize } = require("../index");
 
 class FunctionService {
