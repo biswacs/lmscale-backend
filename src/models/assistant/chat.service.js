@@ -183,25 +183,50 @@ class ChatService {
 
     try {
       const messages = [{ role: "system", content: prompt }];
-
-      const formattedFunctions = functions.map((fn) => ({
-        name: fn.name,
-        description: fn.description || "Function to call external API",
-        parameters: fn.parameters,
-      }));
+      console.log("[ChatService] Preparing function definitions");
+      const formattedFunctions = functions.map((fn) => {
+        console.log(`[ChatService] Formatting function: ${fn.name}`);
+        return {
+          name: fn.name,
+          description:
+            fn.description || "Function to retrieve GitHub user data",
+          parameters: {
+            type: "object",
+            properties: {
+              ...Object.entries(fn.parameters.query || {}).reduce(
+                (acc, [key, value]) => ({
+                  ...acc,
+                  [key]: {
+                    type: value.type || "string",
+                    description: value.description || `The GitHub ${key}`,
+                    ...(value.enum ? { enum: value.enum } : {}),
+                  },
+                }),
+                {}
+              ),
+            },
+            required: Object.entries(fn.parameters.query || {})
+              .filter(([_, value]) => value.required)
+              .map(([key, _]) => key),
+          },
+        };
+      });
 
       const stream = await openai.chat.completions.create({
         model: "gpt-4-0125-preview",
-        messages: messages,
-        functions:
-          formattedFunctions.length > 0 ? formattedFunctions : undefined,
-        function_call: formattedFunctions.length > 0 ? "auto" : undefined,
+        messages,
+        functions: formattedFunctions,
+        function_call: "auto",
         stream: true,
       });
 
       let aiResponse = "";
+      let currentFunctionCall = null;
+      let lastChunk = null;
 
       for await (const chunk of stream) {
+        lastChunk = chunk;
+
         const content = chunk.choices[0]?.delta?.content || "";
         if (content) {
           aiResponse += content;
@@ -212,33 +237,104 @@ class ChatService {
         }
 
         if (chunk.choices[0]?.delta?.function_call) {
-          const functionCall = chunk.choices[0].delta.function_call;
+          const functionDelta = chunk.choices[0].delta.function_call;
 
+          if (functionDelta.name) {
+            currentFunctionCall = {
+              name: functionDelta.name,
+              arguments: "",
+            };
+            console.log(
+              "[ChatService] Starting new function call:",
+              functionDelta.name
+            );
+          }
+
+          if (functionDelta.arguments) {
+            currentFunctionCall.arguments += functionDelta.arguments;
+          }
+        }
+
+        if (
+          currentFunctionCall &&
+          (chunk.choices[0]?.finish_reason === "function_call" ||
+            lastChunk?.choices[0]?.finish_reason === "function_call")
+        ) {
           try {
-            const functionName = functionCall.name;
-            const functionArgs = JSON.parse(functionCall.arguments);
+            const functionArgs = JSON.parse(currentFunctionCall.arguments);
             const matchedFunction = functions.find(
-              (f) => f.name === functionName
+              (f) => f.name === currentFunctionCall.name
             );
 
             if (matchedFunction) {
+              console.log(
+                "[ChatService] Function matched:",
+                matchedFunction.name
+              );
+
+              const headers = {};
+              if (
+                matchedFunction.authType === "bearer" &&
+                matchedFunction.metadata?.token
+              ) {
+                headers[
+                  "Authorization"
+                ] = `Bearer ${matchedFunction.metadata.token}`;
+              }
+
+              if (
+                matchedFunction.parameters.header &&
+                Object.keys(matchedFunction.parameters.header).length > 0
+              ) {
+                Object.assign(headers, matchedFunction.parameters.header);
+              }
+
+              let url = matchedFunction.endpoint;
+              if (
+                matchedFunction.method.toUpperCase() === "GET" &&
+                Object.keys(functionArgs).length > 0
+              ) {
+                const queryParams = new URLSearchParams(
+                  functionArgs
+                ).toString();
+                url = `${url}${url.includes("?") ? "&" : "?"}${queryParams}`;
+              }
+
               const functionResponse = await axios({
-                method: matchedFunction.method || "get",
-                url: matchedFunction.endpoint,
-                data: functionArgs,
+                method: matchedFunction.method,
+                url: url,
+                ...(matchedFunction.method.toUpperCase() !== "GET"
+                  ? { data: functionArgs }
+                  : {}),
+                headers,
+                validateStatus: false,
               });
+
+              console.log(
+                "[ChatService] API call completed with status:",
+                functionResponse.status
+              );
+
+              messages.push(
+                {
+                  role: "assistant",
+                  content: null,
+                  function_call: {
+                    name: currentFunctionCall.name,
+                    arguments: currentFunctionCall.arguments,
+                  },
+                },
+                {
+                  role: "function",
+                  name: currentFunctionCall.name,
+                  content: JSON.stringify(functionResponse.data),
+                }
+              );
 
               const functionResponseCompletion =
                 await openai.chat.completions.create({
                   model: "gpt-4-0125-preview",
-                  messages: [
-                    ...messages,
-                    {
-                      role: "function",
-                      name: functionName,
-                      content: JSON.stringify(functionResponse.data),
-                    },
-                  ],
+                  messages,
                   stream: true,
                 });
 
@@ -255,27 +351,34 @@ class ChatService {
               }
             }
           } catch (error) {
-            console.error("[ChatService] Function call error:", error);
+            console.error("[ChatService] Function execution error:", {
+              name: currentFunctionCall?.name,
+              error: error.message,
+              stack: error.stack,
+            });
             messageCallback({
               type: "error",
-              content: error.message || "Function call failed",
+              content: `I encountered an error while fetching your GitHub data: ${error.message}`,
             });
           }
+
+          currentFunctionCall = null;
         }
       }
 
+      console.log("[ChatService] Stream completed successfully");
       messageCallback({
         type: "done",
         content: aiResponse,
       });
     } catch (error) {
-      console.error("[ChatService] OpenAI chat processing error:", {
+      console.error("[ChatService] Chat processing error:", {
         error: error.message,
         stack: error.stack,
       });
       messageCallback({
         type: "error",
-        content: error.message || "Chat processing failed",
+        content: `I'm sorry, but I encountered an error: ${error.message}`,
       });
     }
   }
