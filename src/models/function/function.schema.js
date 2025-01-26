@@ -47,12 +47,7 @@ Function.init(
       allowNull: false,
       defaultValue: {},
     },
-    isVerified: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    },
-    isActive: {
+    isActivated: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true,
@@ -61,7 +56,6 @@ Function.init(
   {
     sequelize,
     modelName: "Function",
-    paranoid: true,
     timestamps: true,
     indexes: [
       {

@@ -31,16 +31,10 @@ Instruction.init(
       allowNull: false,
       defaultValue: {},
     },
-    isActive: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: true,
-    },
   },
   {
     sequelize,
     modelName: "Instruction",
-    paranoid: true,
     timestamps: true,
     indexes: [
       {
