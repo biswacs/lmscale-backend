@@ -203,6 +203,7 @@ class InstructionService {
         include: [
           {
             model: Assistant,
+            as: "assistant",
             where: { userId: userId },
             attributes: ["id"],
           },
