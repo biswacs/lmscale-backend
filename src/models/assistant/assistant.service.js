@@ -135,14 +135,12 @@ class AssistantService {
           {
             model: Instruction,
             as: "instructions",
-            where: { isActive: true },
             required: false,
             attributes: ["id", "name", "content", "metadata", "createdAt"],
           },
           {
             model: Function,
             as: "functions",
-            where: { isActive: true },
             required: false,
             attributes: [
               "id",

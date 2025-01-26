@@ -172,9 +172,6 @@ class FunctionService {
         ...(updateData.authType && { authType: updateData.authType }),
         ...(updateData.parameters && { parameters: updateData.parameters }),
         ...(updateData.metadata && { metadata: updateData.metadata }),
-        ...(updateData.isActive !== undefined && {
-          isActive: updateData.isActive,
-        }),
       };
 
       await functionItem.update(updatedFields);
