@@ -36,7 +36,10 @@ Function.init(
     parameters: {
       type: DataTypes.JSONB,
       allowNull: false,
-      defaultValue: {},
+      defaultValue: {
+        query: {},
+        header: {},
+      },
     },
     authType: {
       type: DataTypes.STRING,

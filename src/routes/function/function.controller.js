@@ -12,6 +12,7 @@ const FunctionController = {
       authType,
       parameters,
       metadata,
+      testArgs,
     } = req.body;
 
     console.log("[FunctionController] Received create function request", {
@@ -26,6 +27,7 @@ const FunctionController = {
         "endpoint",
         "method",
         "authType",
+        "testArgs",
       ];
       const missingFields = requiredFields.filter((field) => !req.body[field]);
 
@@ -51,6 +53,7 @@ const FunctionController = {
         authType,
         parameters,
         metadata,
+        testArgs,
       };
 
       const response = await functionService.createFunction(
@@ -62,10 +65,13 @@ const FunctionController = {
         console.log("[FunctionController] Create function failed", {
           userId,
           reason: response.message,
+          errors: response.errors,
         });
         return res.status(400).json({
           success: false,
           message: response.message,
+          errors: response.errors,
+          error: response.error,
         });
       }
 
@@ -76,9 +82,10 @@ const FunctionController = {
 
       return res.status(201).json({
         success: true,
-        message: "Function created successfully",
+        message: "Function created and tested successfully",
         data: {
           function: response.data.function,
+          testResult: response.data.testResult,
         },
       });
     } catch (error) {
@@ -105,6 +112,7 @@ const FunctionController = {
       authType,
       parameters,
       metadata,
+      testArgs,
     } = req.body;
 
     console.log("[FunctionController] Received update function request", {
@@ -113,22 +121,25 @@ const FunctionController = {
     });
 
     try {
-      if (!functionId) {
+      if (!functionId || !testArgs) {
         console.log(
-          "[FunctionController] Update function failed - missing functionId",
+          "[FunctionController] Update function failed - missing required fields",
           {
             userId,
+            missing: !functionId ? "functionId" : "testArgs",
           }
         );
         return res.status(400).json({
           success: false,
-          message: "Function ID is required",
+          message: !functionId
+            ? "Function ID is required"
+            : "Test arguments are required",
         });
       }
 
       const response = await functionService.updateFunction(
         functionId,
-        { name, endpoint, method, authType, parameters, metadata },
+        { name, endpoint, method, authType, parameters, metadata, testArgs },
         userId
       );
 
@@ -137,10 +148,13 @@ const FunctionController = {
           userId,
           functionId,
           reason: response.message,
+          errors: response.errors,
         });
         return res.status(400).json({
           success: false,
           message: response.message,
+          errors: response.errors,
+          error: response.error,
         });
       }
 
@@ -151,8 +165,11 @@ const FunctionController = {
 
       return res.status(200).json({
         success: true,
-        message: "Function updated successfully",
-        data: { function: response.data.function },
+        message: "Function updated and tested successfully",
+        data: {
+          function: response.data.function,
+          testResult: response.data.testResult,
+        },
       });
     } catch (error) {
       console.error("[FunctionController] Update function error:", {
