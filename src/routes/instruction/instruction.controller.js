@@ -72,7 +72,7 @@ const InstructionController = {
 
   async updateInstruction(req, res) {
     const userId = req.user.id;
-    const { instructionId, name, content, metadata, isActive } = req.body;
+    const { instructionId, name, content, metadata } = req.body;
 
     console.log("[InstructionController] Received update instruction request", {
       userId,
@@ -82,7 +82,7 @@ const InstructionController = {
     try {
       const response = await instructionService.updateInstruction(
         instructionId,
-        { name, content, metadata, isActive },
+        { name, content, metadata },
         userId
       );
 
@@ -107,6 +107,70 @@ const InstructionController = {
       });
     } catch (error) {
       console.error("[InstructionController] Update instruction error:", {
+        userId,
+        instructionId,
+        error: error.message,
+        stack: error.stack,
+      });
+
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  },
+
+  async deleteInstruction(req, res) {
+    const userId = req.user.id;
+    const { instructionId } = req.query;
+
+    console.log("[InstructionController] Received delete instruction request", {
+      userId,
+      instructionId,
+    });
+
+    try {
+      if (!instructionId) {
+        console.log(
+          "[InstructionController] Delete instruction failed - missing instructionId",
+          {
+            userId,
+          }
+        );
+        return res.status(400).json({
+          success: false,
+          message: "Instruction ID is required",
+        });
+      }
+
+      const response = await instructionService.deleteInstruction(
+        instructionId,
+        userId
+      );
+
+      if (!response.success) {
+        console.log("[InstructionController] Delete instruction failed", {
+          userId,
+          instructionId,
+          reason: response.message,
+        });
+        return res.status(400).json({
+          success: false,
+          message: response.message,
+        });
+      }
+
+      console.log("[InstructionController] Instruction deleted successfully", {
+        userId,
+        instructionId,
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Instruction deleted successfully",
+      });
+    } catch (error) {
+      console.error("[InstructionController] Delete instruction error:", {
         userId,
         instructionId,
         error: error.message,

@@ -43,7 +43,6 @@ class InstructionService {
         where: {
           assistantId,
           name,
-          isActive: true,
         },
       });
 
@@ -65,7 +64,6 @@ class InstructionService {
         name,
         content,
         assistantId,
-        isActive: true,
       });
 
       console.log("[InstructionService] Instruction created successfully", {
@@ -138,7 +136,6 @@ class InstructionService {
           where: {
             assistantId: instruction.assistantId,
             name: updateData.name,
-            isActive: true,
             id: {
               [Op.ne]: instructionId,
             },
@@ -164,9 +161,6 @@ class InstructionService {
         ...(updateData.name && { name: updateData.name }),
         ...(updateData.content && { content: updateData.content }),
         ...(updateData.metadata && { metadata: updateData.metadata }),
-        ...(updateData.isActive !== undefined && {
-          isActive: updateData.isActive,
-        }),
       };
 
       await instruction.update(updatedFields);
@@ -193,6 +187,64 @@ class InstructionService {
       return {
         success: false,
         message: "Failed to update instruction",
+      };
+    }
+  }
+
+  async deleteInstruction(instructionId, userId) {
+    console.log("[InstructionService] Attempting to delete instruction", {
+      instructionId,
+      userId,
+    });
+
+    try {
+      const instruction = await Instruction.findOne({
+        where: { id: instructionId },
+        include: [
+          {
+            model: Assistant,
+            where: { userId: userId },
+            attributes: ["id"],
+          },
+        ],
+      });
+
+      if (!instruction) {
+        console.log(
+          "[InstructionService] Instruction not found or unauthorized access",
+          {
+            instructionId,
+            userId,
+          }
+        );
+        return {
+          success: false,
+          message: "Instruction not found or unauthorized access",
+        };
+      }
+
+      await instruction.destroy();
+
+      console.log("[InstructionService] Instruction deleted successfully", {
+        instructionId,
+        userId,
+      });
+
+      return {
+        success: true,
+        message: "Successfully deleted instruction",
+      };
+    } catch (error) {
+      console.error("[InstructionService] Error deleting instruction:", {
+        instructionId,
+        userId,
+        error: error.message,
+        stack: error.stack,
+      });
+
+      return {
+        success: false,
+        message: "Failed to delete instruction",
       };
     }
   }

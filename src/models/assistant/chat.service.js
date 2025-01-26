@@ -22,7 +22,6 @@ class ChatService {
             model: Instruction,
             as: "instructions",
             attributes: ["name", "content"],
-            where: { isActive: true },
             required: false,
           },
           {
@@ -35,7 +34,6 @@ class ChatService {
               "parameters",
               "authType",
             ],
-            where: { isActive: true },
             required: false,
           },
         ],

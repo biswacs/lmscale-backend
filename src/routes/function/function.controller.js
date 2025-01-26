@@ -12,7 +12,6 @@ const FunctionController = {
       authType,
       parameters,
       metadata,
-      isActive,
     } = req.body;
 
     console.log("[FunctionController] Received create function request", {
@@ -52,7 +51,6 @@ const FunctionController = {
         authType,
         parameters,
         metadata,
-        isActive,
       };
 
       const response = await functionService.createFunction(
@@ -107,7 +105,6 @@ const FunctionController = {
       authType,
       parameters,
       metadata,
-      isActive,
     } = req.body;
 
     console.log("[FunctionController] Received update function request", {
@@ -131,7 +128,7 @@ const FunctionController = {
 
       const response = await functionService.updateFunction(
         functionId,
-        { name, endpoint, method, authType, parameters, metadata, isActive },
+        { name, endpoint, method, authType, parameters, metadata },
         userId
       );
 
@@ -159,6 +156,67 @@ const FunctionController = {
       });
     } catch (error) {
       console.error("[FunctionController] Update function error:", {
+        userId,
+        functionId,
+        error: error.message,
+        stack: error.stack,
+      });
+
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  },
+
+  async deleteFunction(req, res) {
+    const userId = req.user.id;
+    const { functionId } = req.query;
+
+    console.log("[FunctionController] Received delete function request", {
+      userId,
+      functionId,
+    });
+
+    try {
+      if (!functionId) {
+        console.log(
+          "[FunctionController] Delete function failed - missing functionId",
+          {
+            userId,
+          }
+        );
+        return res.status(400).json({
+          success: false,
+          message: "Function ID is required",
+        });
+      }
+
+      const response = await functionService.deleteFunction(functionId, userId);
+
+      if (!response.success) {
+        console.log("[FunctionController] Delete function failed", {
+          userId,
+          functionId,
+          reason: response.message,
+        });
+        return res.status(400).json({
+          success: false,
+          message: response.message,
+        });
+      }
+
+      console.log("[FunctionController] Function deleted successfully", {
+        userId,
+        functionId,
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Function deleted successfully",
+      });
+    } catch (error) {
+      console.error("[FunctionController] Delete function error:", {
         userId,
         functionId,
         error: error.message,

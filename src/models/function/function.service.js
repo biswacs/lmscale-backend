@@ -40,7 +40,7 @@ class FunctionService {
       }
 
       const existingFunction = await Function.findOne({
-        where: { assistantId, name, isActive: true },
+        where: { assistantId, name },
         transaction,
       });
 
@@ -66,7 +66,6 @@ class FunctionService {
           authType,
           parameters: parameters || {},
           metadata: metadata || {},
-          isActive: true,
         },
         { transaction }
       );
@@ -194,6 +193,64 @@ class FunctionService {
         stack: error.stack,
       });
       return { success: false, message: "Failed to update function" };
+    }
+  }
+
+  async deleteFunction(functionId, userId) {
+    console.log("[FunctionService] Attempting to delete function", {
+      functionId,
+      userId,
+    });
+
+    try {
+      const functionItem = await Function.findOne({
+        where: { id: functionId },
+        include: [
+          {
+            model: Assistant,
+            where: { userId: userId },
+            attributes: ["id"],
+          },
+        ],
+      });
+
+      if (!functionItem) {
+        console.log(
+          "[FunctionService] Function not found or unauthorized access",
+          {
+            functionId,
+            userId,
+          }
+        );
+        return {
+          success: false,
+          message: "Function not found or unauthorized access",
+        };
+      }
+
+      await functionItem.destroy();
+
+      console.log("[FunctionService] Function deleted successfully", {
+        functionId,
+        userId,
+      });
+
+      return {
+        success: true,
+        message: "Successfully deleted function",
+      };
+    } catch (error) {
+      console.error("[FunctionService] Error deleting function:", {
+        functionId,
+        userId,
+        error: error.message,
+        stack: error.stack,
+      });
+
+      return {
+        success: false,
+        message: "Failed to delete function",
+      };
     }
   }
 }

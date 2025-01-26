@@ -6,5 +6,6 @@ const router = express.Router();
 
 router.post("/create", auth, InstructionController.createInstruction);
 router.post("/update", auth, InstructionController.updateInstruction);
+router.post("/delete", auth, InstructionController.deleteInstruction);
 
 module.exports = router;
