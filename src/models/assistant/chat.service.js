@@ -178,47 +178,53 @@ class ChatService {
     }
   }
 
-  async processChat(prompt, functions, messageCallback) {
+  async processChat(prompt, functions = [], messageCallback) {
     console.log("[ChatService] Starting OpenAI chat processing");
 
     try {
       const messages = [{ role: "system", content: prompt }];
-      console.log("[ChatService] Preparing function definitions");
-      const formattedFunctions = functions.map((fn) => {
-        console.log(`[ChatService] Formatting function: ${fn.name}`);
-        return {
-          name: fn.name,
-          description:
-            fn.description || "Function to retrieve GitHub user data",
-          parameters: {
-            type: "object",
-            properties: {
-              ...Object.entries(fn.parameters.query || {}).reduce(
-                (acc, [key, value]) => ({
-                  ...acc,
-                  [key]: {
-                    type: value.type || "string",
-                    description: value.description || `The GitHub ${key}`,
-                    ...(value.enum ? { enum: value.enum } : {}),
-                  },
-                }),
-                {}
-              ),
-            },
-            required: Object.entries(fn.parameters.query || {})
-              .filter(([_, value]) => value.required)
-              .map(([key, _]) => key),
-          },
-        };
-      });
 
-      const stream = await openai.chat.completions.create({
+      const completionConfig = {
         model: "gpt-4-0125-preview",
         messages,
-        functions: formattedFunctions,
-        function_call: "auto",
         stream: true,
-      });
+      };
+
+      if (functions && functions.length > 0) {
+        console.log("[ChatService] Preparing function definitions");
+        const formattedFunctions = functions.map((fn) => {
+          console.log(`[ChatService] Formatting function: ${fn.name}`);
+          return {
+            name: fn.name,
+            description:
+              fn.description || "Function to retrieve GitHub user data",
+            parameters: {
+              type: "object",
+              properties: {
+                ...Object.entries(fn.parameters.query || {}).reduce(
+                  (acc, [key, value]) => ({
+                    ...acc,
+                    [key]: {
+                      type: value.type || "string",
+                      description: value.description || `The GitHub ${key}`,
+                      ...(value.enum ? { enum: value.enum } : {}),
+                    },
+                  }),
+                  {}
+                ),
+              },
+              required: Object.entries(fn.parameters.query || {})
+                .filter(([_, value]) => value.required)
+                .map(([key, _]) => key),
+            },
+          };
+        });
+
+        completionConfig.functions = formattedFunctions;
+        completionConfig.function_call = "auto";
+      }
+
+      const stream = await openai.chat.completions.create(completionConfig);
 
       let aiResponse = "";
       let currentFunctionCall = null;
