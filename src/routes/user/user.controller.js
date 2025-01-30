@@ -1,4 +1,4 @@
-const userSchemas = require("../../validation/user/schema");
+const userSchemas = require("./validator");
 const UserService = require("../../models/user/user.service");
 const userService = new UserService();
 
