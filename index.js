@@ -9,7 +9,7 @@ const functionRoutes = require("./src/routes/function/function.routes");
 const instructionRoutes = require("./src/routes/instruction/instruction.routes");
 
 const app = express();
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8080;
 
 app.set("trust proxy", true);
 app.use(cors());
